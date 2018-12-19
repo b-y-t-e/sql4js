@@ -26,7 +26,7 @@ namespace sql4js.Parser
 
         public void AddChildToToken(Is4jToken Child)
         {
-            Value = Child;
+            // Value = Child;
         }
 
         public void AppendCharToToken(Char Char)

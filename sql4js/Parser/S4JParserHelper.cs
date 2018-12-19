@@ -28,9 +28,15 @@ namespace sql4js.Parser
 
             bool result = false;
             var j = toFindChars.Count - 1;
-            var i = index;
+            var i = index + j;
             if (chars.Count > 0)
             {
+                if (i >= chars.Count)
+                {
+                    result = false;
+                    return result;
+                }
+
                 for (; ; i--, j--)
                 {
                     if (j < 0)

@@ -18,8 +18,8 @@ namespace sql4js.Parser
                 if (State.StateType == EStateType.S4J_ARRAY)
                     result = new JsArray();
 
-                //if (State.StateType == EStateType.S4J_COMMENT)
-                //    result = new jsc();
+                if (State.StateType == EStateType.S4J_COMMENT)
+                    result = new JsComment();
 
                 if (State.StateType == EStateType.S4J_OBJECT)
                     result = new JsObject();
@@ -39,8 +39,8 @@ namespace sql4js.Parser
                 if (State.StateType == EStateType.SQL)
                     result = new JsSql();
 
-                //if (State.StateType == EStateType.SQL_COMMENT)
-                //    result = new JsSql();
+                if (State.StateType == EStateType.SQL_COMMENT)
+                    result = new JsSqlComment();
             }
 
             if (result != null)
