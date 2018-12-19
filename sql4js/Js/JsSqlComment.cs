@@ -4,37 +4,32 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class JsValue : Is4jToken
+    public class JsSqlComment : Is4jToken
     {
         public Is4jToken Parent { get; set; }
 
-        public Is4jToken Value { get; set; }
-
         public String Text { get; set; }
-        
+
         public Boolean IsKey { get; set; }
 
         public bool IsCommited { get; set; }
 
         public S4JState State { get; set; }
 
-        public JsValue()
+        public JsSqlComment()
         {
             Text = "";
-            IsKey = false;
         }
 
         public void AddChildToToken(Is4jToken Child)
         {
-            // Value = Child;
+
         }
 
         public void AppendCharsToToken(IList<Char> Chars)
         {
             foreach (var Char in Chars)
             {
-                if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
-                    continue;
                 this.Text += Char;
             }
         }

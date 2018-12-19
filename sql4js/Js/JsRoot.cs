@@ -25,10 +25,10 @@ namespace sql4js.Parser
         {
             Value = Child;
         }
-
-        public void AppendCharToToken(Char Char)
+        
+        public void AppendCharsToToken(IList<Char> Chars)
         {
-            //this.Text += Char;
+
         }
 
         public void CommitToken()

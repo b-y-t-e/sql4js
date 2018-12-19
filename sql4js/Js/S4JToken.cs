@@ -17,7 +17,7 @@ namespace sql4js.Parser
 
         void AddChildToToken(Is4jToken Child);
 
-        void AppendCharToToken(Char Char);
+        void AppendCharsToToken(IList<Char> Chars);
 
         void CommitToken();
 
@@ -46,7 +46,7 @@ namespace sql4js.Parser
         public Is4jToken PeekNonValue()
         {
             return this.
-                LastOrDefault(t => !t.State.IsSimpleValue && !t.State.IsComment);
+                LastOrDefault(t => !t.State.IsSimpleValue); // && !t.State.IsComment);
         }
     }
 }

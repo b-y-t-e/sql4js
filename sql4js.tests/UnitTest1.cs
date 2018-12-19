@@ -8,80 +8,53 @@ namespace sql4js.tests
     public class UnitTest1
     {
         [Fact]
-        public void S4J_parser_test_method_is()
+        public void parser_method_is_should_work_fine()
         {
-            /*string json = @"
-{
-  CPU: @Intel,
-  CPU2: ""Intel"",
-  Drives: [
-    'DVD read/writer',
-    '500 gigabyte hard drive'
-  ]
-}";
-
-            JObject o = JObject.Parse(json, new JsonLoadSettings() { });
-            o = o;*/
-
-            /*string json = @"
-{
-  CPU: 'Intel',
-  CPU2: ""Intel"",
-CPU3: {""test""},
-  Drives: [
-    'DVD read/writer',
-    '500 gigabyte hard drive'
-  ]
-}";
-
-            JObject o = JObject.Parse(json, new JsonLoadSettings() {  });
-            o = o;*/
-
             var chars = @"{a:'cos'}".ToCharArray();
 
             Assert.
                 False(
-                    S4JParser.Is(chars, 0, "'".ToCharArray()));
+                    S4JParserHelper.Is(chars, 0, "'".ToCharArray()));
 
             Assert.
                 True(
-                    S4JParser.Is(chars, 3, "'".ToCharArray()));
+                    S4JParserHelper.Is(chars, 3, "'".ToCharArray()));
 
             Assert.
                 True(
-                    S4JParser.Is(chars, 3, ":'".ToCharArray()));
+                    S4JParserHelper.Is(chars, 2, ":'".ToCharArray()));
 
             Assert.
                 True(
-                    S4JParser.Is(chars, 0, "{".ToCharArray()));
+                    S4JParserHelper.Is(chars, 0, "{".ToCharArray()));
 
             Assert.
                 True(
-                    S4JParser.Is(chars, 1, "{a".ToCharArray()));
+                    S4JParserHelper.Is(chars, 0, "{a".ToCharArray()));
+
+            Assert.
+                True(
+                    S4JParserHelper.Is(chars, 1, "a:'".ToCharArray()));
 
             Assert.
                 False(
-                    S4JParser.Is(chars, 1, "{{a".ToCharArray()));
+                    S4JParserHelper.Is(chars, 0, "{{a".ToCharArray()));
 
             Assert.
                 False(
-                    S4JParser.Is(new char[0], 1, "{".ToCharArray()));
+                    S4JParserHelper.Is(new char[0], 1, "{".ToCharArray()));
+
+            Assert.
+                True(
+                    S4JParserHelper.Is(chars, 8, "}".ToCharArray()));
+
+            Assert.
+                False(
+                    S4JParserHelper.Is(chars, 8, "}}}".ToCharArray()));
         }
-
-        /*[Fact]
-        public void S4J_parser_no_j4s()
-        {
-            var script1 = @"{a:'cos'}";
-            var script2 = @"{a:'cos'}";
-
-            var result = S4JParser.Parse(script1);
-
-            Assert.
-                Equal(script2, result.SimplifiedScriptAsText);
-        }*/
-
+        
         [Fact]
-        public void S4J_parser_simple_j4s_object_1()
+        public void parser_should_understand_simple_json_object_test1()
         {
             var script1 = @"{    a : 'cos', b : ""select 1 "", c: 'aaa' }";
 
@@ -94,7 +67,7 @@ CPU3: {""test""},
         }
 
         [Fact]
-        public void S4J_parser_simple_j4s_object_2()
+        public void parser_should_understand_simple_json_object_test2()
         {
             var script1 = @"{a : 'cos', "" select 1 as val "", c: 'aaa' }";
 
@@ -107,7 +80,7 @@ CPU3: {""test""},
         }
 
         [Fact]
-        public void S4J_parser_simple_j4s_array_1()
+        public void parser_should_understand_simple_json_array_test1()
         {
             var script1 = @"[1 , 2 , 3 , 'abc' ]";
             
@@ -120,7 +93,7 @@ CPU3: {""test""},
         }
 
         [Fact]
-        public void S4J_parser_simple_j4s_simple_expression()
+        public void parser_should_understand_simple_string_value1()
         {
             var script1 = @" 'ab c ' ";
 
@@ -132,6 +105,70 @@ CPU3: {""test""},
                 result.ToJson());
         }
 
+        [Fact]
+        public void parser_should_understand_simple_double_value1()
+        {
+            var script1 = @" 4324234.66 ";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                "4324234.66",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_ignore_comment()
+        {
+            var script1 = @" 4324234.66 /* abc */ ";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                "4324234.66",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_ignore_comment_in_comment()
+        {
+            var script1 = @" 4324234.66 /* abc /* abc */ abc */ ";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                "4324234.66",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_ignore_comment_inside_table()
+        {
+            var script1 = @"[1 , 2 , /* /* abc */ */ 3 , 'abc' ]";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                @"[1,2,3,'abc']",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_ignore_comment_inside_object()
+        {
+            var script1 = @"{a : 'cos', /* abc*/  "" select 1 as val "", c: 'aaa' }";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                @"{a:'cos',"" select 1 as val "",c:'aaa'}",
+                result.ToJson());
+        }
 
         /*[Fact]
         public void S4J_parser_simple_j4s_inner_quotation1()

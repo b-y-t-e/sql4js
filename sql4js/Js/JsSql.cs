@@ -25,14 +25,22 @@ namespace sql4js.Parser
 
         public void AddChildToToken(Is4jToken Child)
         {
-            throw new NotImplementedException();
-            // Value = Child;
+
+        }
+        
+        public void AppendCharsToToken(IList<Char> Chars)
+        {
+            foreach (var Char in Chars)
+            {
+                if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
+                    continue;
+                this.Text += Char;
+            }
         }
 
         public void AppendCharToToken(Char Char)
         {
-            if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
-                return;
+            return;
             this.Text += Char;
         }
 

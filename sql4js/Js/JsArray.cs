@@ -29,7 +29,7 @@ namespace sql4js.Parser
             this.Array.Add(Child);
         }
 
-        public void AppendCharToToken(Char Char)
+        public void AppendCharsToToken(IList<Char> Chars)
         {
             //this.Text += Char;
         }

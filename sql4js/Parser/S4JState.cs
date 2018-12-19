@@ -83,7 +83,7 @@ namespace sql4js.Parser
             set;
         }
 
-        public Char? Char
+        public IList<Char> Chars
         {
             get;
             set;

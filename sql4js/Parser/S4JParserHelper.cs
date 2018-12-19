@@ -8,7 +8,7 @@ namespace sql4js.Parser
     {
         public static Int32? SkipWhiteSpaces(IList<char> chars, int index)
         {
-            Int32? newIndex = null;
+            Int32? newIndex = chars.Count;
             for (var i = index; i < chars.Count; i++)
             {
                 char ch = chars[i];
@@ -28,9 +28,15 @@ namespace sql4js.Parser
 
             bool result = false;
             var j = toFindChars.Count - 1;
-            var i = index;
+            var i = index + j;
             if (chars.Count > 0)
             {
+                if (i >= chars.Count)
+                {
+                    result = false;
+                    return result;
+                }
+
                 for (; ; i--, j--)
                 {
                     if (j < 0)
