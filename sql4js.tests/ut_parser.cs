@@ -5,7 +5,7 @@ using Xunit;
 
 namespace sql4js.tests
 {
-    public class UnitTest1
+    public class ut_parser
     {
         [Fact]
         public void parser_method_is_should_work_fine()
@@ -169,6 +169,56 @@ namespace sql4js.tests
                 @"{a:'cos',"" select 1 as val "",c:'aaa'}",
                 result.ToJson());
         }
+
+        [Fact]
+        public void parser_should_understand_inner_object()
+        {
+            var script1 = @"{a : 'cos', d : { a : 1, b : 2, c : 'abc'}, c: 'aaa' }";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                @"{a:'cos',d:{a:1,b:2,c:'abc'},c:'aaa'}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_inner_object_and_arrays1()
+        {
+            var script1 = @"{  d: [ {@f : 6} ] , c: 'aaa' }";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                @"{d:[{@f:6}],c:'aaa'}",
+                result.ToJson());
+        }
+        [Fact]
+        public void parser_should_understand_inner_object_and_arrays2()
+        {
+            var script1 = @"
+{
+    a : 'cos', 
+    d : { 
+        a : 1, 
+        b : 2, 
+        c : 'abc', 
+        d: [1,2,3, {g: 8, @f : 6} ]  
+    }, 
+    c: 'aaa' 
+}
+";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                @"{a:'cos',d:{a:1,b:2,c:'abc',d:[1,2,3,{g:8,@f:6}]},c:'aaa'}",
+                result.ToJson());
+        }
+
 
         /*[Fact]
         public void S4J_parser_simple_j4s_inner_quotation1()

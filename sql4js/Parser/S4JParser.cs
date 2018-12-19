@@ -88,7 +88,7 @@ namespace sql4js.Parser
             while (valueStack.Count > 0)
             {
                 Is4jToken currentVal = valueStack.Peek();
-                if (currentVal != null)                
+                if (currentVal != null)
                     currentVal.CommitToken();
                 valueStack.Pop();
             }
@@ -101,24 +101,43 @@ namespace sql4js.Parser
         {
             // sprawdzamy zakończenie stanu
             Is4jToken prevTokenNonValue = stateStack.PeekNonValue();
+            Is4jToken prevToken = stateStack.Peek();
             if (prevTokenNonValue != null)
             {
                 IList<char> end = prevTokenNonValue?.State?.Gate?.End;
                 if (S4JParserHelper.Is(code, index, end))
                 {
-                    yield return new S4JStateStackEvent()
+                    if (prevToken.State.IsSimpleValue)
                     {
-                        NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + (end == null ? 0 : (end.Count - 1)) + 1),
-                        State = stateStack.Peek()?.State,
-                        Pushed = false,
-                        Popped = true,
-                        Chars = end
-                    };
-                    yield break;
+                        yield return new S4JStateStackEvent()
+                        {
+                            NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + (end == null ? 0 : (end.Count - 1)) + 1),
+                            State = prevToken?.State,
+                            Popped = true,
+                            Chars = null
+                        };
+                    }
+
+                    if (prevToken != prevTokenNonValue ||
+                        !prevToken.State.IsSimpleValue)
+                    {
+                        yield return new S4JStateStackEvent()
+                        {
+                            NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + (end == null ? 0 : (end.Count - 1)) + 1),
+                            State = stateStack.Peek()?.State,
+                            Popped = true,
+                            Chars = end
+                        };
+                        yield break;
+                    }
+                    else
+                    {
+                        yield break;
+                    }
                 }
             }
 
-            Is4jToken prevToken = stateStack.Peek();
+            prevToken = stateStack.Peek();
             foreach (S4JState state in StateBag)
             {
                 // sprawdzamy rozpoczecie stanu
@@ -206,7 +225,10 @@ namespace sql4js.Parser
                         yield return new S4JStateStackEvent()
                         {
                             // NewIndex = null,
-                            NewIndex = index + (matchedGate?.End == null ? 0 : (matchedGate.End.Count - 1)) + 1, //S4JParserHelper.SkipWhiteSpaces(code, index + (matchedGate?.End == null ? 0 : (matchedGate.End.Count - 1)) + 1),
+                            NewIndex =
+                                state.IsCollection ?
+                                    S4JParserHelper.SkipWhiteSpaces(code, index + (matchedGate?.End == null ? 0 : (matchedGate.End.Count - 1)) + 1) :
+                                    index + (matchedGate?.End == null ? 0 : (matchedGate.End.Count - 1)) + 1, 
                             State = newState,
                             Pushed = true,
                             Chars = matchedGate?.Start ?? new[] { code[index] }
