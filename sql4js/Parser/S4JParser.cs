@@ -8,7 +8,7 @@ namespace sql4js.Parser
     {
         public static Is4jToken Parse(String Text)
         {
-            IList<char> chars = Text.ToCharArray();
+            IList<char> chars = Text.Trim().ToCharArray();
 
             S4JStateBag stateBag = new S4JStateBag();
 

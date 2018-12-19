@@ -81,7 +81,7 @@ CPU3: {""test""},
         }*/
 
         [Fact]
-        public void S4J_parser_simple_j4s()
+        public void S4J_parser_simple_j4s_object_1()
         {
             var script1 = @"{    a : 'cos', b : ""select 1 "", c: 'aaa' }";
 
@@ -94,7 +94,7 @@ CPU3: {""test""},
         }
 
         [Fact]
-        public void S4J_parser_simple_j4s_2()
+        public void S4J_parser_simple_j4s_object_2()
         {
             var script1 = @"{a : 'cos', "" select 1 as val "", c: 'aaa' }";
 
@@ -118,6 +118,20 @@ CPU3: {""test""},
                 @"[1,2,3,'abc']",
                 result.ToJson());
         }
+
+        [Fact]
+        public void S4J_parser_simple_j4s_simple_expression()
+        {
+            var script1 = @" 'ab c ' ";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                "'ab c '",
+                result.ToJson());
+        }
+
 
         /*[Fact]
         public void S4J_parser_simple_j4s_inner_quotation1()
