@@ -55,28 +55,6 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            S4JState sS4jQuotation = new S4JState()
-            {
-                StateType = EStateType.S4J_QUOTATION,
-                IsValue = true,
-                AllowedStatesNames = new List<EStateType?>()
-                {
-                    EStateType.S4J_QUOTATION
-                },
-                Gates = new List<S4JStateGate>()
-                {
-                    new S4JStateGate()
-                    {
-                        Start = "'".ToCharArray(),
-                        End = "'".ToCharArray(),
-                        Inner = "\\".ToCharArray()
-                    }
-                }
-            };
-            this.Add(sS4jQuotation);
-
-            ////////////////////////////////
-
             S4JState sS4jSqlExpression = new S4JState()
             {
                 StateType = EStateType.SQL,
@@ -89,8 +67,8 @@ namespace sql4js.Parser
                 {
                     new S4JStateGate()
                     {
-                        Start = "\"".ToCharArray(),
-                        End = "\"".ToCharArray(),
+                        Start = "{{".ToCharArray(),
+                        End = "}}".ToCharArray(),
                         Inner = "\\".ToCharArray()
                     }
                 }
@@ -122,6 +100,28 @@ namespace sql4js.Parser
                 }
             };
             this.Add(sSqlComment);
+
+            ////////////////////////////////
+
+            S4JState sS4jQuotation = new S4JState()
+            {
+                StateType = EStateType.S4J_QUOTATION,
+                IsValue = true,
+                AllowedStatesNames = new List<EStateType?>()
+                {
+                    EStateType.S4J_QUOTATION
+                },
+                Gates = new List<S4JStateGate>()
+                {
+                    new S4JStateGate()
+                    {
+                        Start = "'".ToCharArray(),
+                        End = "'".ToCharArray(),
+                        Inner = "\\".ToCharArray()
+                    }
+                }
+            };
+            this.Add(sS4jQuotation);
 
             ////////////////////////////////
 

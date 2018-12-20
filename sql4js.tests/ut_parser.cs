@@ -56,26 +56,26 @@ namespace sql4js.tests
         [Fact]
         public void parser_should_understand_simple_json_object_test1()
         {
-            var script1 = @"{    a : 'cos', b : ""select 1 "", c: 'aaa' }";
+            var script1 = @"{    a : 'cos', b : {{select 1 }}, c: 'aaa' }";
 
             var result = S4JParser.
                 Parse(script1);
 
             Assert.Equal(
-                @"{a:'cos',b:""select 1 "",c:'aaa'}",
+                @"{a:'cos',b:{{select 1 }},c:'aaa'}",
                 result.ToJson());
         }
 
         [Fact]
         public void parser_should_understand_simple_json_object_test2()
         {
-            var script1 = @"{a : 'cos', "" select 1 as val "", c: 'aaa' }";
+            var script1 = @"{a : 'cos', {{ select 1 as val }}, c: 'aaa' }";
 
             var result = S4JParser.
                 Parse(script1);
 
             Assert.Equal(
-                @"{a:'cos',"" select 1 as val "",c:'aaa'}",
+                @"{a:'cos',{{ select 1 as val }},c:'aaa'}",
                 result.ToJson());
         }
 
@@ -160,13 +160,13 @@ namespace sql4js.tests
         [Fact]
         public void parser_should_ignore_comment_inside_object()
         {
-            var script1 = @"{a : 'cos', /* abc*/  "" select 1 as val "", c: 'aaa' }";
+            var script1 = @"{a : 'cos', /* abc*/  {{ select 1 as val }}, c: 'aaa' }";
 
             var result = S4JParser.
                 Parse(script1);
 
             Assert.Equal(
-                @"{a:'cos',"" select 1 as val "",c:'aaa'}",
+                @"{a:'cos',{{ select 1 as val }},c:'aaa'}",
                 result.ToJson());
         }
 
@@ -195,6 +195,8 @@ namespace sql4js.tests
                 @"{d:[{@f:6}],c:'aaa'}",
                 result.ToJson());
         }
+
+
         [Fact]
         public void parser_should_understand_inner_object_and_arrays2()
         {
@@ -219,29 +221,43 @@ namespace sql4js.tests
                 result.ToJson());
         }
 
-
-        /*[Fact]
-        public void S4J_parser_simple_j4s_inner_quotation1()
+        [Fact]
+        public void parser_should_understand_inner_object_and_arrays3()
         {
-            var script1 = @"{a:'cos', b: ""select 'abc' 1"", c: 'aaa' }";
-            var script2 = @"{a:'cos', b: @EXP@, c: 'aaa' }";
+            var script1 = @"{d:[{@f:6}],c:'aaa'}";
 
-            var result = S4JParser.Parse(script1);
+            var result = S4JParser.
+                Parse(script1);
 
-            Assert.
-                Equal(script2, result.SimplifiedScriptAsText);
+            Assert.Equal(
+                @"{d:[{@f:6}],c:'aaa'}",
+                result.ToJson());
         }
 
         [Fact]
-        public void S4J_parser_simple_j4s_inner_quotation2()
+        public void parser_should_understand_inner_object_and_arrays4()
         {
-            var script1 = @"{a:'cos', b: ""select \\""aaa\\"" 1"", c: 'aaa' }";
-            var script2 = @"{a:'cos', b: @EXP@, c: 'aaa' }";
+            var script1 = @"{d:[{@f:6}],c:'aaa',d:[{a:['gg']}],e:'b'}";
 
-            var result = S4JParser.Parse(script1);
+            var result = S4JParser.
+                Parse(script1);
 
-            Assert.
-                Equal(script2, result.SimplifiedScriptAsText);
-        }*/
+            Assert.Equal(
+                script1,
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_inner_object_and_arrays5()
+        {
+            var script1 = @"[{d:[{a:['gg']}]},9,1]";
+
+            var result = S4JParser.
+                Parse(script1);
+
+            Assert.Equal(
+                script1,
+                result.ToJson());
+        }
     }
 }
