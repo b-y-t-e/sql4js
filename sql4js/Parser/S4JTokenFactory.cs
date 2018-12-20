@@ -13,34 +13,34 @@ namespace sql4js.Parser
             if (State != null)
             {
                 if (State.StateType == EStateType.S4J)
-                    result = new JsRoot();
+                    result = new S4JRoot();
 
                 if (State.StateType == EStateType.S4J_ARRAY)
-                    result = new JsArray();
+                    result = new S4JArray();
 
                 if (State.StateType == EStateType.S4J_COMMENT)
-                    result = new JsComment();
+                    result = new S4JComment();
 
                 if (State.StateType == EStateType.S4J_OBJECT)
-                    result = new JsObject();
+                    result = new S4JObject();
 
                 if (State.StateType == EStateType.S4J_QUOTATION)
-                    result = new JsValue();
+                    result = new S4JQuotation();
 
                 //if (State.StateType == EStateType.S4J_SEPARATOR)
                 //    result = new JsArray();
 
-                if (State.StateType == EStateType.S4J_VALUE)
-                    result = new JsValue();
+                if (State.StateType == EStateType.S4J_SIMPLE_VALUE)
+                    result = new S4JSimpleValue();
 
                 //if (State.StateType == EStateType.S4J_VALUE_DELIMITER)
                 //    result = new JsArray();
 
                 if (State.StateType == EStateType.SQL)
-                    result = new JsSql();
+                    result = new S4JScript();
 
                 if (State.StateType == EStateType.SQL_COMMENT)
-                    result = new JsSqlComment();
+                    result = new S4JScriptComment();
             }
 
             if (result != null)

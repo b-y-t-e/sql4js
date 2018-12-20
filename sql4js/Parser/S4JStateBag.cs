@@ -136,7 +136,7 @@ namespace sql4js.Parser
                     EStateType.S4J_COMA,
                     EStateType.S4J_OBJECT,
                     EStateType.S4J_ARRAY,
-                    EStateType.S4J_VALUE,
+                    EStateType.S4J_SIMPLE_VALUE,
                     EStateType.SQL
                 },
                 Gates = new List<S4JStateGate>()
@@ -163,7 +163,7 @@ namespace sql4js.Parser
                     EStateType.S4J_ARRAY,
                     EStateType.S4J_VALUE_DELIMITER,
                     EStateType.S4J_COMA,
-                    EStateType.S4J_VALUE,
+                    EStateType.S4J_SIMPLE_VALUE,
                     EStateType.SQL
                 },
                 Gates = new List<S4JStateGate>()
@@ -220,7 +220,7 @@ namespace sql4js.Parser
 
             S4JState sS4jValue = new S4JState()
             {
-                StateType = EStateType.S4J_VALUE,
+                StateType = EStateType.S4J_SIMPLE_VALUE,
                 AllowedStatesNames = new List<EStateType?>()
                 {
                     null

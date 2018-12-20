@@ -13,7 +13,7 @@ namespace sql4js.Parser
             S4JStateBag stateBag = new S4JStateBag();
 
             S4JTokenStack valueStack = new S4JTokenStack();
-            JsRoot rootVal = new JsRoot()
+            S4JRoot rootVal = new S4JRoot()
             {
                 State = stateBag.RootState
             };
@@ -248,39 +248,4 @@ namespace sql4js.Parser
         }
     }
 
-    public class S4JResult
-    {
-        public Object Value { get; set; }
-
-        public Dictionary<String, S4JExpression> Expressions { get; set; }
-
-        public String ScriptAsText { get; set; }
-
-        public String SimplifiedScriptAsText { get; set; }
-
-        public S4JResult()
-        {
-            Expressions = new Dictionary<string, S4JExpression>();
-        }
-
-        public String GetJson()
-        {
-            return JsonSerializer.SerializeJson(this.Value);
-        }
-    }
-
-    public class S4JList : List<Object>
-    {
-
-    }
-
-    public class S4JExpression
-    {
-
-    }
-
-    public class S4JObject : Dictionary<Object, Object>
-    {
-
-    }
 }

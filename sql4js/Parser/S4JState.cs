@@ -119,7 +119,7 @@ namespace sql4js.Parser
         S4J_COMMENT,
         S4J_QUOTATION,
         S4J_ARRAY,
-        S4J_VALUE,
+        S4J_SIMPLE_VALUE,
         S4J_OBJECT,
         SQL,
         SQL_COMMENT,
