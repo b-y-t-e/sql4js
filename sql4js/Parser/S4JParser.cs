@@ -25,6 +25,7 @@ namespace sql4js.Parser
                     stateBag.Add(function);
                     stateBag.Add(function.BracketsDefinition);
                     stateBag.Add(function.CommentDefinition);
+                    stateBag.Add(function.QuotationDefinition);
                 }
 
             S4JTokenStack valueStack = new S4JTokenStack();

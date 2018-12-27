@@ -43,7 +43,10 @@ namespace sql4js.Parser
                     result = new S4JFunctionComment();
 
                 if (State.StateType == EStateType.FUNCTION_BRACKETS)
-                    result = new S4JScriptBracket();
+                    result = new S4JFunctionBracket();
+
+                if (State.StateType == EStateType.FUNCTION_QUOTATION)
+                    result = new S4JFunctionQuotation();
             }
 
             if (result != null)

@@ -12,6 +12,8 @@ namespace sql4js.Parser
 
         public S4JState CommentDefinition { get; set; }
 
+        public S4JState QuotationDefinition { get; set; }
+
         public S4JStateFunction(String Name)
         {
             this.Name = Name;

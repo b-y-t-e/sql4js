@@ -13,6 +13,7 @@ namespace sql4js.Functions
             Priority = 0;
             BracketsDefinition = new TSqlBrackets();
             CommentDefinition = new TSqlComment();
+            QuotationDefinition = new TSqlQuotation();
         }
     }
 
@@ -38,6 +39,29 @@ namespace sql4js.Functions
                     {
                         Start = "--".ToCharArray(),
                         End = "\n".ToCharArray()
+                    }
+                };
+        }
+    }
+
+    public class TSqlQuotation : S4JState
+    {
+        public TSqlQuotation()
+        {
+            Priority = 2;
+            StateType = EStateType.FUNCTION_QUOTATION;
+            AllowedStatesNames = new List<EStateType?>()
+            {
+
+            };
+            IsValue = true;
+            Gates = new List<S4JStateGate>()
+                {
+                    new S4JStateGate()
+                    {
+                        Start = "'".ToCharArray(),
+                        End = "'".ToCharArray(),
+                        Inner = "'".ToCharArray(),
                     }
                 };
         }

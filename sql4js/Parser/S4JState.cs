@@ -123,9 +123,11 @@ namespace sql4js.Parser
         S4J_ARRAY,
         S4J_SIMPLE_VALUE,
         S4J_OBJECT,
+
         FUNCTION,
         FUNCTION_COMMENT,
         FUNCTION_BRACKETS,
+        FUNCTION_QUOTATION,
 
         S4J_VALUE_DELIMITER,
         S4J_COMA

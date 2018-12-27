@@ -5,7 +5,7 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JFunctionBracket : Is4jToken
+    public class S4JFunctionQuotation : Is4jToken
     {
         public Is4jToken Parent { get; set; }
 
@@ -17,7 +17,7 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public S4JFunctionBracket()
+        public S4JFunctionQuotation()
         {
             Children = new List<Is4jToken>();
         }

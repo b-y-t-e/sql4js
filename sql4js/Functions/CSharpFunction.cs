@@ -13,6 +13,7 @@ namespace sql4js.Functions
             Priority = 0;
             BracketsDefinition = new CSharpBrackets();
             CommentDefinition = new CSharpComment();
+            QuotationDefinition = new CSharpQuotation();
         }
     }
 
@@ -43,10 +44,40 @@ namespace sql4js.Functions
         }
     }
 
+    public class CSharpQuotation : S4JState
+    {
+        public CSharpQuotation()
+        {
+            Priority = 2;
+            StateType = EStateType.FUNCTION_QUOTATION;
+            AllowedStatesNames = new List<EStateType?>()
+                {
+                    
+                };
+            IsValue = true;
+            Gates = new List<S4JStateGate>()
+                {
+                    new S4JStateGate()
+                    {
+                        Start = "\"".ToCharArray(),
+                        End = "\"".ToCharArray(),
+                        Inner = "\\".ToCharArray(),
+                    },
+                    new S4JStateGate()
+                    {
+                        Start = "'".ToCharArray(),
+                        End = "'".ToCharArray(),
+                        Inner = "\\".ToCharArray(),
+                    }
+                };
+        }
+    }
+
     public class CSharpBrackets : S4JState
     {
         public CSharpBrackets()
         {
+            Priority = 3;
             StateType = EStateType.FUNCTION_BRACKETS;
             AllowedStatesNames = new List<EStateType?>()
                 {

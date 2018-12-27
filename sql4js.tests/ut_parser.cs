@@ -80,6 +80,84 @@ namespace sql4js.tests
         }
 
         [Fact]
+        public void parser_should_understand_quotation_with_sql_function()
+        {
+            var script1 = @"{ b : "" sql( select getdate())  "" }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:"" sql( select getdate())  ""}",
+                result.ToJson());
+        }
+        
+        [Fact]
+        public void parser_should_understand_function_with_quotation1()
+        {
+            var script1 = @"{ b : sql(select abc('def'))   }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:sql(select abc('def'))}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_function_with_quotation1_inside_quotation1()
+        {
+            var script1 = @"{ b : sql(select abc('d\'ef'))   }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:sql(select abc('d\'ef'))}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_function_with_quotation2_inside_quotation2()
+        {
+            var script1 = @"{ b : sql(select abc(""d\""ef""))   }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:sql(select abc(""d\""ef""))}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_function_with_quotation2_inside_quotation2_version2()
+        {
+            var script1 = @"{ b : sql(select abc(""d\""ff\""ef""))   }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:sql(select abc(""d\""ff\""ef""))}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_function_with_quotation1_inside_quotation2()
+        {
+            var script1 = @"{ b : sql(select abc(""d'ff'ef""))   }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:sql(select abc(""d'ff'ef""))}",
+                result.ToJson());
+        }
+
+        [Fact]
         public void parser_should_understand_simple_function_with_comments()
         {
             var script1 = @"{ b : sql( select 1 /* abc */ )   }";
