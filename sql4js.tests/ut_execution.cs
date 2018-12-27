@@ -59,5 +59,28 @@ return a + new osoba().wiek;");
                 @"{b:""abc1""}",
                 result.ToJson());
         }
+
+        [Fact]
+        async public void executor_simple_csharp_function()
+        {
+            var script1 = @"{ b : c( 
+
+int abc(){
+return 3;
+}
+
+return abc();
+
+)   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            // result
+
+            Assert.Equal(
+                @"{b:3}",
+                result.ToJson());
+        }
     }
 }
