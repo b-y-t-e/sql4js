@@ -4,23 +4,24 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JFunctionComment : Is4jToken
+    public class S4JTextValue : Is4jToken
     {
         public Is4jToken Parent { get; set; }
 
         public List<Is4jToken> Children { get; set; }
 
         public String Text { get; set; }
-
+        
         public Boolean IsKey { get; set; }
 
         public bool IsCommited { get; set; }
 
         public S4JState State { get; set; }
 
-        public S4JFunctionComment()
+        public S4JTextValue()
         {
             Text = "";
+            IsKey = false;
             Children = new List<Is4jToken>();
         }
 
@@ -33,6 +34,8 @@ namespace sql4js.Parser
         {
             foreach (var Char in Chars)
             {
+                if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
+                    continue;
                 this.Text += Char;
             }
         }
@@ -45,8 +48,7 @@ namespace sql4js.Parser
 
         public void BuildJson(StringBuilder Builder)
         {
-            foreach (var child in Children)
-                child.BuildJson(Builder);
+            Builder.Append(Text);
         }
 
         public string ToJson()

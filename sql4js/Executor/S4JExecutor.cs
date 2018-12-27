@@ -34,7 +34,9 @@ namespace sql4js.Executor
                 string code = function.ToJsonWithoutGate();
                 object result = await CSharpScript.EvaluateAsync(code);
                 // node.
-                function.Text = JsonSerializer.SerializeJson(result);
+                String text = JsonSerializer.SerializeJson(result);
+                function.Children.Clear();
+                function.Children.Add(new S4JTextValue() { Text = text });
             }
             else
             {

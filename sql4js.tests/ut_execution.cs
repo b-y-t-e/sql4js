@@ -44,5 +44,20 @@ return a + new osoba().wiek;");
                 @"{b:""abc1""}",
                 result.ToJson());
         }
+
+        [Fact]
+        async public void parser_should_understand_simple_function_with_outer_comments_2()
+        {
+            var script1 = @"{ b : c( ""abc"" + 1 )   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            // result
+
+            Assert.Equal(
+                @"{b:""abc1""}",
+                result.ToJson());
+        }
     }
 }

@@ -67,6 +67,19 @@ namespace sql4js.tests
         }
 
         [Fact]
+        public void parser_should_understand_simple_sql_function_wth_getdate()
+        {
+            var script1 = @"{ b : sql( select getdate())   }";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{b:sql( select getdate())}",
+                result.ToJson());
+        }
+
+        [Fact]
         public void parser_should_understand_simple_function_with_comments()
         {
             var script1 = @"{ b : sql( select 1 /* abc */ )   }";

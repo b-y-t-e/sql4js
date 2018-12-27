@@ -47,23 +47,19 @@ namespace sql4js.Functions
     {
         public TSqlBrackets()
         {
+            IsValue = true;
             StateType = EStateType.FUNCTION_BRACKETS;
             AllowedStatesNames = new List<EStateType?>()
                 {
-                    EStateType.FUNCTION_BRACKETS
+                    EStateType.FUNCTION_BRACKETS,
+                    EStateType.FUNCTION_COMMENT
                 };
-            IsComment = true;
             Gates = new List<S4JStateGate>()
                 {
                     new S4JStateGate()
                     {
-                        Start = "/*".ToCharArray(),
-                        End = "*/".ToCharArray()
-                    },
-                    new S4JStateGate()
-                    {
-                        Start = "--".ToCharArray(),
-                        End = "\n".ToCharArray()
+                        Start = "(".ToCharArray(),
+                        End = ")".ToCharArray()
                     }
                 };
         }

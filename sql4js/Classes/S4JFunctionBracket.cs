@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,9 +10,7 @@ namespace sql4js.Parser
         public Is4jToken Parent { get; set; }
 
         public List<Is4jToken> Children { get; set; }
-
-        public String Text { get; set; }
-
+        
         public Boolean IsKey { get; set; }
 
         public bool IsCommited { get; set; }
@@ -20,32 +19,34 @@ namespace sql4js.Parser
 
         public S4JScriptBracket()
         {
-            Text = "";
             Children = new List<Is4jToken>();
         }
 
         public void AddChildToToken(Is4jToken Child)
         {
-
+            Children.Add(Child);
         }
 
         public void AppendCharsToToken(IList<Char> Chars)
         {
-            foreach (var Char in Chars)
+            Is4jToken lastChild = this.Children.LastOrDefault();
+            if (!(lastChild is S4JTextValue))
             {
-                this.Text += Char;
+                lastChild = new S4JTextValue();
+                this.Children.Add(lastChild);
             }
+            lastChild.AppendCharsToToken(Chars);
         }
 
         public void CommitToken()
         {
-            this.Text = this.Text.Trim();
             IsCommited = true;
         }
 
         public void BuildJson(StringBuilder Builder)
         {
-            Builder.Append(Text);
+            foreach (var child in Children)
+                child.BuildJson(Builder);
         }
 
         public string ToJson()
