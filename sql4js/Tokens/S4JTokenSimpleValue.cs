@@ -1,15 +1,18 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JFunctionBracket : Is4jToken
+    public class S4JTokenSimpleValue : Is4jToken
     {
         public Is4jToken Parent { get; set; }
 
+        // public Is4jToken Value { get; set; }
+
         public List<Is4jToken> Children { get; set; }
+
+        public String Text { get; set; }
         
         public Boolean IsKey { get; set; }
 
@@ -17,36 +20,37 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public S4JFunctionBracket()
+        public S4JTokenSimpleValue()
         {
+            Text = "";
+            IsKey = false;
             Children = new List<Is4jToken>();
         }
 
         public void AddChildToToken(Is4jToken Child)
         {
-            Children.Add(Child);
+            // Value = Child;
         }
 
         public void AppendCharsToToken(IList<Char> Chars)
         {
-            Is4jToken lastChild = this.Children.LastOrDefault();
-            if (!(lastChild is S4JTextValue))
+            foreach (var Char in Chars)
             {
-                lastChild = new S4JTextValue();
-                this.Children.Add(lastChild);
+                if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
+                    continue;
+                this.Text += Char;
             }
-            lastChild.AppendCharsToToken(Chars);
         }
 
         public void CommitToken()
         {
+            this.Text = this.Text.Trim();
             IsCommited = true;
         }
 
         public void BuildJson(StringBuilder Builder)
         {
-            foreach (var child in Children)
-                child.BuildJson(Builder);
+            Builder.Append(Text);
         }
 
         public string ToJson()

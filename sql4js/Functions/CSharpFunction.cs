@@ -1,7 +1,10 @@
-﻿using sql4js.Parser;
+﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using sql4js.Executor;
+using sql4js.Parser;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace sql4js.Functions
 {
@@ -14,6 +17,7 @@ namespace sql4js.Functions
             BracketsDefinition = new CSharpBrackets();
             CommentDefinition = new CSharpComment();
             QuotationDefinition = new CSharpQuotation();
+            Evaluator = new CSharpEvaluator();
         }
     }
 
@@ -93,6 +97,24 @@ namespace sql4js.Functions
                         End = ")".ToCharArray()
                     }
                 };
+        }
+    }
+
+    public class CSharpEvaluator : IEvaluator
+    {
+        // public Dictionary<String, Object>
+
+        public async Task<Object> Evaluate(Is4jToken token)
+        {
+
+            S4JTokenFunction function = token as S4JTokenFunction;
+            string code = function.ToJsonWithoutGate();
+            object result = await CSharpScript.EvaluateAsync(code);
+            function.Result = result;
+            //String text = JsonSerializer.SerializeJson(result);
+            //function.Children.Clear();
+            //function.Children.Add(new S4JTextValue() { Text = text });
+            return result;
         }
     }
 }

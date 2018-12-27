@@ -29,7 +29,7 @@ namespace sql4js.Parser
                 }
 
             S4JTokenStack valueStack = new S4JTokenStack();
-            S4JRoot rootVal = new S4JRoot()
+            S4JTokenRoot rootVal = new S4JTokenRoot()
             {
                 State = stateBag.RootState
             };

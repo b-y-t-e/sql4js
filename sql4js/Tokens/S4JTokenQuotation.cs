@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JQuotation : Is4jToken
+    public class S4JTokenQuotation : Is4jToken
     {
         public Is4jToken Parent { get; set; }
 
@@ -20,7 +20,7 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public S4JQuotation()
+        public S4JTokenQuotation()
         {
             Text = "";
             IsKey = false;

@@ -2,12 +2,17 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using sql4js.Executor;
 
 namespace sql4js.Parser
 {
-    public class S4JFunction : Is4jToken
+    public class S4JTokenFunction : Is4jToken
     {
-        // public Object Value { get; set; }
+        public Object Result { get; set; }
+
+        public IEvaluator Evaluator { get; set; }
+
+        ////////////////////////////////////////////
 
         public Is4jToken Parent { get; set; }
 
@@ -21,7 +26,7 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public S4JFunction()
+        public S4JTokenFunction()
         {
             Text = "";
             Children = new List<Is4jToken>();
@@ -42,9 +47,9 @@ namespace sql4js.Parser
             }*/
 
             Is4jToken lastChild = this.Children.LastOrDefault();
-            if (!(lastChild is S4JTextValue))
+            if (!(lastChild is S4JTokenTextValue))
             {
-                lastChild = new S4JTextValue();
+                lastChild = new S4JTokenTextValue();
                 this.Children.Add(lastChild);
             }
             lastChild.AppendCharsToToken(Chars);

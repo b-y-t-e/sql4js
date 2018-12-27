@@ -5,7 +5,7 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JObject : Is4jToken
+    public class S4JTokenObject : Is4jToken
     {
         /*public object this[string index]
         {
@@ -39,7 +39,7 @@ namespace sql4js.Parser
         
         public S4JState State { get; set; }
 
-        public S4JObject()
+        public S4JTokenObject()
         {
             Text = "";
             Children = new List<Is4jToken>();

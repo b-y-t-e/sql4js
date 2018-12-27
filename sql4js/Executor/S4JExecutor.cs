@@ -23,24 +23,24 @@ namespace sql4js.Executor
             return tree;
         }
 
-        async private Task Evaluate(Is4jToken node)
+        async private Task Evaluate(Is4jToken token)
         {
-            if (node == null)
+            if (token == null)
                 return;
 
-            if (node.State.StateType == EStateType.FUNCTION)
+            if (token.State.StateType == EStateType.FUNCTION)
             {
-                S4JFunction function = node as S4JFunction;
-                string code = function.ToJsonWithoutGate();
-                object result = await CSharpScript.EvaluateAsync(code);
-                // node.
+                S4JTokenFunction function = token as S4JTokenFunction;
+                object result = await function.Evaluator?.Evaluate(token);
+
+                function.Result = result;
                 String text = JsonSerializer.SerializeJson(result);
                 function.Children.Clear();
-                function.Children.Add(new S4JTextValue() { Text = text });
+                function.Children.Add(new S4JTokenTextValue() { Text = text });
             }
             else
             {
-                foreach (Is4jToken child in node.Children)
+                foreach (Is4jToken child in token.Children)
                 {
                     await Evaluate(child);
                 }
@@ -48,4 +48,35 @@ namespace sql4js.Executor
         }
     }
 
+    public interface IEvaluator
+    {
+        Task<Object> Evaluate(Is4jToken node);
+    }
+
+    public class ExecutionTree
+    {
+        public Is4jToken Root;
+
+        public ExecutionTreeNode RootExecutionNode;
+
+        public void Build(Is4jToken Root)
+        {
+
+        }
+    }
+
+    public class ExecutionTreeNode
+    {
+        public Is4jToken Node;
+
+        public Dictionary<String, Object> Variables;
+
+        public List<Is4jToken> Dependencies;
+
+        public ExecutionTreeNode()
+        {
+            Variables = new Dictionary<string, object>();
+            Dependencies = new List<Is4jToken>();
+        }
+    }
 }

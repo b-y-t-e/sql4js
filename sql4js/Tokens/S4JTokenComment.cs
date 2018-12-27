@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JFunctionComment : Is4jToken
+    public class S4JTokenComment : Is4jToken
     {
         public Is4jToken Parent { get; set; }
 
@@ -18,7 +18,7 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public S4JFunctionComment()
+        public S4JTokenComment()
         {
             Text = "";
             Children = new List<Is4jToken>();
@@ -45,8 +45,7 @@ namespace sql4js.Parser
 
         public void BuildJson(StringBuilder Builder)
         {
-            foreach (var child in Children)
-                child.BuildJson(Builder);
+            Builder.Append(Text);
         }
 
         public string ToJson()

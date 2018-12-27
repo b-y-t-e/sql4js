@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sql4js.Executor;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,6 +14,8 @@ namespace sql4js.Parser
         public S4JState CommentDefinition { get; set; }
 
         public S4JState QuotationDefinition { get; set; }
+
+        public IEvaluator Evaluator { get; set; }
 
         public S4JStateFunction(String Name)
         {
