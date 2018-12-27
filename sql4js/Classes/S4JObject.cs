@@ -29,25 +29,25 @@ namespace sql4js.Parser
         }*/
         public Is4jToken Parent { get; set; }
 
+        public List<Is4jToken> Children { get; set; }
+
         public String Text { get; set; }
 
         public Boolean IsKey { get; set; }
 
         public bool IsCommited { get; set; }
-
-        public List<Is4jToken> Items { get; set; }
-
+        
         public S4JState State { get; set; }
 
         public S4JObject()
         {
             Text = "";
-            Items = new List<Is4jToken>();
+            Children = new List<Is4jToken>();
         }
 
         public void AddChildToToken(Is4jToken Child)
         {
-            this.Items.Add(Child);
+            this.Children.Add(Child);
         }
 
 
@@ -66,7 +66,7 @@ namespace sql4js.Parser
             Builder.Append("{");
             Int32 i = 0;
             Boolean prevWasKey = true;
-            foreach (var child in Items)
+            foreach (var child in Children)
             {
                 if (!prevWasKey) Builder.Append(",");
                 child.BuildJson(Builder);

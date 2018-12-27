@@ -1,16 +1,31 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
 namespace sql4js.Parser
 {
-    public static class S4JParser
+    public class S4JParser
     {
-        public static Is4jToken Parse(String Text)
+        public List<S4JStateFunction> Functions { get; set; }
+
+        public S4JParser()
+        {
+            Functions = new List<S4JStateFunction>();
+        }
+
+        public Is4jToken Parse(String Text)
         {
             IList<char> chars = Text.Trim().ToCharArray();
 
             S4JStateBag stateBag = new S4JStateBag();
+            if (Functions != null)
+                foreach (var function in Functions)
+                {
+                    stateBag.Add(function);
+                    stateBag.Add(function.BracketsDefinition);
+                    stateBag.Add(function.CommentDefinition);
+                }
 
             S4JTokenStack valueStack = new S4JTokenStack();
             S4JRoot rootVal = new S4JRoot()
@@ -94,7 +109,7 @@ namespace sql4js.Parser
             }
 
 
-            return rootVal.Value as Is4jToken;
+            return rootVal.Children.Single() as Is4jToken;
         }
 
         private static IEnumerable<S4JStateStackEvent> Analyse(IList<char> code, int index, S4JStateBag StateBag, S4JTokenStack stateStack) // S4JStateStack stateStack)
@@ -227,8 +242,8 @@ namespace sql4js.Parser
                             // NewIndex = null,
                             NewIndex =
                                 state.IsCollection ?
-                                    S4JParserHelper.SkipWhiteSpaces(code, index + (matchedGate?.End == null ? 0 : (matchedGate.End.Count - 1)) + 1) :
-                                    index + (matchedGate?.End == null ? 0 : (matchedGate.End.Count - 1)) + 1, 
+                                    S4JParserHelper.SkipWhiteSpaces(code, index + (matchedGate?.Start == null ? 0 : (matchedGate.Start.Count - 1)) + 1) :
+                                    index + (matchedGate?.Start == null ? 0 : (matchedGate.Start.Count - 1)) + 1, 
                             State = newState,
                             Pushed = true,
                             Chars = matchedGate?.Start ?? new[] { code[index] }

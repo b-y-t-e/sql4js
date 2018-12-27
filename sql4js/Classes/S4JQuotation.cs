@@ -8,8 +8,10 @@ namespace sql4js.Parser
     {
         public Is4jToken Parent { get; set; }
 
-        public Is4jToken Value { get; set; }
+        // public Is4jToken Value { get; set; }
 
+        public List<Is4jToken> Children { get; set; }
+        
         public String Text { get; set; }
         
         public Boolean IsKey { get; set; }
@@ -22,6 +24,7 @@ namespace sql4js.Parser
         {
             Text = "";
             IsKey = false;
+            Children = new List<Is4jToken>();
         }
 
         public void AddChildToToken(Is4jToken Child)

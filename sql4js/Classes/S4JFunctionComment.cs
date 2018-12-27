@@ -4,9 +4,11 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JScriptComment : Is4jToken
+    public class S4JFunctionComment : Is4jToken
     {
         public Is4jToken Parent { get; set; }
+
+        public List<Is4jToken> Children { get; set; }
 
         public String Text { get; set; }
 
@@ -16,9 +18,10 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public S4JScriptComment()
+        public S4JFunctionComment()
         {
             Text = "";
+            Children = new List<Is4jToken>();
         }
 
         public void AddChildToToken(Is4jToken Child)

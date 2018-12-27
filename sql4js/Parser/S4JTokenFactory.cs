@@ -36,11 +36,14 @@ namespace sql4js.Parser
                 //if (State.StateType == EStateType.S4J_VALUE_DELIMITER)
                 //    result = new JsArray();
 
-                if (State.StateType == EStateType.SQL)
-                    result = new S4JScript();
+                if (State.StateType == EStateType.FUNCTION)
+                    result = new S4JFunction();
 
-                if (State.StateType == EStateType.SQL_COMMENT)
-                    result = new S4JScriptComment();
+                if (State.StateType == EStateType.FUNCTION_COMMENT)
+                    result = new S4JFunctionComment();
+
+                if (State.StateType == EStateType.FUNCTION_BRACKETS)
+                    result = new S4JScriptBracket();
             }
 
             if (result != null)

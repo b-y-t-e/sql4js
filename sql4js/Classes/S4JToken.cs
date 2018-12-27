@@ -9,6 +9,8 @@ namespace sql4js.Parser
     {
         Is4jToken Parent { get; set; }
 
+        List<Is4jToken> Children { get; set; }
+
         S4JState State { get; set; }
 
         bool IsKey { get; set; }

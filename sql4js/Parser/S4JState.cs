@@ -15,6 +15,8 @@ namespace sql4js.Parser
 
         public EStateType StateType { get; set; }
 
+        public Int32 Priority { get; set; }
+
         //////////////////////////////////////////
 
         public Boolean IsCollection { get; set; }
@@ -121,8 +123,9 @@ namespace sql4js.Parser
         S4J_ARRAY,
         S4J_SIMPLE_VALUE,
         S4J_OBJECT,
-        SQL,
-        SQL_COMMENT,
+        FUNCTION,
+        FUNCTION_COMMENT,
+        FUNCTION_BRACKETS,
 
         S4J_VALUE_DELIMITER,
         S4J_COMA
