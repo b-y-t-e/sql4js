@@ -109,10 +109,10 @@ namespace sql4js.Functions
             Dictionary<String, object> values = new Dictionary<string, object>();
             while (parentToken != null)
             {
-                var parentResult = parentToken.GetParameters();
-                if (parentResult != null)
+                Dictionary<string, object> parentParameters = parentToken.GetParameters();
+                if (parentParameters != null)
                 {
-                    foreach (var keyAndVal in parentResult)
+                    foreach (KeyValuePair<string, object> keyAndVal in parentParameters)
                     {
                         if (!values.ContainsKey(keyAndVal.Key))
                         {
@@ -124,30 +124,26 @@ namespace sql4js.Functions
             }
 
             S4JTokenFunction function = token as S4JTokenFunction;
-            string code = function.ToJsonWithoutGate();
+            StringBuilder code = new StringBuilder(function.ToJsonWithoutGate());
 
-            foreach (var keyAndVal in values)
+            foreach (KeyValuePair<string, object> keyAndVal in values)
             {
                 if (keyAndVal.Value == null)
                 {
-                    code = $"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};" + Environment.NewLine + code;
+                    code.Insert(0, $"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
                 }
                 else
                 {
-                    code = $"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};" + Environment.NewLine + code;
+                    code.Insert(0, $"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
                 }
             }
 
             var imports = ScriptOptions.Default.WithImports("System", "System.Text", "System.Collections.Generic");
 
             object result = await CSharpScript.EvaluateAsync(
-                code,
+                code.ToString(),
                 imports);
 
-            function.Result = result;
-            //String text = JsonSerializer.SerializeJson(result);
-            //function.Children.Clear();
-            //function.Children.Add(new S4JTextValue() { Text = text });
             return result;
         }
     }

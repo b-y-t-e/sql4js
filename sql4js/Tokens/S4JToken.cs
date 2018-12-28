@@ -13,7 +13,11 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
+        //////////////////////////////////////////////////
+
         public bool IsKey { get; set; }
+
+        public bool IsSingleKey { get; set; }
 
         public bool IsCommited { get; set; }
 
@@ -37,6 +41,29 @@ namespace sql4js.Parser
         public virtual void CommitToken()
         {
             IsCommited = true;
+
+            if (Parent is S4JTokenObject)
+            {
+                if (!this.IsKey && !(this is S4JTokenComment))
+                {
+                    int indexInParent = Parent.Children.IndexOf(this);
+                    S4JToken prevChild = null;
+                    for (var i = indexInParent - 1; i >= 0; i--)
+                    {
+                        S4JToken child = Parent.Children[i];
+                        if (child is S4JTokenComment)
+                            continue;
+                        prevChild = child;
+                        break;
+                    }
+                    //int prevIndexInParent = indexInParent - 1;
+                    //S4JToken prevChild = prevIndexInParent >= 0 ? Parent.Children[prevIndexInParent] : null;
+                    if (prevChild == null || prevChild.IsKey == false)
+                    {
+                        this.IsSingleKey = true;
+                    }
+                }
+            }
         }
 
         public virtual void BuildJson(StringBuilder Builder)
