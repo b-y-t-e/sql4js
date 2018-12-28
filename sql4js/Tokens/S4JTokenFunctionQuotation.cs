@@ -5,36 +5,16 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JTokenFunctionQuotation : Is4jToken
+    public class S4JTokenFunctionQuotation : S4JToken
     {
-        public Is4jToken Parent { get; set; }
-
-        public List<Is4jToken> Children { get; set; }
-        
-        public Boolean IsKey { get; set; }
-
-        public bool IsCommited { get; set; }
-
-        public S4JState State { get; set; }
-
         public S4JTokenFunctionQuotation()
         {
-            Children = new List<Is4jToken>();
+            Children = new List<S4JToken>();
         }
 
-        public Dictionary<String, Object> GetResult()
+        public override void AppendCharsToToken(IList<Char> Chars)
         {
-            return null;
-        }
-
-        public void AddChildToToken(Is4jToken Child)
-        {
-            Children.Add(Child);
-        }
-
-        public void AppendCharsToToken(IList<Char> Chars)
-        {
-            Is4jToken lastChild = this.Children.LastOrDefault();
+            S4JToken lastChild = this.Children.LastOrDefault();
             if (!(lastChild is S4JTokenTextValue))
             {
                 lastChild = new S4JTokenTextValue();
@@ -42,23 +22,6 @@ namespace sql4js.Parser
             }
             lastChild.AppendCharsToToken(Chars);
         }
-
-        public void CommitToken()
-        {
-            IsCommited = true;
-        }
-
-        public void BuildJson(StringBuilder Builder)
-        {
-            foreach (var child in Children)
-                child.BuildJson(Builder);
-        }
-
-        public string ToJson()
-        {
-            StringBuilder builder = new StringBuilder();
-            BuildJson(builder);
-            return builder.ToString();
-        }
+        
     }
 }

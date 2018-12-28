@@ -5,31 +5,18 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public class S4JTokenObject : Is4jToken
+    public class S4JTokenObject : S4JToken
     {
-        public Is4jToken Parent { get; set; }
-
-        public List<Is4jToken> Children { get; set; }
-
-        public String Text { get; set; }
-
-        public Boolean IsKey { get; set; }
-
-        public bool IsCommited { get; set; }
-
-        public S4JState State { get; set; }
-
         public S4JTokenObject()
         {
-            Text = "";
-            Children = new List<Is4jToken>();
+            Children = new List<S4JToken>();
         }
 
-        public Dictionary<String, Object> GetResult()
+        public override Dictionary<String, Object> GetParameters()
         {
             Dictionary<String, Object> result = new Dictionary<string, object>();
             String lastKey = null;
-            foreach (Is4jToken child in Children)
+            foreach (S4JToken child in Children)
             {
                 if (child.IsKey)
                 {
@@ -69,23 +56,7 @@ namespace sql4js.Parser
             return result;
         }
 
-        public void AddChildToToken(Is4jToken Child)
-        {
-            this.Children.Add(Child);
-        }
-
-
-        public void AppendCharsToToken(IList<Char> Chars)
-        {
-
-        }
-
-        public void CommitToken()
-        {
-            IsCommited = true;
-        }
-
-        public void BuildJson(StringBuilder Builder)
+        public override void BuildJson(StringBuilder Builder)
         {
             Builder.Append("{");
             Int32 i = 0;
@@ -99,13 +70,6 @@ namespace sql4js.Parser
                 i++;
             }
             Builder.Append("}");
-        }
-
-        public string ToJson()
-        {
-            StringBuilder builder = new StringBuilder();
-            BuildJson(builder);
-            return builder.ToString();
         }
     }
 

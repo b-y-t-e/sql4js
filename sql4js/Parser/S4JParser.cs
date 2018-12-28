@@ -14,7 +14,7 @@ namespace sql4js.Parser
             Functions = new List<S4JStateFunction>();
         }
 
-        public Is4jToken Parse(String Text)
+        public S4JToken Parse(String Text)
         {
             IList<char> chars = Text.Trim().ToCharArray();
 
@@ -47,7 +47,7 @@ namespace sql4js.Parser
                     // zdjęcie ze stosu
                     if (stackEvent.Popped)
                     {
-                        Is4jToken currentVal = valueStack.PeekNonValue();
+                        S4JToken currentVal = valueStack.PeekNonValue();
                         if (stackEvent.Chars != null)
                         {
                             currentVal.AppendCharsToToken(stackEvent.Chars);
@@ -84,8 +84,8 @@ namespace sql4js.Parser
 
                         if (stackEvent.Pushed)
                         {
-                            Is4jToken prevVal = valueStack.Peek();
-                            Is4jToken newToken = new S4JTokenFactory().To_token(stackEvent.State);
+                            S4JToken prevVal = valueStack.Peek();
+                            S4JToken newToken = new S4JTokenFactory().To_token(stackEvent.State);
                             valueStack.Push(newToken);
 
                             newToken.Parent = prevVal;
@@ -96,7 +96,7 @@ namespace sql4js.Parser
 
                         if (stackEvent.Chars != null)
                         {
-                            Is4jToken currentVal = valueStack.Peek();
+                            S4JToken currentVal = valueStack.Peek();
                             currentVal.AppendCharsToToken(stackEvent.Chars);
                         }
                     }
@@ -105,21 +105,21 @@ namespace sql4js.Parser
 
             while (valueStack.Count > 0)
             {
-                Is4jToken currentVal = valueStack.Peek();
+                S4JToken currentVal = valueStack.Peek();
                 if (currentVal != null)
                     currentVal.CommitToken();
                 valueStack.Pop();
             }
 
 
-            return rootVal.Children.Single() as Is4jToken;
+            return rootVal.Children.Single() as S4JToken;
         }
 
         private static IEnumerable<S4JStateStackEvent> Analyse(IList<char> code, int index, S4JStateBag StateBag, S4JTokenStack stateStack) // S4JStateStack stateStack)
         {
             // sprawdzamy zakończenie stanu
-            Is4jToken prevTokenNonValue = stateStack.PeekNonValue();
-            Is4jToken prevToken = stateStack.Peek();
+            S4JToken prevTokenNonValue = stateStack.PeekNonValue();
+            S4JToken prevToken = stateStack.Peek();
             if (prevTokenNonValue != null)
             {
                 IList<char> end = prevTokenNonValue?.State?.Gate?.End;

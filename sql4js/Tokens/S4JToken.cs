@@ -5,34 +5,75 @@ using System.Text;
 
 namespace sql4js.Parser
 {
-    public interface Is4jToken
+    public abstract class S4JToken
     {
-        Is4jToken Parent { get; set; }
+        public S4JToken Parent { get; set; }
 
-        List<Is4jToken> Children { get; set; }
+        public List<S4JToken> Children { get; set; }
 
-        Dictionary<String, Object> GetResult();
+        public S4JState State { get; set; }
 
-        S4JState State { get; set; }
+        public bool IsKey { get; set; }
 
-        bool IsKey { get; set; }
+        public bool IsCommited { get; set; }
 
-        bool IsCommited { get; set; }
+        //////////////////////////////////////////////////
 
-        void AddChildToToken(Is4jToken Child);
+        public virtual Dictionary<String, Object> GetParameters()
+        {
+            return null;
+        }
 
-        void AppendCharsToToken(IList<Char> Chars);
+        public virtual void AddChildToToken(S4JToken Child)
+        {
+            Children.Add(Child);
+        }
 
-        void CommitToken();
+        public virtual void AppendCharsToToken(IList<Char> Chars)
+        {
 
-        void BuildJson(StringBuilder Builder);
+        }
 
-        string ToJson();
+        public virtual void CommitToken()
+        {
+            IsCommited = true;
+        }
+
+        public virtual void BuildJson(StringBuilder Builder)
+        {
+            foreach (var child in Children)
+                child.BuildJson(Builder);
+        }
+
+        public virtual string ToJson()
+        {
+            StringBuilder builder = new StringBuilder();
+            BuildJson(builder);
+            return builder.ToString();
+        }
+
+        public string ToJsonWithoutGate()
+        {
+            StringBuilder builder = new StringBuilder();
+            BuildJson(builder);
+            if (State?.Gate != null)
+            {
+                if (builder.ToString().StartsWith(new string(State.Gate.Start.ToArray())))
+                {
+                    builder.Remove(0, State.Gate.Start.Count);
+                }
+                if (builder.ToString().EndsWith(new string(State.Gate.End.ToArray())))
+                {
+                    builder.Remove(builder.Length - State.Gate.End.Count, State.Gate.End.Count);
+                }
+            }
+            return builder.ToString();
+        }
     }
 
-    public class S4JTokenStack : List<Is4jToken>
+    public class S4JTokenStack : List<S4JToken>
     {
-        public void Push(Is4jToken Token)
+        public void Push(S4JToken Token)
         {
             this.Add(Token);
         }
@@ -42,12 +83,12 @@ namespace sql4js.Parser
             this.RemoveAt(this.Count - 1);
         }
 
-        public Is4jToken Peek()
+        public S4JToken Peek()
         {
             return this.LastOrDefault();
         }
 
-        public Is4jToken PeekNonValue()
+        public S4JToken PeekNonValue()
         {
             return this.
                 LastOrDefault(t => !t.State.IsSimpleValue); // && !t.State.IsComment);

@@ -6,9 +6,9 @@ namespace sql4js.Parser
 {
     public class S4JTokenFactory
     {
-        public Is4jToken To_token(S4JState State)
+        public S4JToken To_token(S4JState State)
         {
-            Is4jToken result = null;
+            S4JToken result = null;
 
             if (State != null)
             {

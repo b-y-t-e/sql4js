@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using sql4js.Executor;
 using sql4js.Parser;
 using System;
@@ -11,7 +12,7 @@ namespace sql4js.Functions
     public class CSharpFunction : S4JStateFunction
     {
         public CSharpFunction() :
-            base("c")
+            base("c#")
         {
             Priority = 0;
             BracketsDefinition = new CSharpBrackets();
@@ -102,15 +103,13 @@ namespace sql4js.Functions
 
     public class CSharpEvaluator : IEvaluator
     {
-        // public Dictionary<String, Object>
-
-        public async Task<Object> Evaluate(Is4jToken token)
+        public async Task<Object> Evaluate(S4JToken token)
         {
-            Is4jToken parentToken = token;
+            S4JToken parentToken = token;
             Dictionary<String, object> values = new Dictionary<string, object>();
             while (parentToken != null)
             {
-                var parentResult = parentToken.GetResult();
+                var parentResult = parentToken.GetParameters();
                 if (parentResult != null)
                 {
                     foreach (var keyAndVal in parentResult)
@@ -139,7 +138,12 @@ namespace sql4js.Functions
                 }
             }
 
-            object result = await CSharpScript.EvaluateAsync(code);
+            var imports = ScriptOptions.Default.WithImports("System", "System.Text", "System.Collections.Generic");
+
+            object result = await CSharpScript.EvaluateAsync(
+                code,
+                imports);
+
             function.Result = result;
             //String text = JsonSerializer.SerializeJson(result);
             //function.Children.Clear();

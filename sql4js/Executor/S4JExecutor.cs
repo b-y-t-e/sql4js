@@ -11,19 +11,21 @@ namespace sql4js.Executor
     {
         public S4JParser Parser { get; set; }
 
+        public Object Result { get; private set; }
+
         public S4JExecutor(S4JParser Parser)
         {
             this.Parser = Parser;
         }
 
-        async public Task<Is4jToken> Execute(String Text)
+        async public Task<S4JToken> Execute(String Text)
         {
-            Is4jToken tree = Parser.Parse(Text);
+            S4JToken tree = Parser.Parse(Text);
             await Evaluate(tree);
             return tree;
         }
 
-        async private Task Evaluate(Is4jToken token)
+        async private Task Evaluate(S4JToken token)
         {
             if (token == null)
                 return;
@@ -35,13 +37,21 @@ namespace sql4js.Executor
 
                 function.IsEvaluated = true;
                 function.Result = result;
-                String text = JsonSerializer.SerializeJson(result);
-                function.Children.Clear();
-                function.Children.Add(new S4JTokenTextValue() { Text = text });
+
+                /*if (function.Parent is S4JTokenObject)
+                {
+
+                }
+                else*/
+                {
+                    String text = JsonSerializer.SerializeJson(result);
+                    function.Children.Clear();
+                    function.Children.Add(new S4JTokenTextValue() { Text = text });
+                }
             }
             else
             {
-                foreach (Is4jToken child in token.Children)
+                foreach (S4JToken child in token.Children)
                 {
                     await Evaluate(child);
                 }
@@ -51,16 +61,16 @@ namespace sql4js.Executor
 
     public interface IEvaluator
     {
-        Task<Object> Evaluate(Is4jToken node);
+        Task<Object> Evaluate(S4JToken node);
     }
 
     public class ExecutionTree
     {
-        public Is4jToken Root;
+        public S4JToken Root;
 
         public ExecutionTreeNode RootExecutionNode;
 
-        public void Build(Is4jToken Root)
+        public void Build(S4JToken Root)
         {
 
         }
@@ -68,16 +78,16 @@ namespace sql4js.Executor
 
     public class ExecutionTreeNode
     {
-        public Is4jToken Node;
+        public S4JToken Node;
 
         public Dictionary<String, Object> Variables;
 
-        public List<Is4jToken> Dependencies;
+        public List<S4JToken> Dependencies;
 
         public ExecutionTreeNode()
         {
             Variables = new Dictionary<string, object>();
-            Dependencies = new List<Is4jToken>();
+            Dependencies = new List<S4JToken>();
         }
     }
 }
