@@ -68,6 +68,32 @@ return a + new osoba().wiek;");
                 @"{a:1,b:2}",
                 result.ToJson());
         }
+        
+        [Fact]
+        async public void executor_should_understand_parent_values_version2()
+        {
+            var script1 = @"{ a: 1, b : c( a + 1 ), c : c( a + b )   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"{a:1,b:2,c:3}",
+                result.ToJson());
+        }
+        
+        [Fact]
+        async public void executor_should_understand_parent_values_version3()
+        {
+            var script1 = @"{ a: 1, b : c( a + 1 ), c : c( a + b ), d: {a:10, b:c(a+c)}   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"{a:1,b:2,c:3,d:{a:10,b:13}}",
+                result.ToJson());
+        }
 
         [Fact]
         async public void executor_simple_csharp_function()

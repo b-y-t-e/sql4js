@@ -54,10 +54,12 @@ namespace sql4js.Parser
                     {
                         if (fun.IsEvaluated)
                         {
-                            throw new NotImplementedException();
+                            Object val = fun.Result; // child.ToJson().DeserializeJson();
+                            result[lastKey] = val;
+                            //throw new NotImplementedException();
                         }
                     }
-                    else
+                    else if (child.State.IsValue)
                     {
                         Object val = child.ToJson().DeserializeJson();
                         result[lastKey] = val;
