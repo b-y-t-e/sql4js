@@ -24,7 +24,7 @@ public static class JsonSerializer
     {
         if (Item == null)
         {
-            return null;
+            return "null";
         }
         else
         {

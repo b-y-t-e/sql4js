@@ -29,6 +29,11 @@ namespace sql4js.Parser
 
         }
 
+        public Dictionary<String, Object> GetResult()
+        {
+            return null;
+        }
+
         public void AppendCharsToToken(IList<Char> Chars)
         {
             foreach (var Char in Chars)

@@ -20,13 +20,15 @@ namespace sql4js.Parser
 
             S4JStateBag stateBag = new S4JStateBag();
             if (Functions != null)
-                foreach (var function in Functions)
+            {
+                foreach (S4JStateFunction function in Functions)
                 {
                     stateBag.Add(function);
                     stateBag.Add(function.BracketsDefinition);
                     stateBag.Add(function.CommentDefinition);
                     stateBag.Add(function.QuotationDefinition);
                 }
+            }
 
             S4JTokenStack valueStack = new S4JTokenStack();
             S4JTokenRoot rootVal = new S4JTokenRoot()
@@ -42,7 +44,7 @@ namespace sql4js.Parser
                     if (stackEvent.NewIndex != null)
                         i = stackEvent.NewIndex.Value - 1;
 
-                    // zdjęcie ze stosy
+                    // zdjęcie ze stosu
                     if (stackEvent.Popped)
                     {
                         Is4jToken currentVal = valueStack.PeekNonValue();

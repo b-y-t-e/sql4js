@@ -12,6 +12,8 @@ namespace sql4js.Parser
 
         public IEvaluator Evaluator { get; set; }
 
+        public Boolean IsEvaluated { get; set; }
+
         ////////////////////////////////////////////
 
         public Is4jToken Parent { get; set; }
@@ -30,6 +32,12 @@ namespace sql4js.Parser
         {
             Text = "";
             Children = new List<Is4jToken>();
+        }
+
+        public Dictionary<String, Object> GetResult()
+        {
+            return null;
+            // throw new NotImplementedException();
         }
 
         public void AddChildToToken(Is4jToken Child)

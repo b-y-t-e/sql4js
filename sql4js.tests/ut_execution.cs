@@ -31,14 +31,12 @@ return a + new osoba().wiek;");
         }
 
         [Fact]
-        async public void parser_should_understand_simple_function_with_outer_comments()
+        async public void executor_should_understand_simple_function_with_outer_comments()
         {
             var script1 = @"{ b : c( ""abc"" + 1 )   }";
 
             var result = await new S4JDefaultExecutor().
                 Execute(script1);
-
-            // result
 
             Assert.Equal(
                 @"{b:""abc1""}",
@@ -46,17 +44,28 @@ return a + new osoba().wiek;");
         }
 
         [Fact]
-        async public void parser_should_understand_simple_function_with_outer_comments_2()
+        async public void executor_should_understand_simple_function_with_outer_comments_2()
         {
             var script1 = @"{ b : c( ""abc"" + 1 )   }";
 
             var result = await new S4JDefaultExecutor().
                 Execute(script1);
 
-            // result
-
             Assert.Equal(
                 @"{b:""abc1""}",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_parent_values()
+        {
+            var script1 = @"{ a: 1, b : c( a + 1 )   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"{a:1,b:2}",
                 result.ToJson());
         }
 
@@ -75,9 +84,7 @@ return abc();
 
             var result = await new S4JDefaultExecutor().
                 Execute(script1);
-
-            // result
-
+            
             Assert.Equal(
                 @"{b:3}",
                 result.ToJson());

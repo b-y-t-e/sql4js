@@ -25,6 +25,11 @@ namespace sql4js.Parser
             Children = new List<Is4jToken>();
         }
 
+        public Dictionary<String, Object> GetResult()
+        {
+            return null;
+        }
+
         public void AddChildToToken(Is4jToken Child)
         {
 

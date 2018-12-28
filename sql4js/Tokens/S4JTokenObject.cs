@@ -7,26 +7,6 @@ namespace sql4js.Parser
 {
     public class S4JTokenObject : Is4jToken
     {
-        /*public object this[string index]
-        {
-            get
-            {
-                var key = this.Items.FirstOrDefault(i => index.Equals2(i.Key));
-                return key?.Value;
-            }
-            set
-            {
-                var key = this.Items.FirstOrDefault(i => index.Equals2(i.Key));
-                if (key == null)
-                {
-                    key = new IJsToken();
-                    this.Items.Add(key);
-                }
-                key.Key = index;
-                key.Value = value;
-            }
-
-        }*/
         public Is4jToken Parent { get; set; }
 
         public List<Is4jToken> Children { get; set; }
@@ -36,13 +16,55 @@ namespace sql4js.Parser
         public Boolean IsKey { get; set; }
 
         public bool IsCommited { get; set; }
-        
+
         public S4JState State { get; set; }
 
         public S4JTokenObject()
         {
             Text = "";
             Children = new List<Is4jToken>();
+        }
+
+        public Dictionary<String, Object> GetResult()
+        {
+            Dictionary<String, Object> result = new Dictionary<string, object>();
+            String lastKey = null;
+            foreach (Is4jToken child in Children)
+            {
+                if (child.IsKey)
+                {
+                    lastKey = null;
+                    if (child is S4JTokenFunction fun)
+                    {
+                        if (fun.IsEvaluated)
+                        {
+                            throw new NotImplementedException();
+                        }
+                    }
+                    else
+                    {
+                        lastKey = child.ToJson();
+                        if (lastKey != null)
+                            result[lastKey] = null;
+                    }
+                }
+                else if (lastKey != null)
+                {
+                    if (child is S4JTokenFunction fun)
+                    {
+                        if (fun.IsEvaluated)
+                        {
+                            throw new NotImplementedException();
+                        }
+                    }
+                    else
+                    {
+                        Object val = child.ToJson().DeserializeJson();
+                        result[lastKey] = val;
+                    }
+                }
+            }
+            return result;
         }
 
         public void AddChildToToken(Is4jToken Child)

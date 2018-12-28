@@ -33,6 +33,7 @@ namespace sql4js.Executor
                 S4JTokenFunction function = token as S4JTokenFunction;
                 object result = await function.Evaluator?.Evaluate(token);
 
+                function.IsEvaluated = true;
                 function.Result = result;
                 String text = JsonSerializer.SerializeJson(result);
                 function.Children.Clear();

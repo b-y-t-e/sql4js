@@ -10,6 +10,8 @@ namespace sql4js.Parser
 
         // public Is4jToken Value { get; set; }
 
+        public Dictionary<String, Object> Parameters { get; set; }
+
         public List<Is4jToken> Children { get; set; }
 
         public Boolean IsKey { get; set; }
@@ -21,6 +23,12 @@ namespace sql4js.Parser
         public S4JTokenRoot()
         {
             Children = new List<Is4jToken>();
+            Parameters = new Dictionary<string, object>();
+        }
+
+        public Dictionary<String, Object> GetResult()
+        {
+            return Parameters;
         }
 
         public void AddChildToToken(Is4jToken Child)

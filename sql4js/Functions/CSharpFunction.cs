@@ -55,9 +55,9 @@ namespace sql4js.Functions
             Priority = 2;
             StateType = EStateType.FUNCTION_QUOTATION;
             AllowedStatesNames = new List<EStateType?>()
-                {
-                    
-                };
+            {
+
+            };
             IsValue = true;
             Gates = new List<S4JStateGate>()
                 {
@@ -106,9 +106,39 @@ namespace sql4js.Functions
 
         public async Task<Object> Evaluate(Is4jToken token)
         {
+            Is4jToken parentToken = token;
+            Dictionary<String, object> values = new Dictionary<string, object>();
+            while (parentToken != null)
+            {
+                var parentResult = parentToken.GetResult();
+                if (parentResult != null)
+                {
+                    foreach (var keyAndVal in parentResult)
+                    {
+                        if (!values.ContainsKey(keyAndVal.Key))
+                        {
+                            values[keyAndVal.Key] = keyAndVal.Value;
+                        }
+                    }
+                }
+                parentToken = parentToken.Parent;
+            }
 
             S4JTokenFunction function = token as S4JTokenFunction;
             string code = function.ToJsonWithoutGate();
+
+            foreach (var keyAndVal in values)
+            {
+                if (keyAndVal.Value == null)
+                {
+                    code = $"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};" + Environment.NewLine + code;
+                }
+                else
+                {
+                    code = $"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};" + Environment.NewLine + code;
+                }
+            }
+
             object result = await CSharpScript.EvaluateAsync(code);
             function.Result = result;
             //String text = JsonSerializer.SerializeJson(result);

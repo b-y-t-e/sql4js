@@ -11,6 +11,8 @@ namespace sql4js.Parser
 
         List<Is4jToken> Children { get; set; }
 
+        Dictionary<String, Object> GetResult();
+
         S4JState State { get; set; }
 
         bool IsKey { get; set; }
