@@ -38,10 +38,28 @@ namespace sql4js.Parser
 
         }
 
+        public virtual bool ReplaceChild(S4JToken OldChild, IList<S4JToken> NewChilds)
+        {
+            Int32 childIndex = this.Children.IndexOf(OldChild);
+            if (childIndex < 0)
+                return false;
+
+            this.Children.RemoveAt(childIndex);
+            foreach (S4JToken newChild in NewChilds)
+            {
+                this.Children.Insert(childIndex, newChild);
+                childIndex++;
+            }
+
+            return true;
+        }
+
         public virtual void CommitToken()
         {
             IsCommited = true;
 
+            // próba określenia czy token jest w obiekcie
+            // oraz czy jest 'kluczem bez wartosci' 
             if (Parent is S4JTokenObject)
             {
                 if (!this.IsKey && !(this is S4JTokenComment))
@@ -56,8 +74,6 @@ namespace sql4js.Parser
                         prevChild = child;
                         break;
                     }
-                    //int prevIndexInParent = indexInParent - 1;
-                    //S4JToken prevChild = prevIndexInParent >= 0 ? Parent.Children[prevIndexInParent] : null;
                     if (prevChild == null || prevChild.IsKey == false)
                     {
                         this.IsSingleKey = true;
