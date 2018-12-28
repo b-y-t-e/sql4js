@@ -74,7 +74,16 @@ namespace sql4js.Executor
             if (Dictionary == null)
                 yield break;
 
-            foreach (var item in Dictionary)
+            yield return new S4JTokenObjectContent()
+            {
+                Text = Dictionary.SerializeJsonNoBrackets(),
+                //IsKey = true,
+                IsSingleKey = true,
+                IsCommited = true,
+                State = new S4JState() { StateType = EStateType.S4J_OBJECT_CONTENT, IsValue = true, IsSimpleValue = true }
+            };
+
+            /*foreach (var item in Dictionary)
             {
                 yield return new S4JTokenSimpleValue()
                 {
@@ -90,7 +99,7 @@ namespace sql4js.Executor
                     IsCommited = true,
                     State = new S4JState() { StateType = EStateType.S4J_SIMPLE_VALUE, IsValue = true, IsSimpleValue = true }
                 };
-            }
+            }*/
         }
 
         private IDictionary<String, Object> GetSingleFieldsAndValues(Object value)

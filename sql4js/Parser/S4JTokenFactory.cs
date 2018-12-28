@@ -33,6 +33,9 @@ namespace sql4js.Parser
                 if (State.StateType == EStateType.S4J_SIMPLE_VALUE)
                     result = new S4JTokenSimpleValue();
 
+                if (State.StateType == EStateType.S4J_OBJECT_CONTENT)
+                    result = new S4JTokenObjectContent();
+
                 //if (State.StateType == EStateType.S4J_VALUE_DELIMITER)
                 //    result = new JsArray();
 

@@ -8,17 +8,30 @@ using System.IO;
 
 public static class JsonSerializer
 {
-    /* private static JsonSerializerSettings getSettings()
+     /*private static JsonSerializerSettings getSettings()
      {
          JsonSerializerSettings customJsonSettings = new JsonSerializerSettings()
          {
-             //DateFormatHandling = DateFormatHandling.IsoDateFormat,
-             //DateTimeZoneHandling = DateTimeZoneHandling.Local
+             DateFormatHandling = DateFormatHandling.IsoDateFormat,
+             DateTimeZoneHandling = DateTimeZoneHandling.Local
          };
          return customJsonSettings;
      }*/
 
     //////////////////////////////////
+
+    public static String SerializeJsonNoBrackets(this IDictionary<String, Object> Dictionary)
+    {
+        if (Dictionary == null)
+        {
+            return "null";
+        }
+        else
+        {
+            String result = JsonConvert.SerializeObject(Dictionary); // , getSettings());
+            return result.Substring(1, result.Length - 2);
+        }
+    }
 
     public static String SerializeJson(this Object Item)
     {

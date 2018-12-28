@@ -105,9 +105,22 @@ return a + new osoba().wiek;");
                 Execute(script1);
 
             Assert.Equal(
-                @"{a:1,b:2,c:3}",
+                @"{a:1,""b"":2,""c"":3}",
                 result.ToJson());
         }
+
+        /*[Fact]
+        async public void executor_should_understand_additional_fields_for_object()
+        {
+            var script1 = @"{ a: 1, b: c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 22; dict[""c""] = 33; return dict;  )   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"{a:1,b:2}",
+                result.ToJson());
+        }*/
 
         [Fact]
         async public void executor_simple_csharp_function()
