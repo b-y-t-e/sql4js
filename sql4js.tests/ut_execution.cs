@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace sql4js.tests
 {
+    /// <summary>
+    /// TODO: add test for classes
+    /// </summary>
     public class ut_execution
     {
         [Fact]
@@ -139,6 +142,129 @@ namespace sql4js.tests
                 result.ToJson());
         }
 
+        [Fact]
+        async public void executor_should_understand_additional_items_for_array()
+        {
+            var script1 = @"[ 1, c#(  var list = new List<Object>(); list.Add(2); list.Add(3); return list;  )   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1,2,3]",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_items_for_array_version2()
+        {
+            var script1 = @"[ 1, c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1,2]",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_items_for_array_version3()
+        {
+            var script1 = @"[ 1, c#(  
+                var list = new List<Object>();
+                {
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 2; 
+                    dict[""c""] = 3; 
+                    list.Add(dict);
+                }
+                {
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 22; 
+                    dict[""c""] = 33; 
+                    list.Add(dict);
+                }
+                return list;  )   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1,2,22]",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_objects_for_array()
+        {
+            var script1 = @"[ 1, {c#(  
+                var list = new List<Object>();
+                {
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 2; 
+                    dict[""c""] = 3; 
+                    list.Add(dict);
+                }
+                {
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 22; 
+                    dict[""c""] = 33; 
+                    list.Add(dict);
+                }
+                return list;  )}   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1,{""b"":2,""c"":3},{""b"":22,""c"":33}]",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_objects_with_fields_for_array()
+        {
+            var script1 = @"[ 1, {c#(  
+                var list = new List<Object>();
+                {
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 2; 
+                    dict[""c""] = 3; 
+                    list.Add(dict);
+                }
+                {
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 22; 
+                    dict[""c""] = 33; 
+                    list.Add(dict);
+                }
+                return list;  ),d:100}   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1,{""b"":2,""c"":3,d:100},{""b"":22,""c"":33,d:100}]",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_objects_for_array_version2()
+        {
+            var script1 = @"[ 1, {c#(  
+                    var dict = new Dictionary<String, Object>(); 
+                    dict[""b""] = 2; 
+                    dict[""c""] = 3;                    
+                    return dict;  )}   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1,{""b"":2,""c"":3}]",
+                result.ToJson());
+        }
 
         [Fact]
         async public void executor_should_understand_additional_fields_for_object_version2()

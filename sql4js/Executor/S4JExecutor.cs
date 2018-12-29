@@ -41,11 +41,60 @@ namespace sql4js.Executor
                 function.IsEvaluated = true;
                 function.Result = result;
 
-                if (function.Parent is S4JTokenObject &&
+                if (function.Parent is S4JTokenObject objectToken &&
                     token.IsObjectSingleKey)
                 {
-                    IList<S4JToken> tokens = ConvertToTokens(
-                        GetSingleObjectFromResult(result)).ToArray();
+                    if (objectToken.Parent is S4JTokenArray)
+                    {
+                        if (objectToken.Children.Count == 1)
+                        {
+                            Int32 indexOfFun = objectToken.IndexOfChild(function);
+
+                            IList<S4JToken> tokensFromResult = ConvertToToken(
+                                GetManyObjectsFromResult(result)).ToArray();
+                            
+                            objectToken.Parent.ReplaceChild(
+                                objectToken,
+                                tokensFromResult);
+                        }
+                        else
+                        {
+                            Int32 indexOfFun = objectToken.IndexOfChild(function);
+
+                            IList<S4JToken> tokensFromResult = ConvertToManyTokens(
+                                GetManyObjectsFromResult(result)).ToArray();
+
+                            List<S4JToken> newTokens = new List<S4JToken>();
+                            foreach (S4JToken tokenFromResult in tokensFromResult)
+                            {
+                                S4JToken newObjectToken = objectToken.Clone();
+
+                                newObjectToken.ReplaceChild(
+                                    indexOfFun,
+                                    new[] { tokenFromResult });
+
+                                newTokens.Add(newObjectToken);
+                            }
+
+                            objectToken.Parent.ReplaceChild(
+                                objectToken,
+                                newTokens);
+                        }
+                    }
+                    else
+                    {
+                        IList<S4JToken> tokens = ConvertToTokens(
+                            GetSingleObjectFromResult(result)).ToArray();
+
+                        objectToken.ReplaceChild(
+                            function,
+                            tokens);
+                    }
+                }
+                else if (function.Parent is S4JTokenArray)
+                {
+                    IList<S4JToken> tokens = ConvertToToken(
+                        GetListOfSingleObjectsFromResult(result)).ToArray();
 
                     function.Parent.ReplaceChild(
                         function,
@@ -59,19 +108,6 @@ namespace sql4js.Executor
                     String text = JsonSerializer.SerializeJson(result);
                     function.Children.Clear();
                     function.Children.AddRange(tokens);
-
-                    /*if (function.IsKey)
-                    {
-                        String text = JsonSerializer.SerializeJson(result);
-                        function.Children.Clear();
-                        function.Children.AddRange(tokens);
-                    }
-                    else
-                    {
-                        String text = JsonSerializer.SerializeJson(result);
-                        function.Children.Clear();
-                        function.Children.AddRange(tokens);
-                    }*/
                 }
             }
             else
@@ -99,6 +135,37 @@ namespace sql4js.Executor
             };
         }
 
+        private IEnumerable<S4JToken> ConvertToToken(IList<Object> List)
+        {
+            if (List == null)
+                yield break;
+
+            yield return new S4JTokenObjectContent()
+            {
+                Text = List.SerializeJsonNoBrackets(),
+                //IsKey = true,
+                IsObjectSingleKey = true,
+                IsCommited = true,
+                State = new S4JState() { StateType = EStateType.S4J_OBJECT_CONTENT, IsValue = true, IsSimpleValue = true }
+            };
+        }
+
+        private IEnumerable<S4JToken> ConvertToManyTokens(IList<Object> List)
+        {
+            if (List == null)
+                yield break;
+
+            foreach (Object item in List)
+                yield return new S4JTokenObjectContent()
+                {
+                    Text = item.SerializeJsonNoBrackets(),
+                    //IsKey = true,
+                    IsObjectSingleKey = true,
+                    IsCommited = true,
+                    State = new S4JState() { StateType = EStateType.S4J_OBJECT_CONTENT, IsValue = true, IsSimpleValue = true }
+                };
+        }
+
         private IEnumerable<S4JToken> ConvertToTokens(Object Value)
         {
             if (Value == null)
@@ -111,6 +178,37 @@ namespace sql4js.Executor
                 IsCommited = true,
                 State = new S4JState() { StateType = EStateType.S4J_TEXT_VALUE, IsValue = true, IsSimpleValue = true }
             };
+        }
+
+        private IList<Object> GetManyObjectsFromResult(Object value, Boolean AnaliseSubValues = true)
+        {
+            if (value == null)
+                return null;
+
+            List<Object> list = new List<object>();
+
+            if (MyTypeHelper.IsPrimitive(value.GetType()))
+                list.Add(value);
+
+            else if (value is IDictionary<String, Object>)
+            {
+                list.Add(value);
+            }
+
+            else if (value is ICollection)
+            {
+                if (AnaliseSubValues)
+                {
+                    foreach (Object subValue in (ICollection)value)
+                        list.AddRange(GetManyObjectsFromResult(subValue, false));
+                }
+                else
+                {
+                    list.Add(value);
+                }
+            }
+
+            return list;
         }
 
         private IDictionary<String, Object> GetSingleObjectFromResult(Object value)
@@ -136,6 +234,37 @@ namespace sql4js.Executor
             }
 
             return null;
+        }
+
+        private List<Object> GetListOfSingleObjectsFromResult(Object value, Boolean AnalyseSubValues = true)
+        {
+            if (value == null)
+                return null;
+
+            List<Object> list = new List<object>();
+
+            if (MyTypeHelper.IsPrimitive(value.GetType()))
+                list.Add(value);
+
+            else if (value is IDictionary<String, Object> dict)
+            {
+                list.Add(dict.First().Value);
+            }
+
+            else if (value is ICollection)
+            {
+                if (AnalyseSubValues)
+                {
+                    foreach (Object subValue in (ICollection)value)
+                        list.AddRange(GetListOfSingleObjectsFromResult(subValue, false));
+                }
+                else
+                {
+                    list.Add(value);
+                }
+            }
+
+            return list;
         }
 
         private Object GetSingleAndFirstValueFromResult(Object value)

@@ -35,9 +35,20 @@ namespace sql4js.Parser
             Children.Add(Child);
         }
 
-        public virtual bool ReplaceChild(S4JToken OldChild, IList<S4JToken> NewChilds)
+        public virtual Int32 IndexOfChild(S4JToken OldChild)
         {
             Int32 childIndex = this.Children.IndexOf(OldChild);
+            return childIndex;
+        }
+
+        public virtual bool ReplaceChild(S4JToken OldChild, IList<S4JToken> NewChilds)
+        {
+            Int32 childIndex = IndexOfChild(OldChild);
+            return ReplaceChild(childIndex, NewChilds);
+        }
+
+        public virtual bool ReplaceChild(Int32 childIndex, IList<S4JToken> NewChilds)
+        {
             if (childIndex < 0)
                 return false;
 
@@ -193,6 +204,15 @@ namespace sql4js.Parser
                 }
             }
             return builder.ToString();
+        }
+
+        public S4JToken Clone()
+        {
+            S4JToken newToken = (S4JToken)this.MemberwiseClone();
+            newToken.State = newToken.State?.Clone();
+            newToken.Children = newToken.Children.Select(i => i.Clone()).ToList();
+            // newToken.Parent = newToken.Parent?.Clone();
+            return newToken;
         }
     }
 
