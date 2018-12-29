@@ -115,9 +115,10 @@ namespace sql4js.Parser
                 Priority = -998,
                 StateType = EStateType.S4J_QUOTATION,
                 IsValue = true,
+                IsQuotation = true,
                 AllowedStatesNames = new List<EStateType?>()
                 {
-                    EStateType.S4J_QUOTATION
+                    // EStateType.S4J_QUOTATION
                 },
                 Gates = new List<S4JStateGate>()
                 {
@@ -125,6 +126,12 @@ namespace sql4js.Parser
                     {
                         Start = "'".ToCharArray(),
                         End = "'".ToCharArray(),
+                        Inner = "\\".ToCharArray()
+                    },
+                    new S4JStateGate()
+                    {
+                        Start = "\"".ToCharArray(),
+                        End = "\"".ToCharArray(),
                         Inner = "\\".ToCharArray()
                     }
                 }
@@ -145,7 +152,7 @@ namespace sql4js.Parser
                     EStateType.S4J_COMA,
                     EStateType.S4J_OBJECT,
                     EStateType.S4J_ARRAY,
-                    EStateType.S4J_SIMPLE_VALUE,
+                    EStateType.S4J_TEXT_VALUE,
                     EStateType.FUNCTION
                 },
                 Gates = new List<S4JStateGate>()
@@ -173,7 +180,7 @@ namespace sql4js.Parser
                     EStateType.S4J_ARRAY,
                     EStateType.S4J_VALUE_DELIMITER,
                     EStateType.S4J_COMA,
-                    EStateType.S4J_SIMPLE_VALUE,
+                    EStateType.S4J_TEXT_VALUE,
                     EStateType.FUNCTION
                 },
                 Gates = new List<S4JStateGate>()
@@ -233,7 +240,7 @@ namespace sql4js.Parser
             S4JState sS4jValue = new S4JState()
             {
                 Priority = 1004,
-                StateType = EStateType.S4J_SIMPLE_VALUE,
+                StateType = EStateType.S4J_TEXT_VALUE,
                 AllowedStatesNames = new List<EStateType?>()
                 {
                     null

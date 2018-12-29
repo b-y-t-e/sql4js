@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Else.HttpService.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,12 +8,19 @@ namespace sql4js.Parser
     public class S4JTokenTextValue : S4JToken
     {
         public String Text { get; set; }
-        
+
+        public Object Value { get; set; }
+
         public S4JTokenTextValue()
         {
             Text = "";
-            IsKey = false;
+            IsObjectKey = false;
             Children = new List<S4JToken>();
+            State = new S4JState()
+            {
+                StateType = EStateType.S4J_TEXT_VALUE,
+                IsValue = true,
+            };
         }
 
         public override Dictionary<String, Object> GetParameters()
@@ -29,21 +37,57 @@ namespace sql4js.Parser
         {
             foreach (var Char in Chars)
             {
-                if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
-                    continue;
+                //if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
+                //    continue;
                 this.Text += Char;
             }
         }
 
         public override void BuildJson(StringBuilder Builder)
         {
+            //if(Value != null)
+            //    Builder.Append(UniConvert.to);
+            //else
             Builder.Append(Text);
         }
 
-        public override void CommitToken()
+        public override void Commit()
         {
-            this.Text = this.Text.Trim();
-            base.CommitToken();
+            //this.Text = this.Text.Trim();
+            // this.Value = this.Text.DeserializeJson();
+            this.IsCommited = true;
+        }
+
+        public override void MarkAsObjectKey()
+        {
+            base.MarkAsObjectKey();
+            AnaliseValue();
+        }
+
+        public override void MarkAsObjectValue()
+        {
+            base.MarkAsObjectValue();
+            AnaliseValue();
+        }
+
+        private void AnaliseValue()
+        {
+            try
+            {
+                if (MyStringHelper.IsNumber(this.Text.Trim()) ||
+                    MyStringHelper.IsQuotedText(this.Text.Trim()))
+                {
+                    this.Value = this.Text.DeserializeJson();
+                }
+                else
+                {
+                    this.Value = this.Text.Trim();
+                }
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

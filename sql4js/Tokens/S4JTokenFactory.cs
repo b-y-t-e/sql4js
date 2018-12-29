@@ -26,12 +26,15 @@ namespace sql4js.Parser
 
                 if (State.StateType == EStateType.S4J_QUOTATION)
                     result = new S4JTokenQuotation();
+                
+                if (State.StateType == EStateType.S4J_TEXT_VALUE)
+                    result = new S4JTokenTextValue();
 
                 //if (State.StateType == EStateType.S4J_SEPARATOR)
                 //    result = new JsArray();
 
-                if (State.StateType == EStateType.S4J_SIMPLE_VALUE)
-                    result = new S4JTokenSimpleValue();
+                //if (State.StateType == EStateType.S4J_SIMPLE_VALUE)
+                //    result = new S4JTokenSimpleValue();
 
                 if (State.StateType == EStateType.S4J_OBJECT_CONTENT)
                     result = new S4JTokenObjectContent();

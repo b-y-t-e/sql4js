@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using Else.HttpService.Helpers;
 
 namespace sql4js.Parser
 {
@@ -18,19 +19,21 @@ namespace sql4js.Parser
             String lastKey = null;
             foreach (S4JToken child in Children)
             {
-                if (child.IsKey)
+                if (child.IsObjectKey)
                 {
                     lastKey = null;
                     if (child is S4JTokenFunction fun)
                     {
                         if (fun.IsEvaluated)
                         {
-                            throw new NotImplementedException();
+                            lastKey = UniConvert.ToString(fun.Result);
+                            if (lastKey != null)
+                                result[lastKey] = null;
                         }
                     }
                     else
                     {
-                        lastKey = child.ToJson();
+                        lastKey = UniConvert.ToString(child.ToJson().ParseJsonOrText());
                         if (lastKey != null)
                             result[lastKey] = null;
                     }
@@ -48,8 +51,15 @@ namespace sql4js.Parser
                     }
                     else if (child.State.IsValue)
                     {
-                        Object val = child.ToJson().DeserializeJson();
-                        result[lastKey] = val;
+                        try
+                        {
+                            Object val = child.ToJson().ParseJsonOrText();
+                            result[lastKey] = val;
+                        }
+                        catch
+                        {
+                            throw;
+                        }
                     }
                 }
             }
@@ -68,7 +78,7 @@ namespace sql4js.Parser
                     Builder.Append(",");
                 }
 
-                if (child.IsKey)
+                if (child.IsObjectKey)
                 {
                     child.BuildJson(Builder);
                     prevWasKey = true;

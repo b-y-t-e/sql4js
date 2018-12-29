@@ -11,21 +11,51 @@ namespace sql4js.tests
     public class ut_execution
     {
         [Fact]
+        async public void executor_should_understand_dunamicl_fields_and_values()
+        {
+            var script1 = @"{ ""a"": 1, c#(""bb"") : c#( 999 )  }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{""a"":1,""bb"":999}",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_dunamicl_fields_and_values_no_quotes()
+        {
+            var script1 = @"{ a: 1, c#(""bb"") : c#( 999 )  }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{a:1,""bb"":999}",
+                result.ToJson());
+        }
+
+        [Fact]
         public async void parser_method_is_should_work_fine()
         {
             for (var i = 0; i < 10; i++)
             {
                 object result = await CSharpScript.EvaluateAsync(@"
-int a = " + i + @";
+        int a = " + i + @";
 
-public class osoba{
-public int wiek;
-public osoba(){
-wiek = 2;
-}
-};
+        public class osoba{
+        public int wiek;
+        public osoba(){
+        wiek = 2;
+        }
+        };
 
-return a + new osoba().wiek;");
+        return a + new osoba().wiek;");
                 Assert.Equal(2 + i, result);
 
             }
@@ -109,18 +139,6 @@ return a + new osoba().wiek;");
                 result.ToJson());
         }
 
-        [Fact]
-        async public void executor_should_understand_dunamicl_fields_and_values()
-        {
-            var script1 = @"{ a: 1, c#(""bb"") : c#( 999 )  }";
-
-            var result = await new S4JDefaultExecutor().
-                Execute(script1);
-
-            Assert.Equal(
-                @"{a:1,""bb"":999}",
-                result.ToJson());
-        }
 
         [Fact]
         async public void executor_should_understand_additional_fields_for_object_version2()
@@ -140,13 +158,13 @@ return a + new osoba().wiek;");
         {
             var script1 = @"{ b : c#( 
 
-int abc(){
-return 3;
-}
+        int abc(){
+        return 3;
+        }
 
-return abc();
+        return abc();
 
-)   }";
+        )   }";
 
             var result = await new S4JDefaultExecutor().
                 Execute(script1);

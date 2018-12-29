@@ -55,6 +55,7 @@ namespace sql4js.Functions
 
             };
             IsValue = true;
+            IsQuotation = true;
             Gates = new List<S4JStateGate>()
                 {
                     new S4JStateGate()

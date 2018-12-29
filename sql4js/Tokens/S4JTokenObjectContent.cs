@@ -11,7 +11,7 @@ namespace sql4js.Parser
         public S4JTokenObjectContent()
         {
             Text = "";
-            IsKey = false;
+            IsObjectKey = false;
             Children = new List<S4JToken>();
         }
 
@@ -40,11 +40,11 @@ namespace sql4js.Parser
             Builder.Append(Text);
         }
 
-        public override void CommitToken()
+        public override void Commit()
         {
             this.Text = this.Text.Trim();
             // this.ValueFromText = this.Text.DeserializeJson();
-            base.CommitToken();
+            base.Commit();
         }
 
     }

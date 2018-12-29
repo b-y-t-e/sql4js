@@ -27,23 +27,17 @@ namespace sql4js.Parser
             // throw new NotImplementedException();
         }
 
-
-        public override void AppendCharsToToken(IList<Char> Chars)
+        public override void BuildJson(StringBuilder Builder)
         {
-            /*foreach (var Char in Chars)
+            if (IsEvaluated)
             {
-                if (this.Text.Length == 0 && System.Char.IsWhiteSpace(Char))
-                    continue;
-                this.Text += Char;
-            }*/
-
-            S4JToken lastChild = this.Children.LastOrDefault();
-            if (!(lastChild is S4JTokenTextValue))
-            {
-                lastChild = new S4JTokenTextValue();
-                this.Children.Add(lastChild);
+                foreach (var child in Children)
+                    child.BuildJson(Builder);
             }
-            lastChild.AppendCharsToToken(Chars);
+            else
+            {
+                base.BuildJson(Builder);
+            }
         }
     }
 }

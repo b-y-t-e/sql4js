@@ -27,6 +27,8 @@ namespace sql4js.Parser
 
         public Boolean IsFunction { get; set; }
 
+        public Boolean IsQuotation { get; set; }
+
         public Boolean IsComment { get; set; }
 
         public Boolean IsDelimiter { get; set; }
@@ -123,7 +125,8 @@ namespace sql4js.Parser
         S4J_COMMENT,
         S4J_QUOTATION,
         S4J_ARRAY,
-        S4J_SIMPLE_VALUE,
+        // S4J_SIMPLE_VALUE,
+        S4J_TEXT_VALUE,
         S4J_OBJECT_CONTENT,
         S4J_OBJECT,
 

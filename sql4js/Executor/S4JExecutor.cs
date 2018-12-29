@@ -42,7 +42,7 @@ namespace sql4js.Executor
                 function.Result = result;
 
                 if (function.Parent is S4JTokenObject &&
-                    token.IsSingleKey)
+                    token.IsObjectSingleKey)
                 {
                     IList<S4JToken> tokens = ConvertToTokens(
                         GetSingleObjectFromResult(result)).ToArray();
@@ -56,7 +56,11 @@ namespace sql4js.Executor
                     IList<S4JToken> tokens = ConvertToTokens(
                         GetSingleAndFirstValueFromResult(result)).ToArray();
 
-                    if (function.IsKey)
+                    String text = JsonSerializer.SerializeJson(result);
+                    function.Children.Clear();
+                    function.Children.AddRange(tokens);
+
+                    /*if (function.IsKey)
                     {
                         String text = JsonSerializer.SerializeJson(result);
                         function.Children.Clear();
@@ -67,7 +71,7 @@ namespace sql4js.Executor
                         String text = JsonSerializer.SerializeJson(result);
                         function.Children.Clear();
                         function.Children.AddRange(tokens);
-                    }
+                    }*/
                 }
             }
             else
@@ -89,7 +93,7 @@ namespace sql4js.Executor
             {
                 Text = Dictionary.SerializeJsonNoBrackets(),
                 //IsKey = true,
-                IsSingleKey = true,
+                IsObjectSingleKey = true,
                 IsCommited = true,
                 State = new S4JState() { StateType = EStateType.S4J_OBJECT_CONTENT, IsValue = true, IsSimpleValue = true }
             };
@@ -100,12 +104,12 @@ namespace sql4js.Executor
             if (Value == null)
                 yield break;
 
-            yield return new S4JTokenSimpleValue()
+            yield return new S4JTokenTextValue()
             {
                 Text = Value.SerializeJson(),
-                IsSingleKey = true,
+                IsObjectSingleKey = true,
                 IsCommited = true,
-                State = new S4JState() { StateType = EStateType.S4J_SIMPLE_VALUE, IsValue = true, IsSimpleValue = true }
+                State = new S4JState() { StateType = EStateType.S4J_TEXT_VALUE, IsValue = true, IsSimpleValue = true }
             };
         }
 

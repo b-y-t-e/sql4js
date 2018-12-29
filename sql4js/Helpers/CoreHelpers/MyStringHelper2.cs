@@ -293,6 +293,39 @@ namespace Else.HttpService.Helpers
             return true;
         }
 
+        public static Boolean IsQuotedText(this String Text)
+        {
+            Text = (Text ?? "").Trim();
+            if (Text.StartsWith("'") && Text.EndsWith("'"))
+                return true;
+            if (Text.StartsWith("\"") && Text.EndsWith("\""))
+                return true;
+            return false;
+        }
+
+        public static Object ParseJsonOrText(this String Text)
+        {
+            try
+            {
+                if (Text == null)
+                    return null;
+
+                if (MyStringHelper.IsNumber(Text.Trim()) ||
+                    MyStringHelper.IsQuotedText(Text.Trim()))
+                {
+                    return Text.DeserializeJson();
+                }
+                else
+                {
+                    return Text.Trim();
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public static Boolean StartsWithNumber(this String Text)
         {
             Text = (Text ?? "").Trim();
