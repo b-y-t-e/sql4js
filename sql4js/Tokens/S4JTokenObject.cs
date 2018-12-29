@@ -61,12 +61,25 @@ namespace sql4js.Parser
             Builder.Append("{");
             Int32 i = 0;
             Boolean prevWasKey = true;
-            foreach (var child in Children)
+            foreach (S4JToken child in Children)
             {
-                if (!prevWasKey) Builder.Append(",");
-                child.BuildJson(Builder);
-                if (child.IsKey) { prevWasKey = true; Builder.Append(":"); }
-                else { prevWasKey = false; }
+                if (!prevWasKey)
+                {
+                    Builder.Append(",");
+                }
+
+                if (child.IsKey)
+                {
+                    child.BuildJson(Builder);
+                    prevWasKey = true;
+                    Builder.Append(":");
+                }
+                else
+                {
+                    child.BuildJson(Builder);
+                    prevWasKey = false;
+                }
+
                 i++;
             }
             Builder.Append("}");
