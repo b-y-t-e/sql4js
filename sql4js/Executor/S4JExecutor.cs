@@ -44,19 +44,30 @@ namespace sql4js.Executor
                 if (function.Parent is S4JTokenObject &&
                     token.IsSingleKey)
                 {
-                    var tokens = ConvertToTokens(GetSingleFieldsAndValues(result)).ToArray();
-                    if (tokens != null)
-                    {
-                        function.Parent.ReplaceChild(
-                            function,
-                            tokens);
-                    }
+                    IList<S4JToken> tokens = ConvertToTokens(
+                        GetSingleObjectFromResult(result)).ToArray();
+
+                    function.Parent.ReplaceChild(
+                        function,
+                        tokens);
                 }
                 else
                 {
-                    String text = JsonSerializer.SerializeJson(result);
-                    function.Children.Clear();
-                    function.Children.Add(new S4JTokenTextValue() { Text = text });
+                    IList<S4JToken> tokens = ConvertToTokens(
+                        GetSingleAndFirstValueFromResult(result)).ToArray();
+
+                    if (function.IsKey)
+                    {
+                        String text = JsonSerializer.SerializeJson(result);
+                        function.Children.Clear();
+                        function.Children.AddRange(tokens);
+                    }
+                    else
+                    {
+                        String text = JsonSerializer.SerializeJson(result);
+                        function.Children.Clear();
+                        function.Children.AddRange(tokens);
+                    }
                 }
             }
             else
@@ -82,27 +93,23 @@ namespace sql4js.Executor
                 IsCommited = true,
                 State = new S4JState() { StateType = EStateType.S4J_OBJECT_CONTENT, IsValue = true, IsSimpleValue = true }
             };
-
-            /*foreach (var item in Dictionary)
-            {
-                yield return new S4JTokenSimpleValue()
-                {
-                    Text = item.Key,
-                    IsKey = true,
-                    IsCommited = true,
-                    State = new S4JState() {  StateType = EStateType.S4J_SIMPLE_VALUE, IsValue = true, IsSimpleValue = true }
-                };
-
-                yield return new S4JTokenSimpleValue()
-                {
-                    Text = item.Value.SerializeJson(),
-                    IsCommited = true,
-                    State = new S4JState() { StateType = EStateType.S4J_SIMPLE_VALUE, IsValue = true, IsSimpleValue = true }
-                };
-            }*/
         }
 
-        private IDictionary<String, Object> GetSingleFieldsAndValues(Object value)
+        private IEnumerable<S4JToken> ConvertToTokens(Object Value)
+        {
+            if (Value == null)
+                yield break;
+
+            yield return new S4JTokenSimpleValue()
+            {
+                Text = Value.SerializeJson(),
+                IsSingleKey = true,
+                IsCommited = true,
+                State = new S4JState() { StateType = EStateType.S4J_SIMPLE_VALUE, IsValue = true, IsSimpleValue = true }
+            };
+        }
+
+        private IDictionary<String, Object> GetSingleObjectFromResult(Object value)
         {
             if (value == null)
                 return null;
@@ -121,7 +128,29 @@ namespace sql4js.Executor
             if (value is ICollection)
             {
                 foreach (Object subValue in (ICollection)value)
-                    return GetSingleFieldsAndValues(subValue);
+                    return GetSingleObjectFromResult(subValue);
+            }
+
+            return null;
+        }
+
+        private Object GetSingleAndFirstValueFromResult(Object value)
+        {
+            if (value == null)
+                return null;
+
+            if (MyTypeHelper.IsPrimitive(value.GetType()))
+                return value;
+
+            if (value is IDictionary<String, Object> dict)
+            {
+                return dict.Count > 0 ? dict.FirstOrDefault().Value : null;
+            }
+
+            if (value is ICollection)
+            {
+                foreach (Object subValue in (ICollection)value)
+                    return GetSingleAndFirstValueFromResult(subValue);
             }
 
             return null;

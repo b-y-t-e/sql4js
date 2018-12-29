@@ -21,6 +21,7 @@ namespace sql4js.Parser
         {
             this.Name = Name;
             this.IsValue = true;
+            this.IsFunction = true;
             this.Priority = 0;
             this.StateType = EStateType.FUNCTION;
             this.AllowedStatesNames = new List<EStateType?>()

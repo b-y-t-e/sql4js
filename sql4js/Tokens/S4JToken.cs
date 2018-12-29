@@ -45,11 +45,13 @@ namespace sql4js.Parser
                 return false;
 
             this.Children.RemoveAt(childIndex);
-            foreach (S4JToken newChild in NewChilds)
-            {
-                this.Children.Insert(childIndex, newChild);
-                childIndex++;
-            }
+
+            if (NewChilds != null)
+                foreach (S4JToken newChild in NewChilds)
+                {
+                    this.Children.Insert(childIndex, newChild);
+                    childIndex++;
+                }
 
             return true;
         }

@@ -109,18 +109,31 @@ return a + new osoba().wiek;");
                 result.ToJson());
         }
 
-        /*[Fact]
-        async public void executor_should_understand_additional_fields_for_object()
+        [Fact]
+        async public void executor_should_understand_dunamicl_fields_and_values()
         {
-            var script1 = @"{ a: 1, b: c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 22; dict[""c""] = 33; return dict;  )   }";
+            var script1 = @"{ a: 1, c#(""bb"") : c#( 999 )  }";
 
             var result = await new S4JDefaultExecutor().
                 Execute(script1);
 
             Assert.Equal(
-                @"{a:1,b:2}",
+                @"{a:1,""bb"":999}",
                 result.ToJson());
-        }*/
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_fields_for_object_version2()
+        {
+            var script1 = @"{ a: 1, b: c#(  var dict = new Dictionary<String, Object>(); dict[""bb""] = 22; dict[""cc""] = 33; return dict;  )   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"{a:1,b:22}",
+                result.ToJson());
+        }
 
         [Fact]
         async public void executor_simple_csharp_function()

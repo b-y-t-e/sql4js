@@ -125,6 +125,8 @@ namespace sql4js.Parser
                 IList<char> end = prevTokenNonValue?.State?.Gate?.End;
                 if (S4JParserHelper.Is(code, index, end))
                 {
+                    // jesli poprzednia wartosc na stosie to 'prosta wartosc' 
+                    // to zdejmujemy te wartosc ze stosu
                     if (prevToken.State.IsSimpleValue)
                     {
                         yield return new S4JStateStackEvent()
@@ -136,8 +138,11 @@ namespace sql4js.Parser
                         };
                     }
 
-                    if (prevToken != prevTokenNonValue ||
-                        !prevToken.State.IsSimpleValue)
+                    // jesli poprzednia wartosc na stosie to nie 'prosta wartosc' 
+                    // lub ?????
+                    // to zdejmujemy te wartosc ze stosu
+                    if (!prevToken.State.IsSimpleValue ||
+                        prevToken != prevTokenNonValue)
                     {
                         yield return new S4JStateStackEvent()
                         {

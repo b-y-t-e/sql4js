@@ -25,6 +25,8 @@ namespace sql4js.Parser
 
         public Boolean IsSimpleValue { get; set; }
 
+        public Boolean IsFunction { get; set; }
+
         public Boolean IsComment { get; set; }
 
         public Boolean IsDelimiter { get; set; }
