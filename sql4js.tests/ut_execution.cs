@@ -106,6 +106,26 @@ namespace sql4js.tests
         }
 
         [Fact]
+        async public void executor_should_understand_additional_class_fields_for_object()
+        {
+            var script1 = @"{ a: 1, c#( 
+    class osoba { public string imie; public string nazwisko; } 
+    osoba o = new osoba(); 
+    o.imie = ""adam""; 
+    o.nazwisko = ""adsafasg""; 
+    return o; )  }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{a:1,""imie"":""adam"",""nazwisko"":""adsafasg""}",
+                result.ToJson());
+        }
+
+        [Fact]
         public async void parser_method_is_should_work_fine()
         {
             for (var i = 0; i < 10; i++)

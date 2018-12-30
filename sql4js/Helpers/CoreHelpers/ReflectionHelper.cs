@@ -25,6 +25,22 @@ namespace ProZ.App.Base.Helpers
 
     public static class ReflectionHelper
     {
+        public static Dictionary<string, object> ToDictionary(Object Value)
+        {
+            if (Value == null || MyTypeHelper.IsPrimitive(Value.GetType()))
+                return null;
+
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+
+            foreach (var field in GetFields(Value))
+                dict[field.Name] = field.GetValue(Value);
+
+            foreach (var property in GetProperties(Value))
+                dict[property.Name] = property.GetValue(Value);
+
+            return dict;
+        }
+
         public static void CopyTo(Object Source, Object Dest)
         {
             if (Source == null || Dest == null)
@@ -44,6 +60,15 @@ namespace ProZ.App.Base.Helpers
                 return Item.GetType().GetProperties().ToArray();
             }
             return new PropertyInfo[0];
+        }
+
+        public static FieldInfo[] GetFields(Object Item)
+        {
+            if (Item != null)
+            {
+                return Item.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).ToArray();
+            }
+            return new FieldInfo[0];
         }
 
         public static MethodInfo GetMethod(Type Type, String MethodName)

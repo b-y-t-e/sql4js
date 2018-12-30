@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using ProZ.App.Base.Helpers;
 
 namespace sql4js.Executor
 {
@@ -227,6 +228,11 @@ namespace sql4js.Executor
                 }
             }
 
+            else if (value.GetType().IsClass)
+            {
+                list.Add(value);
+            }
+
             return list;
         }
 
@@ -241,15 +247,20 @@ namespace sql4js.Executor
                     { "value", value }
                 };
 
-            if (value is IDictionary<String, Object>)
+            else if (value is IDictionary<String, Object>)
             {
                 return (IDictionary<String, Object>)value;
             }
 
-            if (value is ICollection)
+            else if (value is ICollection)
             {
                 foreach (Object subValue in (ICollection)value)
                     return GetSingleObjectFromResult(subValue);
+            }
+
+            else if (value.GetType().IsClass)
+            {
+                return ReflectionHelper.ToDictionary(value);
             }
 
             return null;
@@ -267,7 +278,8 @@ namespace sql4js.Executor
 
             else if (value is IDictionary<String, Object> dict)
             {
-                list.Add(dict.First().Value);
+                if (dict.Count > 0)
+                    list.Add(dict.First().Value);
             }
 
             else if (value is ICollection)
@@ -283,6 +295,13 @@ namespace sql4js.Executor
                 }
             }
 
+            else if (value.GetType().IsClass)
+            {
+                var dictForValue = ReflectionHelper.ToDictionary(value);
+                if (dictForValue.Count > 0)
+                    list.Add(dictForValue.First().Value);
+            }
+
             return list;
         }
 
@@ -294,15 +313,21 @@ namespace sql4js.Executor
             if (MyTypeHelper.IsPrimitive(value.GetType()))
                 return value;
 
-            if (value is IDictionary<String, Object> dict)
+            else if (value is IDictionary<String, Object> dict)
             {
                 return dict.Count > 0 ? dict.FirstOrDefault().Value : null;
             }
 
-            if (value is ICollection)
+            else if (value is ICollection)
             {
                 foreach (Object subValue in (ICollection)value)
                     return GetSingleAndFirstValueFromResult(subValue);
+            }
+            
+            else if (value.GetType().IsClass)
+            {
+                var dictForValue = ReflectionHelper.ToDictionary(value);
+                return dictForValue.Count > 0 ? dictForValue.FirstOrDefault().Value : null;
             }
 
             return null;
