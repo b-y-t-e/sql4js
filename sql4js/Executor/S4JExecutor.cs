@@ -138,7 +138,7 @@ namespace sql4js.Executor
 
         private IEnumerable<S4JToken> ConvertToToken(IList<Object> List)
         {
-            if (List == null)
+            if (List == null || List.Count == 0)
                 yield break;
 
             yield return new S4JTokenObjectContent()
@@ -171,8 +171,8 @@ namespace sql4js.Executor
 
         private IEnumerable<S4JToken> ConvertToTokens(Object Value)
         {
-            if (Value == null)
-                yield break;
+            //if (Value == null)
+            //    yield break;
 
             yield return new S4JTokenTextValue()
             {

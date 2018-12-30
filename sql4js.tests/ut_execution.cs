@@ -28,10 +28,10 @@ namespace sql4js.tests
                 result.ToJson());
         }
 
-       /* [Fact]
+        [Fact]
         async public void executor_should_understand_arguments()
         {
-            var script1 = @"{ ""a"": 1, c#(""bb"") : c#( 999 )  }";
+            var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
 
             var result = await new S4JDefaultExecutor().
                 Execute(script1);
@@ -39,9 +39,26 @@ namespace sql4js.tests
             var txt = result.ToJson();
 
             Assert.Equal(
-                @"{""a"":1,""bb"":999}",
+                @"method1(param1){""a"":null}",
                 result.ToJson());
-        }*/
+        }
+
+        [Fact]
+        async public void executor_should_understand_null_value_forKey()
+        {
+            var a = 1 + null;
+
+            var script1 = @"   { ""a"": null, ""b"" : c#(1+(int?)a)  }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{""a"":null,""b"":null}",
+                result.ToJson());
+        }
 
         [Fact]
         async public void executor_should_understand_dunamicl_fields_and_values_no_quotes()
@@ -158,6 +175,19 @@ namespace sql4js.tests
         }
 
         [Fact]
+        async public void executor_should_understand_additional_null_fields_for_object()
+        {
+            var script1 = @"{ a: 1, c#(  null  ), d: 3   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"{a:1,d:3}",
+                result.ToJson());
+        }
+
+        [Fact]
         async public void executor_should_understand_additional_items_for_array()
         {
             var script1 = @"[ 1, c#(  var list = new List<Object>(); list.Add(2); list.Add(3); return list;  )   ]";
@@ -167,6 +197,36 @@ namespace sql4js.tests
 
             Assert.Equal(
                 @"[1,2,3]",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_empty_items_for_array()
+        {
+            var script1 = @"[ 1, c#(  var list = new List<Object>(); return list;  )   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"[1]",
+                result.ToJson());
+        }
+        
+        [Fact]
+        async public void executor_should_understand_additional_null_items_for_array()
+        {
+            var script1 = @"[ 1, c#(  return null;  )   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"[1]",
                 result.ToJson());
         }
 
@@ -280,6 +340,20 @@ namespace sql4js.tests
                 @"[1,{""b"":2,""c"":3}]",
                 result.ToJson());
         }
+        
+        [Fact]
+        async public void executor_should_understand_additional_null_objects_for_array()
+        {
+            var script1 = @"[ 1, {c#(  
+                    null  )}   ]";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            Assert.Equal(
+                @"[1]",
+                result.ToJson());
+        }
 
         [Fact]
         async public void executor_should_understand_additional_fields_for_object_version2()
@@ -291,6 +365,21 @@ namespace sql4js.tests
 
             Assert.Equal(
                 @"{a:1,b:22}",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_additional_null_field_for_object()
+        {
+            var script1 = @"{ a: 1, b: c#(  null  )   }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{a:1,b:null}",
                 result.ToJson());
         }
 

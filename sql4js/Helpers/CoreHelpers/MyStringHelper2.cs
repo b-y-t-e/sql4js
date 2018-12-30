@@ -310,6 +310,9 @@ namespace Else.HttpService.Helpers
                 if (Text == null)
                     return null;
 
+                if (Text == "null")
+                    return null;
+
                 if (MyStringHelper.IsNumber(Text.Trim()) ||
                     MyStringHelper.IsQuotedText(Text.Trim()))
                 {
