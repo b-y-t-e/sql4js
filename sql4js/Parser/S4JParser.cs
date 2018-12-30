@@ -62,6 +62,7 @@ namespace sql4js.Parser
                             currentVal.Commit();
                         }
 
+                        currentVal.OnPop();
                         valueStack.Pop();
                     }
 
@@ -121,11 +122,16 @@ namespace sql4js.Parser
                 S4JToken currentVal = valueStack.Peek();
                 if (currentVal != null)
                     currentVal.Commit();
+                currentVal.OnPop();
                 valueStack.Pop();
             }
 
+            if (String.IsNullOrEmpty(rootVal.Name))
+            {
+                return rootVal.Children.Single() as S4JToken;
+            }
 
-            return rootVal.Children.Single() as S4JToken;
+            return rootVal;
         }
 
         private static IEnumerable<S4JStateStackEvent> Analyse(IList<char> code, int index, S4JStateBag StateBag, S4JTokenStack stateStack) // S4JStateStack stateStack)

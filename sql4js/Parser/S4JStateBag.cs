@@ -24,7 +24,15 @@ namespace sql4js.Parser
                 StateType = EStateType.S4J,
                 AllowedStatesNames = new List<EStateType?>()
                 {
-                    null
+                    EStateType.S4J_COMMENT,
+                    EStateType.S4J_QUOTATION,
+                    EStateType.S4J_OBJECT,
+                    EStateType.S4J_ARRAY,
+                    EStateType.S4J_VALUE_DELIMITER,
+                    EStateType.S4J_COMA,
+                    EStateType.S4J_TEXT_VALUE,
+                    EStateType.FUNCTION,
+                    EStateType.S4J_PARAMETERS
                 },
                 Gates = new List<S4JStateGate>()
                 {
@@ -169,7 +177,7 @@ namespace sql4js.Parser
 
             this.items.Add(new S4JState()
             {
-                Priority = 1001,
+                Priority = 2000,
                 StateType = EStateType.S4J_OBJECT,
                 IsCollection = true,
                 AllowedStatesNames = new List<EStateType?>()
@@ -195,9 +203,35 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
+            this.items.Add(new S4JState()
+            {
+                Priority = 2500,
+                StateType = EStateType.S4J_PARAMETERS,
+                IsCollection = true,
+                AllowedStatesNames = new List<EStateType?>()
+                {
+                    EStateType.S4J_COMMENT,
+                    EStateType.S4J_QUOTATION,
+                    EStateType.S4J_OBJECT,
+                    EStateType.S4J_ARRAY,
+                    EStateType.S4J_VALUE_DELIMITER,
+                    EStateType.S4J_COMA,
+                    EStateType.S4J_TEXT_VALUE
+                },
+                Gates = new List<S4JStateGate>()
+                {
+                    new S4JStateGate()
+                    {
+                        Start = "(".ToCharArray(),
+                        End = ")".ToCharArray()
+                    }
+                }
+            });
+            ////////////////////////////////
+
             S4JState sS4jDelimiter = new S4JState()
             {
-                Priority = 1002,
+                Priority = 3000,
                 StateType = EStateType.S4J_VALUE_DELIMITER,
                 AllowedStatesNames = new List<EStateType?>()
                 {
@@ -218,7 +252,7 @@ namespace sql4js.Parser
 
             S4JState sS4jSeparator = new S4JState()
             {
-                Priority = 1003,
+                Priority = 4000,
                 StateType = EStateType.S4J_COMA,
                 AllowedStatesNames = new List<EStateType?>()
                 {
@@ -239,7 +273,7 @@ namespace sql4js.Parser
 
             S4JState sS4jValue = new S4JState()
             {
-                Priority = 1004,
+                Priority = 5000,
                 StateType = EStateType.S4J_TEXT_VALUE,
                 AllowedStatesNames = new List<EStateType?>()
                 {

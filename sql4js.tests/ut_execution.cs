@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace sql4js.tests
 {
     /// <summary>
-    /// TODO: add test for classes
+    /// TODO: add test for classes, add test for sqlite, add test for configuration, add test for parameters
     /// </summary>
     public class ut_execution
     {

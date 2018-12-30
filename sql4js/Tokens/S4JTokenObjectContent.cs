@@ -8,6 +8,8 @@ namespace sql4js.Parser
     {
         public String Text { get; set; }
 
+        public Object Value { get; set; }
+
         public S4JTokenObjectContent()
         {
             Text = "";
@@ -17,6 +19,14 @@ namespace sql4js.Parser
 
         public override Dictionary<String, Object> GetParameters()
         {
+            if( Value is IDictionary<string, object> dict)
+            {
+                Dictionary<String, Object> variables = new Dictionary<string, object>();
+                foreach (var item in dict)
+                    variables[item.Key] = item.Value;
+                return variables;
+            }
+
             return null;
         }
 

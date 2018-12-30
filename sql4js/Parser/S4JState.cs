@@ -129,6 +129,7 @@ namespace sql4js.Parser
         S4J_TEXT_VALUE,
         S4J_OBJECT_CONTENT,
         S4J_OBJECT,
+        S4J_PARAMETERS,
 
         FUNCTION,
         FUNCTION_COMMENT,

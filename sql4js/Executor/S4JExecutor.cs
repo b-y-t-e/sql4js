@@ -127,6 +127,7 @@ namespace sql4js.Executor
 
             yield return new S4JTokenObjectContent()
             {
+                Value = Dictionary,
                 Text = Dictionary.SerializeJsonNoBrackets(),
                 //IsKey = true,
                 IsObjectSingleKey = true,
@@ -142,6 +143,7 @@ namespace sql4js.Executor
 
             yield return new S4JTokenObjectContent()
             {
+                Value = List,
                 Text = List.SerializeJsonNoBrackets(),
                 //IsKey = true,
                 IsObjectSingleKey = true,
@@ -158,6 +160,7 @@ namespace sql4js.Executor
             foreach (Object item in List)
                 yield return new S4JTokenObjectContent()
                 {
+                    Value = item,
                     Text = item.SerializeJsonNoBrackets(),
                     //IsKey = true,
                     IsObjectSingleKey = true,

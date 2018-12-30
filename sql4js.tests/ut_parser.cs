@@ -54,6 +54,84 @@ namespace sql4js.tests
         }
 
         [Fact]
+        public void parser_should_understand_root_name()
+        {
+            var script1 = @" a( p ) { 1 } ";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                "a(p){1}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_root_name_and_few_parameters()
+        {
+            var script1 = @" a( p, c : int, b : string ) { 1 } ";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                "a(p,c:int,b:string){1}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_invalid_object()
+        {
+            var script1 = @" { ""a"" } ";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{""a""}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_invalid_object_version2()
+        {
+            var script1 = @" { ""a"" , ""b""  } ";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{""a"",""b""}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_invalid_object_version3()
+        {
+            var script1 = @" { 11 } ";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{11}",
+                result.ToJson());
+        }
+
+        [Fact]
+        public void parser_should_understand_invalid_object_version4()
+        {
+            var script1 = @" { 22 , 33  } ";
+
+            var result = new S4JDefaultParser().
+                Parse(script1);
+
+            Assert.Equal(
+                @"{22,33}",
+                result.ToJson());
+        }
+
+        [Fact]
         public void parser_should_ignore_comment()
         {
             var script1 = @" 3 /* abc */ ";

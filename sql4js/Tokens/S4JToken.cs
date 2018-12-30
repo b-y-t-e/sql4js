@@ -7,11 +7,15 @@ namespace sql4js.Parser
 {
     public abstract class S4JToken
     {
+        public String Name { get; set; }
+
         public S4JToken Parent { get; set; }
 
         public List<S4JToken> Children { get; set; }
 
         public S4JState State { get; set; }
+
+        public Dictionary<String, Object> Attributes { get; set; }
 
         //////////////////////////////////////////////////
 
@@ -22,6 +26,13 @@ namespace sql4js.Parser
         public bool IsObjectSingleKey { get; set; }
 
         public bool IsCommited { get; set; }
+
+        //////////////////////////////////////////////////
+
+        public S4JToken()
+        {
+            Attributes = new Dictionary<string, object>();
+        }
 
         //////////////////////////////////////////////////
 
@@ -118,23 +129,73 @@ namespace sql4js.Parser
 
             S4JToken lastChild = this.Children.LastOrDefault();
             if (lastChild is S4JTokenTextValue txtVal)
-            {
                 txtVal.Commit();
-            }
+
+            //CalculateIsSingleKey(this, lastChild);
+            // CalculateIsSingleKey(this.Parent, this);
+        }
+
+        public virtual void OnPop()
+        {
+            // CalculateIsSingleKey(this.Parent, this);
+
+            S4JToken lastChild = this.Children.LastOrDefault();
+            if (lastChild is S4JTokenTextValue txtVal)
+                txtVal.Commit();
+
+            CalculateIsSingleKey(this, lastChild);
+        }
+
+        private void CalculateIsSingleKey(S4JToken Token, S4JToken Item)
+        {
+            if (Item == null)
+                return;
 
             // ustalenie IsSingleKey = true
             // próba określenia czy token jest w obiekcie
             // oraz czy jest 'kluczem bez wartosci' 
-            if (Parent is S4JTokenObject)
+            if (Token is S4JTokenObject ||
+                Token is S4JTokenParameters)
             {
-                if (!this.IsObjectKey && !(this is S4JTokenComment))
+                S4JToken prevChild = null;
+                foreach (S4JToken child in Token.Children)
+                {
+                    if (!child.IsObjectKey)
+                    {
+                        if (prevChild == null ||
+                            prevChild.IsObjectKey == false)
+                        {
+                            child.MarkAsSingleObjectKey();
+                        }
+
+                        else if (prevChild != null &&
+                                 prevChild.IsObjectKey == true)
+                        {
+                            child.MarkAsObjectValue();
+                        }
+                    }
+
+                    prevChild = child;
+                }
+            }
+
+            return;
+
+            // ustalenie IsSingleKey = true
+            // próba określenia czy token jest w obiekcie
+            // oraz czy jest 'kluczem bez wartosci' 
+            if (Token is S4JTokenObject ||
+                Token is S4JTokenParameters)
+            {
+                if (!Item.IsObjectKey && !(Item is S4JTokenComment))
                 {
                     S4JToken prevChild = null;
 
-                    int indexInParent = Parent.Children.IndexOf(this);
+                    //o dszukanie poprzedniego elementu
+                    int indexInParent = Token.Children.IndexOf(Item);
                     for (var i = indexInParent - 1; i >= 0; i--)
                     {
-                        S4JToken child = Parent.Children[i];
+                        S4JToken child = Token.Children[i];
                         if (child is S4JTokenComment)
                             continue;
 
@@ -145,13 +206,13 @@ namespace sql4js.Parser
                     if (prevChild == null ||
                         prevChild.IsObjectKey == false)
                     {
-                        this.MarkAsSingleObjectKey();
+                        Item.MarkAsSingleObjectKey();
                     }
 
                     else if (prevChild != null &&
                              prevChild.IsObjectKey == true)
                     {
-                        this.MarkAsObjectValue();
+                        Item.MarkAsObjectValue();
                     }
                 }
             }
@@ -166,6 +227,37 @@ namespace sql4js.Parser
 
         public virtual void BuildJson(StringBuilder Builder)
         {
+            ////////////////////////////////////
+
+            if (!string.IsNullOrEmpty(Name))
+            {
+                Builder.Append(Name);
+
+                if (Attributes != null && Attributes.Count > 0)
+                {
+                    Builder.Append("(");
+                    Int32 index = 0;
+                    foreach (var attr in Attributes)
+                    {
+                        if (index > 0) Builder.Append(",");
+                        if (attr.Value == null)
+                        {
+                            Builder.Append($"{attr.Key}");
+                        }
+                        else
+                        {
+                            Builder.Append($"{attr.Key}:{attr.Value}");
+                        }
+                        index++;
+                    }
+                    Builder.Append(")");
+                }
+            }
+
+            ////////////////////////////////////
+
+            ////////////////////////////////////
+
             if (State.Gate != null)
                 foreach (var ch in State.Gate.Start)
                     Builder.Append(ch);

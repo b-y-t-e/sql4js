@@ -24,6 +24,9 @@ namespace sql4js.Parser
                 if (State.StateType == EStateType.S4J_OBJECT)
                     result = new S4JTokenObject();
 
+                if (State.StateType == EStateType.S4J_PARAMETERS)
+                    result = new S4JTokenParameters();
+
                 if (State.StateType == EStateType.S4J_QUOTATION)
                     result = new S4JTokenQuotation();
                 
