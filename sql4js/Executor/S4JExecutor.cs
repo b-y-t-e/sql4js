@@ -21,10 +21,26 @@ namespace sql4js.Executor
             this.Parser = Parser;
         }
 
-        async public Task<S4JToken> Execute(String Text)
+        async public Task<S4JToken> Execute(String Text, params Object[] Parameters)
         {
             S4JToken tree = Parser.Parse(Text);
+            if (tree is S4JTokenRoot root)
+            {
+                if (Parameters != null)
+                {
+                    Int32 index = 0;
+                    foreach (var key in root.Attributes.Keys.ToArray())
+                    {
+                        if (index < Parameters.Length)
+                            root.Attributes[key] = Parameters[index];
+                        index++;
+                    }
+                }
+            }
             await Evaluate(tree);
+
+            if (tree is S4JTokenRoot)
+                return tree.Children.LastOrDefault();
             return tree;
         }
 
@@ -52,7 +68,7 @@ namespace sql4js.Executor
 
                             IList<S4JToken> tokensFromResult = ConvertToToken(
                                 GetManyObjectsFromResult(result)).ToArray();
-                            
+
                             objectToken.Parent.ReplaceChild(
                                 objectToken,
                                 tokensFromResult);

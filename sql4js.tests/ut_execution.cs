@@ -29,7 +29,7 @@ namespace sql4js.tests
         }
 
         [Fact]
-        async public void executor_should_understand_arguments()
+        async public void executor_should_understand_empty_arguments()
         {
             var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
 
@@ -39,7 +39,37 @@ namespace sql4js.tests
             var txt = result.ToJson();
 
             Assert.Equal(
-                @"method1(param1){""a"":null}",
+                @"{""a"":null}",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_one_argument()
+        {
+            var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1, 999);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{""a"":999}",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_many_arguments()
+        {
+            var script1 = @"  method1 (param1, param2, param3, param4) { ""a"": c#(param1+param2+param3+param4) }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1, 1, 10, 100, 1000.0);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{""a"":1111.0}",
                 result.ToJson());
         }
 
