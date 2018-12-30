@@ -28,6 +28,21 @@ namespace sql4js.tests
                 result.ToJson());
         }
 
+       /* [Fact]
+        async public void executor_should_understand_arguments()
+        {
+            var script1 = @"{ ""a"": 1, c#(""bb"") : c#( 999 )  }";
+
+            var result = await new S4JDefaultExecutor().
+                Execute(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{""a"":1,""bb"":999}",
+                result.ToJson());
+        }*/
+
         [Fact]
         async public void executor_should_understand_dunamicl_fields_and_values_no_quotes()
         {

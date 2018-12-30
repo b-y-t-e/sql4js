@@ -233,10 +233,9 @@ namespace sql4js.Parser
             {
                 Builder.Append(Name);
 
-                if (Attributes != null && Attributes.Count > 0)
-                {
-                    Builder.Append("(");
-                    Int32 index = 0;
+                Builder.Append("(");
+                Int32 index = 0;
+                if (Attributes != null)
                     foreach (var attr in Attributes)
                     {
                         if (index > 0) Builder.Append(",");
@@ -250,8 +249,7 @@ namespace sql4js.Parser
                         }
                         index++;
                     }
-                    Builder.Append(")");
-                }
+                Builder.Append(")");
             }
 
             ////////////////////////////////////
