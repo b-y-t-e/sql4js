@@ -12,7 +12,13 @@ namespace sql4js.Functions
     public class CSharpFunction : S4JStateFunction
     {
         public CSharpFunction() :
-            base("c#")
+            this("c#")
+        {
+
+        }
+
+        public CSharpFunction(string aliasName) :
+            base(aliasName, null)
         {
             Priority = 0;
             BracketsDefinition = new CSharpBrackets();
@@ -104,40 +110,24 @@ namespace sql4js.Functions
 
     public class CSharpEvaluator : IEvaluator
     {
-        public async Task<Object> Evaluate(S4JToken token)
+        public async Task<Object> Evaluate(S4JToken token, IDictionary<String, object> variables)
         {
-            S4JToken parentToken = token;
-            Dictionary<String, object> values = new Dictionary<string, object>();
-            while (parentToken != null)
-            {
-                Dictionary<string, object> parentParameters = parentToken.GetParameters();
-                if (parentParameters != null)
-                {
-                    foreach (KeyValuePair<string, object> keyAndVal in parentParameters)
-                    {
-                        if (!values.ContainsKey(keyAndVal.Key))
-                        {
-                            values[keyAndVal.Key] = keyAndVal.Value;
-                        }
-                    }
-                }
-                parentToken = parentToken.Parent;
-            }
-
             S4JTokenFunction function = token as S4JTokenFunction;
-            StringBuilder code = new StringBuilder(function.ToJsonWithoutGate());
+            StringBuilder code = new StringBuilder();
 
-            foreach (KeyValuePair<string, object> keyAndVal in values)
+            foreach (KeyValuePair<string, object> keyAndVal in variables)
             {
                 if (keyAndVal.Value == null)
                 {
-                    code.Insert(0, $"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
+                    code.Append($"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
                 }
                 else
                 {
-                    code.Insert(0, $"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
+                    code.Append($"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
                 }
             }
+
+            code.Append(function.ToJsonWithoutGate());
 
             var imports = ScriptOptions.Default.WithImports("System", "System.Text", "System.Collections.Generic");
 

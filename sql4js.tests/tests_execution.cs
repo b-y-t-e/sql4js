@@ -9,16 +9,16 @@ using System.Collections.Generic;
 namespace sql4js.tests
 {
     /// <summary>
-    /// TODO: add test for classes, add test for sqlite, add test for configuration, add test for parameters
+    /// TODO:  add test for sqlite, add test for configuration, add test for parameter types
     /// </summary>
-    public class ut_execution
+    public class tests_execution
     {
         [Fact]
         async public void executor_should_understand_dunamicl_fields_and_values()
         {
             var script1 = @"{ ""a"": 1, c#(""bb"") : c#( 999 )  }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -33,7 +33,7 @@ namespace sql4js.tests
         {
             var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -48,7 +48,7 @@ namespace sql4js.tests
         {
             var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1, 999);
 
             var txt = result.ToJson();
@@ -63,7 +63,7 @@ namespace sql4js.tests
         {
             var script1 = @"  method1 (param1, param2, param3, param4) { ""a"": c#(param1+param2+param3+param4) }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1, 1, 10, 100, 1000.0);
 
             var txt = result.ToJson();
@@ -80,7 +80,7 @@ namespace sql4js.tests
 
             var script1 = @"   { ""a"": null, ""b"" : c#(1+(int?)a)  }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -95,7 +95,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, c#(""bb"") : c#( 999 )  }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -115,7 +115,7 @@ namespace sql4js.tests
     o.nazwisko = ""adsafasg""; 
     return o; )  }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -151,7 +151,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : c#( ""abc"" + 1 )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -164,7 +164,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : c#( ""abc"" + 1 )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -177,7 +177,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, b : c#( a + 1 )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -190,7 +190,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, b : c#( a + 1 ), c : c#( a + b )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -203,7 +203,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, b : c#( a + 1 ), c : c#( a + b ), d: {a:10, b:c#(a+c)}   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -216,7 +216,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -229,7 +229,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, c#(  null  ), d: 3   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -242,7 +242,7 @@ namespace sql4js.tests
         {
             var script1 = @"[ 1, c#(  var list = new List<Object>(); list.Add(2); list.Add(3); return list;  )   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -255,7 +255,7 @@ namespace sql4js.tests
         {
             var script1 = @"[ 1, c#(  var list = new List<Object>(); return list;  )   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -270,7 +270,7 @@ namespace sql4js.tests
         {
             var script1 = @"[ 1, c#(  return null;  )   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -285,7 +285,7 @@ namespace sql4js.tests
         {
             var script1 = @"[ 1, c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -312,7 +312,7 @@ namespace sql4js.tests
                 }
                 return list;  )   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -339,7 +339,7 @@ namespace sql4js.tests
                 }
                 return list;  )}   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -366,7 +366,7 @@ namespace sql4js.tests
                 }
                 return list;  ),d:100}   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -383,7 +383,7 @@ namespace sql4js.tests
                     dict[""c""] = 3;                    
                     return dict;  )}   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -397,7 +397,7 @@ namespace sql4js.tests
             var script1 = @"[ 1, {c#(  
                     null  )}   ]";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -410,7 +410,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, b: c#(  var dict = new Dictionary<String, Object>(); dict[""bb""] = 22; dict[""cc""] = 33; return dict;  )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(
@@ -423,7 +423,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ a: 1, b: c#(  null  )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             var txt = result.ToJson();
@@ -446,7 +446,7 @@ namespace sql4js.tests
 
         )   }";
 
-            var result = await new S4JDefaultExecutor().
+            var result = await new S4JExecutorForTests().
                 Execute(script1);
 
             Assert.Equal(

@@ -7,8 +7,12 @@ namespace sql4js.Parser
 {
     public class S4JStateFunction : S4JState
     {
-        public String Name { get; set; }
-        
+        public String FunctionName { get; set; }
+
+        public String Source { get; set; }
+
+        ////////////////////////////////////////
+
         public S4JState BracketsDefinition { get; set; }
 
         public S4JState CommentDefinition { get; set; }
@@ -17,9 +21,12 @@ namespace sql4js.Parser
 
         public IEvaluator Evaluator { get; set; }
 
-        public S4JStateFunction(String Name)
+        ////////////////////////////////////////
+
+        public S4JStateFunction(String FunctionName, String Source)
         {
-            this.Name = Name;
+            this.FunctionName = FunctionName;
+            this.Source = Source;
             this.IsValue = true;
             this.IsFunction = true;
             this.Priority = 0;
@@ -33,7 +40,7 @@ namespace sql4js.Parser
                 {
                     new S4JStateGate()
                     {
-                        Start = (Name + "(").ToCharArray(),
+                        Start = (FunctionName + "(").ToCharArray(),
                         End = ")".ToCharArray()
                     }
                 };

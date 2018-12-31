@@ -61,16 +61,16 @@ namespace sql4js.Parser
         public override void MarkAsObjectKey()
         {
             base.MarkAsObjectKey();
-            AnaliseValue();
+            AnalyseValue();
         }
 
         public override void MarkAsObjectValue()
         {
             base.MarkAsObjectValue();
-            AnaliseValue();
+            AnalyseValue();
         }
 
-        private void AnaliseValue()
+        private void AnalyseValue()
         {
             try
             {

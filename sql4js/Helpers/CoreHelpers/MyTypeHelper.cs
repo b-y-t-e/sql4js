@@ -60,6 +60,25 @@ namespace ProZ.Base.Helpers
             return false;
         }
 
+        public static bool IsInteger(this Type Type)
+        {
+            if (Type == typeof(Int32) ||
+                Type == typeof(Int32?) ||
+                Type == typeof(Int16) ||
+                Type == typeof(Int16?) ||
+                Type == typeof(Int64) ||
+                Type == typeof(Int64?) ||
+                Type == typeof(Byte) ||
+                Type == typeof(Byte?) ||
+                Type == typeof(SByte?) ||
+                Type == typeof(SByte) ||
+                Type == typeof(SByte?) ||
+                Type == typeof(Boolean) ||
+                Type == typeof(Boolean?))
+                return true;
+            return false;
+        }
+
         ////////////////////
 
         public static Boolean IsEqualWithNumericConvert(this Object o1, Object o2)

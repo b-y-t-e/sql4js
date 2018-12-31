@@ -9,8 +9,10 @@ namespace sql4js.Parser
     {
         public S4JDefaultParser()
         {
-            Functions.Add(new CSharpFunction());
-            Functions.Add(new TSqlFunction());
+            AvailableFunctions.Add(new CSharpFunction("c#")
+            {
+
+            });
         }
     }
 }

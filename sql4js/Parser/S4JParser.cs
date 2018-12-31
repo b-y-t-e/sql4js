@@ -7,21 +7,25 @@ namespace sql4js.Parser
 {
     public class S4JParser
     {
-        public List<S4JStateFunction> Functions { get; set; }
+        public List<S4JStateFunction> AvailableFunctions { get; set; }
+
+        ////////////////////////////////////////////////////////////////
 
         public S4JParser()
         {
-            Functions = new List<S4JStateFunction>();
+            AvailableFunctions = new List<S4JStateFunction>();
         }
 
+        ////////////////////////////////////////////////////////////////
+        
         public S4JToken Parse(String Text)
         {
             IList<char> chars = Text.Trim().ToCharArray();
 
             S4JStateBag stateBag = new S4JStateBag();
-            if (Functions != null)
+            if (AvailableFunctions != null)
             {
-                foreach (S4JStateFunction function in Functions)
+                foreach (S4JStateFunction function in AvailableFunctions)
                 {
                     stateBag.Add(function);
                     stateBag.Add(function.BracketsDefinition);
@@ -350,5 +354,4 @@ namespace sql4js.Parser
             return null;
         }
     }
-
 }

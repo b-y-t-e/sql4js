@@ -52,8 +52,9 @@ namespace sql4js.Executor
 
             if (token.State.StateType == EStateType.FUNCTION)
             {
+                IDictionary<String, object> variables = GetExecutiongVariables(token);
                 S4JTokenFunction function = token as S4JTokenFunction;
-                object result = await function.Evaluator?.Evaluate(token);
+                object result = await function.Evaluator?.Evaluate(token, variables);
 
                 function.IsEvaluated = true;
                 function.Result = result;
@@ -137,6 +138,30 @@ namespace sql4js.Executor
             }
         }
 
+        private IDictionary<String, object> GetExecutiongVariables(S4JToken token)
+        {
+            Dictionary<String, object> variables = new Dictionary<string, object>();
+            {
+                S4JToken parentToken = token;
+                while (parentToken != null)
+                {
+                    Dictionary<string, object> parentParameters = parentToken.GetParameters();
+                    if (parentParameters != null)
+                    {
+                        foreach (KeyValuePair<string, object> keyAndVal in parentParameters)
+                        {
+                            if (!variables.ContainsKey(keyAndVal.Key))
+                            {
+                                variables[keyAndVal.Key] = keyAndVal.Value;
+                            }
+                        }
+                    }
+                    parentToken = parentToken.Parent;
+                }
+            }
+            return variables;
+        }
+
         private IEnumerable<S4JToken> ConvertToTokens(IDictionary<String, Object> Dictionary)
         {
             if (Dictionary == null)
@@ -200,7 +225,7 @@ namespace sql4js.Executor
             };
         }
 
-        private IList<Object> GetManyObjectsFromResult(Object value, Boolean AnaliseSubValues = true)
+        private IList<Object> GetManyObjectsFromResult(Object value, Boolean AnalyseSubValues = true)
         {
             if (value == null)
                 return null;
@@ -217,7 +242,7 @@ namespace sql4js.Executor
 
             else if (value is ICollection)
             {
-                if (AnaliseSubValues)
+                if (AnalyseSubValues)
                 {
                     foreach (Object subValue in (ICollection)value)
                         list.AddRange(GetManyObjectsFromResult(subValue, false));
@@ -336,7 +361,7 @@ namespace sql4js.Executor
 
     public interface IEvaluator
     {
-        Task<Object> Evaluate(S4JToken node);
+        Task<Object> Evaluate(S4JToken node, IDictionary<String, object> variables);
     }
 
     public class ExecutionTree

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace sql4js.tests
 {
-    public class ut_parser
+    public class tests_parser
     {
         [Fact]
         public void parser_method_is_should_work_fine()
@@ -58,7 +58,7 @@ namespace sql4js.tests
         {
             var script1 = @" a( p ) { 1 } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -71,7 +71,7 @@ namespace sql4js.tests
         {
             var script1 = @" a( p, c : int, b : string ) { 1 } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -84,7 +84,7 @@ namespace sql4js.tests
         {
             var script1 = @" { ""a"" } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -97,7 +97,7 @@ namespace sql4js.tests
         {
             var script1 = @" { ""a"" , ""b""  } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -110,7 +110,7 @@ namespace sql4js.tests
         {
             var script1 = @" { 11 } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -123,7 +123,7 @@ namespace sql4js.tests
         {
             var script1 = @" { 22 , 33  } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -136,7 +136,7 @@ namespace sql4js.tests
         {
             var script1 = @" 3 /* abc */ ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
             
             Assert.Equal(
@@ -149,7 +149,7 @@ namespace sql4js.tests
         {
             var script1 = @" {  a: 1, b: 2, c: 3 } ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             var txt = result.ToJson();
@@ -165,7 +165,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql( select 1 )   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -178,7 +178,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql( select getdate())   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -191,7 +191,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : "" sql( select getdate()   )  "" }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             var txt = result.ToJson();
@@ -206,7 +206,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql(select abc('def'))   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -219,7 +219,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql(select abc('d\'ef'))   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -232,7 +232,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql(select abc(""d\""ef""))   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -245,7 +245,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql(select abc(""d\""ff\""ef""))   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -258,7 +258,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql(select abc(""d'ff'ef""))   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -271,7 +271,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : sql( select 1 /* abc */ )   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -284,7 +284,7 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : /*sql( select 1 /* abc */ )*/   }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -297,7 +297,7 @@ namespace sql4js.tests
         {
             var script1 = @"{    a : 'cos', b : sql(select 1 ), c: 'aaa' }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -310,7 +310,7 @@ namespace sql4js.tests
         {
             var script1 = @"{a : 'cos', sql( select 1 as val ), c: 'aaa' }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -323,7 +323,7 @@ namespace sql4js.tests
         {
             var script1 = @"[1 , 2 , 3 , 'abc' ]";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -336,7 +336,7 @@ namespace sql4js.tests
         {
             var script1 = @" 'ab c ' ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             var txt = result.ToJson();
@@ -351,7 +351,7 @@ namespace sql4js.tests
         {
             var script1 = @" 4324234.66 ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -365,7 +365,7 @@ namespace sql4js.tests
         {
             var script1 = @" 4324234.66 /* abc /* abc */ abc */ ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -378,7 +378,7 @@ namespace sql4js.tests
         {
             var script1 = @"[1 , 2 , /* /* abc */ */ 3 , 'abc' ]";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -391,7 +391,7 @@ namespace sql4js.tests
         {
             var script1 = @"{a : 'cos', /* abc*/  sql( select 1 as val ), c: 'aaa' }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             var txt = result.ToJson();
@@ -406,7 +406,7 @@ namespace sql4js.tests
         {
             var script1 = @"{a : 'cos', d : { a : 1, b : 2, c : 'abc'}, c: 'aaa' }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -419,7 +419,7 @@ namespace sql4js.tests
         {
             var script1 = @"{  d: [ {@f : 6} ] , c: 'aaa' }";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -444,7 +444,7 @@ namespace sql4js.tests
         }
         ";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -457,7 +457,7 @@ namespace sql4js.tests
         {
             var script1 = @"{d:[{@f:6}],c:'aaa'}";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -470,7 +470,7 @@ namespace sql4js.tests
         {
             var script1 = @"{d:[{@f:6}],c:'aaa',d:[{a:['gg']}],e:'b'}";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
@@ -483,7 +483,7 @@ namespace sql4js.tests
         {
             var script1 = @"[{d:[{a:['gg']}]},9,1]";
 
-            var result = new S4JDefaultParser().
+            var result = new S4JParserForTests().
                 Parse(script1);
 
             Assert.Equal(
