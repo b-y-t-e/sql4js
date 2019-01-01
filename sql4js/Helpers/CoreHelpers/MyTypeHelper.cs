@@ -10,6 +10,14 @@ namespace ProZ.Base.Helpers
 {
     public static class MyTypeHelper
     {
+        public static Boolean IsPrimitive(this Object Object)
+        {
+            if (Object == null)
+                return true;
+
+            return IsPrimitive(Object.GetType());
+        }
+
         public static Boolean IsPrimitive(this Type Type)
         {
             return Type.IsPrimitive ||

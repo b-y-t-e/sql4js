@@ -49,6 +49,62 @@ namespace sql4js.tests
         }
 
         [Fact]
+        async public void executor_should_understand_object_parameter_in_sql()
+        {
+            await PrepareDb();
+
+            var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko  ) ";
+
+            var result = await new S4JExecutorForTests().
+                Execute(script1, new osoba() { imie = "IMIE", nazwisko = "NAZWISKO" });
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"""IMIE!NAZWISKO""",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_list_in_object_parameter_in_sql()
+        {
+            await PrepareDb();
+
+            var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko + '!' + cast((select count(*) from #param1_rodzice) as varchar(max))  ) ";
+
+            var result = await new S4JExecutorForTests().
+                Execute(script1, new osobaWithList() { imie = "IMIE", nazwisko = "NAZWISKO", rodzice = new List<osoba>() { new osoba() { imie = "tata" }, new osoba() { imie = "mama" } } } );
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"""IMIE!NAZWISKO!2""",
+                result.ToJson());
+        }
+
+        [Fact]
+        async public void executor_should_understand_list_parameter_in_sql()
+        {
+            await PrepareDb();
+
+            var script1 = @" method(param1) sql( select count(*) from #param1  ) ";
+
+            var result = await new S4JExecutorForTests().
+                Execute(
+                    script1,
+                    new List<osoba>() {
+                        new osoba() { imie = "IMIE1", nazwisko = "NAZWISKO2" },
+                        new osoba() { imie = "IMIE1", nazwisko = "NAZWISKO2" }
+                    });
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"2",
+                result.ToJson());
+        }
+
+        [Fact]
         async public void executor_should_understand_object_from_sql()
         {
             await PrepareDb();
@@ -114,4 +170,18 @@ select 'imie2', 'nazwisko2', 30, '1990-01-01', getdate();
                 Execute(script);
         }
     }
+
+    class osoba
+    {
+        public string imie;
+        public string nazwisko;
+    }
+
+    class osobaWithList
+    {
+        public string imie;
+        public string nazwisko;
+        public List<osoba> rodzice = new List<osoba>();
+    }
+
 }

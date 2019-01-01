@@ -1,8 +1,11 @@
 ﻿using Database;
+using ProZ.App.Base.Helpers;
 using ProZ.Base.Helpers;
 using sql4js.Executor;
 using sql4js.Parser;
 using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
@@ -113,12 +116,7 @@ namespace sql4js.Functions
 
             foreach (KeyValuePair<string, object> keyAndVal in variables)
             {
-                query.Append($"declare @{keyAndVal.Key} {TSqlHelper.GetSqlType(keyAndVal.Value?.GetType())};\n");
-
-                if (keyAndVal.Value != null)
-                {
-                    query.Append($"set @{keyAndVal.Key} = {{0}};\n", keyAndVal.Value);
-                }
+                BuildScriptForVariable(query, keyAndVal.Key, keyAndVal.Value);
             }
 
             query.Append(functionToken.ToJsonWithoutGate());
@@ -129,6 +127,120 @@ namespace sql4js.Functions
                 return result;
             }
         }
+
+        private void BuildScriptForVariable(MyQuery Query, String Name, Object Value, String ParentName = null)
+        {
+            string name = string.IsNullOrEmpty(ParentName) ? Name : (ParentName + "_" + Name);
+
+            if (MyTypeHelper.IsPrimitive(Value))
+            {
+                Query.Append($"declare @{name} {TSqlHelper.GetSqlType(Value?.GetType())};\n");
+                Query.Append($"set @{name} = {{0}};\n", Value);
+            }
+
+            else if (Value is IDictionary<string, object> dict)
+            {
+                BuildCreateTableScriptForVariable(Query, name, dict);
+                BuildInsertIntoTableScriptForVariable(Query, name, dict);
+            }
+
+            else if (Value is IList list)
+            {
+                var firstValue = ReflectionHelper.ToDictionary(list.Count > 0 ? list[0] : null);
+                BuildCreateTableScriptForVariable(Query, name, firstValue);
+                foreach (var item in list)
+                    BuildInsertIntoTableScriptForVariable(Query, name, item);
+            }
+
+            else if (Value.GetType().IsClass)
+            {
+                var classAsDict = ReflectionHelper.ToDictionary(Value);
+                if (string.IsNullOrEmpty(ParentName))
+                {
+                    foreach (var keyAndValue in classAsDict)
+                    {
+                        BuildScriptForVariable(Query, keyAndValue.Key, keyAndValue.Value, Name);
+                    }
+                }
+                else
+                {
+                    BuildCreateTableScriptForVariable(Query, name, classAsDict);
+                    BuildInsertIntoTableScriptForVariable(Query, name, classAsDict);
+                }
+            }
+        }
+
+
+        private void BuildCreateTableScriptForVariable(MyQuery Query, String TableName, Object Value)
+        {
+            if (MyTypeHelper.IsPrimitive(Value))
+            {
+
+            }
+
+            else if (Value is IDictionary<string, object> dict)
+            {
+                Query.Append("create table #").Append(TableName).Append(" (");
+                Int32 index = 0;
+                foreach (var keyAndValue in dict)
+                {
+                    if (index > 0) Query.Append(", ");
+                    Query.Append(keyAndValue.Key).Append(" ").Append(TSqlHelper.GetSqlType(keyAndValue.Value?.GetType()));
+                    index++;
+                }
+                Query.Append(");");
+            }
+
+            else if (Value is IList)
+            {
+
+            }
+
+            else if (Value.GetType().IsClass)
+            {
+                BuildCreateTableScriptForVariable(Query, TableName, ReflectionHelper.ToDictionary(Value));
+            }
+        }
+
+        private void BuildInsertIntoTableScriptForVariable(MyQuery Query, String TableName, Object Value)
+        {
+            if (MyTypeHelper.IsPrimitive(Value))
+            {
+
+            }
+
+            else if (Value is IDictionary<string, object> dict)
+            {
+                Query.Append("insert into #").Append(TableName).Append(" (");
+                Int32 index = 0;
+                foreach (var keyAndValue in dict)
+                {
+                    if (index > 0) Query.Append(", ");
+                    Query.Append(keyAndValue.Key);
+                    index++;
+                }
+                Query.Append(") values (");
+                index = 0;
+                foreach (var keyAndValue in dict)
+                {
+                    if (index > 0) Query.Append(", ");
+                    Query.AppendVal(keyAndValue.Value);
+                    index++;
+                }
+                Query.Append(");");
+            }
+
+            else if (Value is IList)
+            {
+
+            }
+
+            else if (Value.GetType().IsClass)
+            {
+                BuildInsertIntoTableScriptForVariable(Query, TableName, ReflectionHelper.ToDictionary(Value));
+            }
+        }
+
     }
 
     public static class TSqlHelper

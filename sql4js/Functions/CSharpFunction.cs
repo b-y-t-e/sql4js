@@ -1,9 +1,13 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using ProZ.Base.Helpers;
 using sql4js.Executor;
 using sql4js.Parser;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -108,6 +112,16 @@ namespace sql4js.Functions
         }
     }
 
+    public class CSharpEvaluatorGlobals
+    {
+        public dynamic Globals { get; set; }
+
+        public CSharpEvaluatorGlobals()
+        {
+            Globals = new ExpandoObject();
+        }
+    }
+
     public class CSharpEvaluator : IEvaluator
     {
         public async Task<Object> Evaluate(S4JToken token, IDictionary<String, object> variables)
@@ -115,25 +129,43 @@ namespace sql4js.Functions
             S4JTokenFunction function = token as S4JTokenFunction;
             StringBuilder code = new StringBuilder();
 
+            CSharpEvaluatorGlobals globals = new CSharpEvaluatorGlobals();
+            IDictionary<string, object> globaVariables = globals.Globals as IDictionary<string, object>;
+            // var globalObject = new Dictionary<string, object>();
+
             foreach (KeyValuePair<string, object> keyAndVal in variables)
             {
-                if (keyAndVal.Value == null)
+                globaVariables[keyAndVal.Key] = keyAndVal.Value;
+                /*if (keyAndVal.Value == null)
                 {
                     code.Append($"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
                 }
                 else
                 {
                     code.Append($"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
-                }
+                }*/
             }
 
             code.Append(function.ToJsonWithoutGate());
 
-            var imports = ScriptOptions.Default.WithImports("System", "System.Text", "System.Collections.Generic");
+            var refs = new List<MetadataReference>{
+                MetadataReference.CreateFromFile(typeof(System.Linq.Enumerable).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)};
+
+            var imports = ScriptOptions.Default.
+                WithImports(
+                    "System",
+                    "System.Text",
+                    "System.Linq",
+                    "System.Collections", 
+                    "System.Collections.Generic").
+                WithReferences(refs);
 
             object result = await CSharpScript.EvaluateAsync(
                 code.ToString(),
-                imports);
+                imports,
+                globals);
 
             return result;
         }
