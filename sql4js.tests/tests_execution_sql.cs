@@ -22,7 +22,7 @@ namespace sql4js.tests
             var script1 = @" sql( select 1  ) ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -39,7 +39,7 @@ namespace sql4js.tests
             var script1 = @" method(param1) sql( select @param1 + 1  ) ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1, 199);
+                ExecuteWithParameters(script1, 199);
 
             var txt = result.ToJson();
 
@@ -56,7 +56,7 @@ namespace sql4js.tests
             var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko  ) ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1, new osoba() { imie = "IMIE", nazwisko = "NAZWISKO" });
+                ExecuteWithParameters(script1, new osoba() { imie = "IMIE", nazwisko = "NAZWISKO" });
 
             var txt = result.ToJson();
 
@@ -70,10 +70,10 @@ namespace sql4js.tests
         {
             await PrepareDb();
 
-            var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko + '!' + cast((select count(*) from #param1_rodzice) as varchar(max))  ) ";
+            var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko + '!' + cast((select count(*) from @param1_rodzice) as varchar(max))  ) ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1, new osobaWithList() { imie = "IMIE", nazwisko = "NAZWISKO", rodzice = new List<osoba>() { new osoba() { imie = "tata" }, new osoba() { imie = "mama" } } } );
+                ExecuteWithParameters(script1, new osobaWithList() { imie = "IMIE", nazwisko = "NAZWISKO", rodzice = new List<osoba>() { new osoba() { imie = "tata" }, new osoba() { imie = "mama" } } } );
 
             var txt = result.ToJson();
 
@@ -87,10 +87,10 @@ namespace sql4js.tests
         {
             await PrepareDb();
 
-            var script1 = @" method(param1) sql( select count(*) from #param1  ) ";
+            var script1 = @" method(param1) sql( select count(*) from @param1  ) ";
 
             var result = await new S4JExecutorForTests().
-                Execute(
+                ExecuteWithParameters(
                     script1,
                     new List<osoba>() {
                         new osoba() { imie = "IMIE1", nazwisko = "NAZWISKO2" },
@@ -109,10 +109,10 @@ namespace sql4js.tests
         {
             await PrepareDb();
 
-            var script1 = @" {sql( select imie, nazwisko from osoba )} ";
+            var script1 = @" {sql( select imie, nazwisko from osoba where imie = 'imie1' )} ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -122,14 +122,31 @@ namespace sql4js.tests
         }
 
         [Fact]
+        async public void executor_should_understand_object_with_inner_fields_from_sql()
+        {
+            await PrepareDb();
+
+            var script1 = @" {sql( select imie, nazwisko, idrodzica from osoba where imie = 'imie1' ), ""parent"": { sql(select imie from osoba where id = @idrodzica) } } ";
+
+            var result = await new S4JExecutorForTests().
+                ExecuteWithParameters(script1);
+
+            var txt = result.ToJson();
+
+            Assert.Equal(
+                @"{""imie"":""imie1"",""nazwisko"":""nazwisko1"",""idrodzica"":3,""parent"":{""imie"":""imie rodzica""}}",
+                result.ToJson());
+        }
+
+        [Fact]
         async public void executor_should_understand_objects_from_sql()
         {
             await PrepareDb();
 
-            var script1 = @" [{sql( select imie, nazwisko from osoba )}] ";
+            var script1 = @" [{sql( select imie, nazwisko from osoba where idrodzica is not null )}] ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -141,33 +158,43 @@ namespace sql4js.tests
         private async Task PrepareDb()
         {
             var script = @"
+[
+    sql(
 
-sql(
+        if object_id('dbo.osoba') is not null  
+            drop table dbo.osoba
 
-if object_id('dbo.osoba') is not null  
-    drop table dbo.osoba
+        create table dbo.osoba(
+            id int identity(1,1), 
+            idrodzica int,
+            imie varchar(max), 
+            nazwisko nvarchar(max), 
+            wiek int, 
+            dataurodzenia datetime, 
+            utworzono datetime default(getdate())
+        )
 
-create table dbo.osoba(
-    id int identity(1,1), 
-    imie varchar(max), 
-    nazwisko nvarchar(max), 
-    wiek int, 
-    dataurodzenia datetime, 
-    utworzono datetime default(getdate())
-)
+    ),
 
-insert into dbo.osoba(imie, nazwisko, wiek, dataurodzenia, utworzono)
-select 'imie1', 'nazwisko1', 20, '2000-01-01', getdate();
+    sql(
 
-insert into dbo.osoba(imie, nazwisko, wiek, dataurodzenia, utworzono)
-select 'imie2', 'nazwisko2', 30, '1990-01-01', getdate();
+        insert into dbo.osoba(imie, nazwisko, wiek, dataurodzenia, utworzono)
+        select 'imie1', 'nazwisko1', 20, '2000-01-01', getdate();
 
-)
+        insert into dbo.osoba(imie, nazwisko, wiek, dataurodzenia, utworzono)
+        select 'imie2', 'nazwisko2', 30, '1990-01-01', getdate();
 
+        insert into dbo.osoba(imie, nazwisko, wiek, dataurodzenia, utworzono)
+        select 'imie rodzica', 'nazwisko rodzica', 50, '1970-01-01', getdate();
+
+        update osoba set idrodzica = scope_identity() where imie <> 'imie rodzica';
+
+    )
+]
 ";
 
             var result = await new S4JExecutorForTests().
-                Execute(script);
+                ExecuteWithParameters(script);
         }
     }
 

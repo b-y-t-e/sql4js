@@ -10,8 +10,12 @@ namespace sql4js.tests
 {
     /// <summary>
     /// TODO:  
-    /// add test for sqlite, 
-    /// add test for configuration, 
+    /// integration with azure functions
+    /// converstion from josn to net
+    /// integration with self hosting environment
+    /// support for http methods (get / post / put .. ) via tags
+    /// support for saving data through api (c# helpers)
+    /// support for add refenernces for executing project / custom namespaces / custom dll's
     /// add test for parameter types, 
     /// support for jsonsettings, 
     /// ? support for diffirent parameters parsing styles (dynamic / json / pure .net)
@@ -24,7 +28,7 @@ namespace sql4js.tests
             var script1 = @"{ ""a"": 1, c#(""bb"") : c#( 999 )  }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -39,7 +43,7 @@ namespace sql4js.tests
             var script1 = @"  method1 (param1) { ""a"": c#(Globals.param1) }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -54,7 +58,7 @@ namespace sql4js.tests
             var script1 = @"  method1 (param1) { ""a"": c#(Globals.param1) }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1, 999);
+                ExecuteWithParameters(script1, 999);
 
             var txt = result.ToJson();
 
@@ -69,7 +73,7 @@ namespace sql4js.tests
             var script1 = @"  method1 (param1, param2, param3, param4) { ""a"": c#(Globals.param1+Globals.param2+Globals.param3+Globals.param4) }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1, 1, 10, 100, 1000.0);
+                ExecuteWithParameters(script1, 1, 10, 100, 1000.0);
 
             var txt = result.ToJson();
 
@@ -86,7 +90,7 @@ namespace sql4js.tests
             var script1 = @"   { ""a"": null, ""b"" : c#(1+(int?)Globals.a)  }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -101,7 +105,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, c#(""bb"") : c#( 999 )  }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -121,7 +125,7 @@ namespace sql4js.tests
     return o; )  }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -157,7 +161,7 @@ namespace sql4js.tests
             var script1 = @"{ b : c#( ""abc"" + 1 )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{b:""abc1""}",
@@ -170,7 +174,7 @@ namespace sql4js.tests
             var script1 = @"{ b : c#( ""abc"" + 1 )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{b:""abc1""}",
@@ -183,7 +187,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, b : c#( Globals.a + 1 )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{a:1,b:2}",
@@ -196,7 +200,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, b : c#( Globals.a + 1 ), c : c#( Globals.a + Globals.b )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{a:1,b:2,c:3}",
@@ -209,7 +213,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, b : c#( Globals.a + 1 ), c : c#( Globals.a + Globals.b ), d: {a:10, b:c#(Globals.a+Globals.c)}   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{a:1,b:2,c:3,d:{a:10,b:13}}",
@@ -222,7 +226,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{a:1,""b"":2,""c"":3}",
@@ -235,7 +239,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, c#(  null  ), d: 3   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{a:1,d:3}",
@@ -248,7 +252,7 @@ namespace sql4js.tests
             var script1 = @"[ 1, c#(  var list = new List<Object>(); list.Add(2); list.Add(3); return list;  )   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1,2,3]",
@@ -261,7 +265,7 @@ namespace sql4js.tests
             var script1 = @"[ 1, c#(  var list = new List<Object>(); return list;  )   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -276,7 +280,7 @@ namespace sql4js.tests
             var script1 = @"[ 1, c#(  return null;  )   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -291,7 +295,7 @@ namespace sql4js.tests
             var script1 = @"[ 1, c#(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1,2]",
@@ -318,7 +322,7 @@ namespace sql4js.tests
                 return list;  )   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1,2,22]",
@@ -345,7 +349,7 @@ namespace sql4js.tests
                 return list;  )}   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1,{""b"":2,""c"":3},{""b"":22,""c"":33}]",
@@ -372,7 +376,7 @@ namespace sql4js.tests
                 return list;  ),d:100}   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1,{""b"":2,""c"":3,d:100},{""b"":22,""c"":33,d:100}]",
@@ -389,7 +393,7 @@ namespace sql4js.tests
                     return dict;  )}   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1,{""b"":2,""c"":3}]",
@@ -403,7 +407,7 @@ namespace sql4js.tests
                     null  )}   ]";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"[1]",
@@ -416,7 +420,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, b: c#(  var dict = new Dictionary<String, Object>(); dict[""bb""] = 22; dict[""cc""] = 33; return dict;  )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{a:1,b:22}",
@@ -429,7 +433,7 @@ namespace sql4js.tests
             var script1 = @"{ a: 1, b: c#(  null  )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             var txt = result.ToJson();
 
@@ -452,7 +456,7 @@ namespace sql4js.tests
         )   }";
 
             var result = await new S4JExecutorForTests().
-                Execute(script1);
+                ExecuteWithParameters(script1);
 
             Assert.Equal(
                 @"{b:3}",

@@ -19,7 +19,33 @@ namespace sql4js.Parser
             String lastKey = null;
             foreach (S4JToken child in Children)
             {
-                if (child.IsObjectKey)
+                if (child.IsObjectSingleKey)
+                {
+                    lastKey = null;
+                    if (child is S4JTokenFunction fun)
+                    {
+                        if (fun.IsEvaluated)
+                        {
+                            /*lastKey = UniConvert.ToString(fun.Result);
+                            if (lastKey != null)
+                                result[lastKey] = null;*/
+                        }
+                    }
+                    else if (child is S4JTokenObjectContent obj)
+                    {
+                        foreach (var keyAndVal in obj.GetParameters())
+                        {
+                            result[keyAndVal.Key] = keyAndVal.Value;
+                        }
+                    }
+                    else
+                    {
+                        /*lastKey = UniConvert.ToString(child.ToJson().ParseJsonOrText());
+                        if (lastKey != null)
+                            result[lastKey] = null;*/
+                    }
+                }
+                else if (child.IsObjectKey)
                 {
                     lastKey = null;
                     if (child is S4JTokenFunction fun)

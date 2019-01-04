@@ -140,8 +140,20 @@ namespace sql4js.Functions
 
             else if (Value is IDictionary<string, object> dict)
             {
-                BuildCreateTableScriptForVariable(Query, name, dict);
-                BuildInsertIntoTableScriptForVariable(Query, name, dict);
+                if (string.IsNullOrEmpty(ParentName))
+                {
+                    foreach (var keyAndValue in dict)
+                    {
+                        BuildScriptForVariable(Query, keyAndValue.Key, keyAndValue.Value, Name);
+                    }
+                }
+                else
+                {
+                    BuildCreateTableScriptForVariable(Query, name, dict);
+                    BuildInsertIntoTableScriptForVariable(Query, name, dict);
+                }
+                //BuildCreateTableScriptForVariable(Query, name, dict);
+                // BuildInsertIntoTableScriptForVariable(Query, name, dict);
             }
 
             else if (Value is IList list)
@@ -180,7 +192,7 @@ namespace sql4js.Functions
 
             else if (Value is IDictionary<string, object> dict)
             {
-                Query.Append("create table #").Append(TableName).Append(" (");
+                Query.Append("declare @").Append(TableName).Append(" table (");
                 Int32 index = 0;
                 foreach (var keyAndValue in dict)
                 {
@@ -211,7 +223,7 @@ namespace sql4js.Functions
 
             else if (Value is IDictionary<string, object> dict)
             {
-                Query.Append("insert into #").Append(TableName).Append(" (");
+                Query.Append("insert into @").Append(TableName).Append(" (");
                 Int32 index = 0;
                 foreach (var keyAndValue in dict)
                 {

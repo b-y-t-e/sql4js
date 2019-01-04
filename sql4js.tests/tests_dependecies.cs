@@ -97,6 +97,18 @@ namespace sql4js.tests
                 typeof(List<object>),
                 dynObj.c[2].c.GetType());
         }
+
+        [Fact]
+        public void deserializer_dynamic_should_properly_deserialize_simple_int_as_json()
+        {
+            string json = @"1";
+
+            dynamic dynObj = JsonToDynamicDeserializer.Deserialize(json);
+
+            Assert.Equal(
+                1,
+                dynObj);
+        }
     }
 
 }

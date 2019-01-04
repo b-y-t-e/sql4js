@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using ProZ.App.Base.Helpers;
+using sql4js.Helpers.CoreHelpers;
 
 namespace sql4js.Executor
 {
@@ -22,27 +23,57 @@ namespace sql4js.Executor
             this.Parser = Parser;
         }
 
-        async public Task<S4JToken> Execute(String Text, params Object[] Parameters)
+        async public Task<S4JToken> ExecuteWithJsonParameters(String MethodDefinitionAsJson, params String[] ParametersAsJson)
         {
-            S4JToken tree = Parser.Parse(Text);
-            if (tree is S4JTokenRoot root)
+            Object[] parameters = null;
+
+            if (ParametersAsJson != null)
+            {
+                parameters = ParametersAsJson.
+                    Select(p => JsonToDynamicDeserializer.Deserialize(p)).
+                    ToArray();
+            }
+
+            return await ExecuteWithParameters(MethodDefinitionAsJson, parameters);
+        }
+
+        async public Task<S4JToken> ExecuteWithParameters(String MethodDefinitionAsJson, params Object[] Parameters)
+        {
+            S4JToken methodDefinition = Parser.Parse(MethodDefinitionAsJson);
+            return await ExecuteWithParameters(methodDefinition, Parameters);
+        }
+
+        async public Task<S4JToken> ExecuteWithParameters(S4JToken MethodDefinition, params Object[] Parameters)
+        {
+            if (MethodDefinition is S4JTokenRoot root)
             {
                 if (Parameters != null)
                 {
                     Int32 index = 0;
-                    foreach (var key in root.Attributes.Keys.ToArray())
+                    foreach (var key in root.Parameters.Keys.ToArray())
                     {
+                        object parameterValue = null;
                         if (index < Parameters.Length)
-                            root.Attributes[key] = Parameters[index];
+                            parameterValue = Parameters[index];
+
+                        S4JFieldDescription fieldDescription = null;
+                        root.Arguments.TryGetValue(key, out fieldDescription);
+
+                        if (fieldDescription != null)
+                            fieldDescription.Validate(parameterValue);
+
+                        if (index < Parameters.Length)
+                            root.Parameters[key] = Parameters[index];
                         index++;
                     }
                 }
             }
-            await Evaluate(tree);
 
-            if (tree is S4JTokenRoot)
-                return tree.Children.LastOrDefault();
-            return tree;
+            await Evaluate(MethodDefinition);
+
+            if (MethodDefinition is S4JTokenRoot)
+                return MethodDefinition.Children.LastOrDefault();
+            return MethodDefinition;
         }
 
         async private Task Evaluate(S4JToken token)
@@ -130,9 +161,10 @@ namespace sql4js.Executor
             }
             else
             {
-                for (var i = 0; i < token.Children.Count; i++)
+                var children = token.Children.ToArray();
+                for (var i = 0; i < children.Length; i++)
                 {
-                    S4JToken child = token.Children[i];
+                    S4JToken child = children[i];
                     await Evaluate(child);
                 }
             }
@@ -348,7 +380,7 @@ namespace sql4js.Executor
                 foreach (Object subValue in (ICollection)value)
                     return GetSingleAndFirstValueFromResult(subValue);
             }
-            
+
             else if (value.GetType().IsClass)
             {
                 var dictForValue = ReflectionHelper.ToDictionary(value);

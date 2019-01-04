@@ -109,7 +109,8 @@ namespace sql4js.Parser
             {
                 var root = Parent;
 
-                root.Attributes = new Dictionary<string, object>();
+                root.Arguments = new Dictionary<string, S4JFieldDescription>();
+                root.Parameters = new Dictionary<string, object>();
 
                 string lastKey = null;
                 foreach (S4JToken child in this.Children)
@@ -119,17 +120,20 @@ namespace sql4js.Parser
                     if (child.IsObjectSingleKey)
                     {
                         lastKey = null;
-                        root.Attributes[UniConvert.ToString(val)] = null;
+                        root.Arguments[UniConvert.ToString(val)] = null;
+                        root.Parameters[UniConvert.ToString(val)] = null;
                     }
                     else if (child.IsObjectKey)
                     {
                         lastKey = null;
                         lastKey = UniConvert.ToString(val);
-                        root.Attributes[lastKey] = null;
+                        root.Arguments[lastKey] = null;
+                        root.Parameters[lastKey] = null;
                     }
                     else if (child.IsObjectValue)
                     {
-                        root.Attributes[lastKey] = val;
+                        root.Arguments[lastKey] = S4JFieldDescription.Parse(lastKey, UniConvert.ToString(val));
+                        root.Parameters[lastKey] = null;
                     }
                 }
             }

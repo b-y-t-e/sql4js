@@ -31,6 +31,11 @@ namespace ProZ.Base.Helpers
             return (Type == typeof(String));
         }
 
+        public static bool IsClass(this Type Type)
+        {
+            return (Type != typeof(String)) && Type.IsClass;
+        }
+
         public static bool IsDateTime(this Type Type)
         {
             return (Type == typeof(DateTime) ||
@@ -63,6 +68,22 @@ namespace ProZ.Base.Helpers
                 Type == typeof(SByte) ||
                 Type == typeof(SByte?) ||
                 Type == typeof(Boolean) ||
+                Type == typeof(Boolean?))
+                return true;
+            return false;
+        }
+
+        public static bool IsDecimal(this Type Type)
+        {
+            if (Type == typeof(Decimal) ||
+                Type == typeof(Decimal?))
+                return true;
+            return false;
+        }
+
+        public static bool IsBoolean(this Type Type)
+        {
+            if (Type == typeof(Boolean) ||
                 Type == typeof(Boolean?))
                 return true;
             return false;

@@ -20,7 +20,7 @@ namespace sql4js.Parser
 
         public override Dictionary<String, Object> GetParameters()
         {
-            return Attributes;
+            return Parameters;
         }
 
         public override void BuildJson(StringBuilder Builder)

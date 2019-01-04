@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using ProZ.Base.Helpers;
+using System.Collections;
 
 namespace sql4js.Parser
 {
@@ -15,7 +17,9 @@ namespace sql4js.Parser
 
         public S4JState State { get; set; }
 
-        public Dictionary<String, Object> Attributes { get; set; }
+        public Dictionary<String, S4JFieldDescription> Arguments { get; set; }
+
+        public Dictionary<String, Object> Parameters { get; set; }
 
         //////////////////////////////////////////////////
 
@@ -31,7 +35,8 @@ namespace sql4js.Parser
 
         public S4JToken()
         {
-            Attributes = new Dictionary<string, object>();
+            Parameters = new Dictionary<string, object>();
+            Arguments = new Dictionary<string, S4JFieldDescription>();
         }
 
         //////////////////////////////////////////////////
@@ -178,44 +183,6 @@ namespace sql4js.Parser
                     prevChild = child;
                 }
             }
-
-            return;
-
-            // ustalenie IsSingleKey = true
-            // próba określenia czy token jest w obiekcie
-            // oraz czy jest 'kluczem bez wartosci' 
-            if (Token is S4JTokenObject ||
-                Token is S4JTokenParameters)
-            {
-                if (!Item.IsObjectKey && !(Item is S4JTokenComment))
-                {
-                    S4JToken prevChild = null;
-
-                    //o dszukanie poprzedniego elementu
-                    int indexInParent = Token.Children.IndexOf(Item);
-                    for (var i = indexInParent - 1; i >= 0; i--)
-                    {
-                        S4JToken child = Token.Children[i];
-                        if (child is S4JTokenComment)
-                            continue;
-
-                        prevChild = child;
-                        break;
-                    }
-
-                    if (prevChild == null ||
-                        prevChild.IsObjectKey == false)
-                    {
-                        Item.MarkAsSingleObjectKey();
-                    }
-
-                    else if (prevChild != null &&
-                             prevChild.IsObjectKey == true)
-                    {
-                        Item.MarkAsObjectValue();
-                    }
-                }
-            }
         }
 
         public virtual string ToJson()
@@ -235,8 +202,8 @@ namespace sql4js.Parser
 
                 Builder.Append("(");
                 Int32 index = 0;
-                if (Attributes != null)
-                    foreach (var attr in Attributes)
+                if (Parameters != null)
+                    foreach (var attr in Arguments)
                     {
                         if (index > 0) Builder.Append(",");
                         if (attr.Value == null)
@@ -245,7 +212,7 @@ namespace sql4js.Parser
                         }
                         else
                         {
-                            Builder.Append($"{attr.Key}:{attr.Value}");
+                            Builder.Append($"{attr.Key}:{attr.Value.ToJson()}");
                         }
                         index++;
                     }
@@ -328,5 +295,121 @@ namespace sql4js.Parser
             return this.
                 LastOrDefault(t => !t.State.IsValue); // && !t.State.IsComment);
         }*/
+    }
+
+    public class S4JFieldDescription
+    {
+        public String Name { get; set; }
+
+        public S4JFieldType Type { get; set; }
+
+        public Boolean IsRequired { get; set; }
+
+        public static S4JFieldDescription Parse(String Name, String Type)
+        {
+            Type = (Type ?? "").Trim().ToLower();
+            Name = (Name ?? "").Trim();
+            if (string.IsNullOrEmpty(Name))
+                throw new Exception("Field name should not be empty!");
+            Boolean isRequired = Type.EndsWith("!");
+            Type = Type.TrimEnd('!');
+            S4JFieldType fieldType = (S4JFieldType)Enum.Parse(typeof(S4JFieldType), Type, true);
+            return new S4JFieldDescription()
+            {
+                Name = Name,
+                IsRequired = isRequired,
+                Type = fieldType
+            };
+        }
+
+        public Object Validate(Object Value)
+        {
+            if (Type == S4JFieldType.ANY)
+                return Value;
+
+            if (IsRequired && Value == null)
+                throw new S4JNullParameterException("Parameter " + Name + " cannot be null");
+            
+            if (Value != null && Type == S4JFieldType.BOOL)
+                if (!MyTypeHelper.IsBoolean(Value.GetType()))
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type boolean");
+
+            if (Value != null && Type == S4JFieldType.DATETIME)
+                if (!MyTypeHelper.IsDateTime(Value.GetType()))
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type datetime");
+
+            if (Value != null && Type == S4JFieldType.FLOAT)
+                if (!MyTypeHelper.IsNumeric(Value.GetType()))
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type float");
+
+            if (Value != null && Type == S4JFieldType.INT)
+                if (!MyTypeHelper.IsInteger(Value.GetType()))
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type integer");
+
+            if (Value != null && Type == S4JFieldType.STRING)
+                if (!MyTypeHelper.IsString(Value.GetType()))
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type string");
+
+            if (Type == S4JFieldType.ARRAY)
+                if (Value == null)
+                {
+                    return new List<Object>();
+                }
+                else if (!(Value is IList))
+                {
+                    //if (MyTypeHelper.IsClass(Value.GetType()) || Value is IDictionary<String, Object>)
+                    //    return new List<Object>() { Value };
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type array");
+                }
+
+            if (Value != null && Type == S4JFieldType.OBJECT)
+                if (!(MyTypeHelper.IsClass(Value.GetType()) || Value is IDictionary<String, Object>) || Value is IList)
+                    throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type object");
+
+            return Value;
+        }
+
+        internal object ToJson()
+        {
+            return Type.ToString().ToLower();
+        }
+    }
+
+
+    [Serializable]
+    public class S4JNullParameterException : Exception
+    {
+        public S4JNullParameterException() { }
+        public S4JNullParameterException(string message) : base(message) { }
+        public S4JNullParameterException(string message, Exception inner) : base(message, inner) { }
+        protected S4JNullParameterException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+
+
+    [Serializable]
+    public class S4JInvalidParameterTypeException : Exception
+    {
+        public S4JInvalidParameterTypeException() { }
+        public S4JInvalidParameterTypeException(string message) : base(message) { }
+        public S4JInvalidParameterTypeException(string message, Exception inner) : base(message, inner) { }
+        protected S4JInvalidParameterTypeException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+
+    public enum S4JFieldType
+    {
+        ANY,
+        STRING,
+        //TIMESPAN,
+        INT,
+        BOOL,
+        //DOUBLE,
+        FLOAT,
+        DATETIME,
+        ARRAY,
+        OBJECT
     }
 }
