@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using sql4js.Tokens;
 
 namespace sql4js.Parser
 {

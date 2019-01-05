@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using sql4js.Helpers.CoreHelpers;
 using System.Web;
 using System.Xml.Linq;
 
-namespace Else.HttpService.Helpers.WebHelpers
+namespace sql4js.Helpers.WebHelpers
 {
     public class QueryStringHelper
     {

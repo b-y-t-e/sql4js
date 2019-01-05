@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Else.HttpService.Helpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public static class MyReflectionHelper
     {

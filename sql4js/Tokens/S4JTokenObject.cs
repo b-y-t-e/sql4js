@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using Else.HttpService.Helpers;
+using sql4js.Helpers;
+using sql4js.Helpers.CoreHelpers;
 
-namespace sql4js.Parser
+namespace sql4js.Tokens
 {
     public class S4JTokenObject : S4JToken
     {

@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 
-namespace Database
+namespace sql4js.Helpers.DatabaseHelpers
 {
     public class MyConnection : IDisposable
     {

@@ -8,9 +8,9 @@ using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net;
-using ProZ.Base.Helpers;
+using sql4js.Helpers;
 
-namespace ProZ.App.Base.Helpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public class ValueHelper
     {

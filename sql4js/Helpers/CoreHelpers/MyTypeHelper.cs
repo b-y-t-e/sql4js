@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 
-namespace ProZ.Base.Helpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public static class MyTypeHelper
     {

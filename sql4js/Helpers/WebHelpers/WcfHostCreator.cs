@@ -9,7 +9,7 @@ using System.ServiceModel.Channels;
 using System.ServiceModel.Configuration;
 using System.ServiceModel.Dispatcher;*/
 
-namespace Else.HttpService.Helpers.WebHelpers
+namespace sql4js.Helpers.WebHelpers
 {/*
     public static class WcfHostCreator
     {

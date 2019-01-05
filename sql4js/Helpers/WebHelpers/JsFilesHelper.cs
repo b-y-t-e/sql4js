@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sql4js.Helpers.CoreHelpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Else.HttpService.Helpers.WebHelpers
+namespace sql4js.Helpers.WebHelpers
 {
     public static class JsFilesHelper
     {

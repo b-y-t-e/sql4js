@@ -1,8 +1,9 @@
-﻿using System;
+﻿using sql4js.Parser;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sql4js.Parser
+namespace sql4js.Tokens
 {
     public class S4JTokenFactory
     {

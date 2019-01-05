@@ -4,18 +4,16 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-using Database;
 using System.Data.Common;
 using System.Threading;
 using System.Data.SqlClient;
-using ProZ.Base.Helpers;
-using ProZ.App.Base.Helpers;
-using Else.HttpService.Helpers;
+using sql4js.Helpers;
+using sql4js.Helpers;
 using System.Data.SqlClient;
-using DatabaseHelper;
+using sql4js.Helpers.CoreHelpers;
 //using ProZ.Classes.Classes;
 
-namespace Database
+namespace sql4js.Helpers.DatabaseHelpers
 {
     public static class DbDataReaderHelper
     {

@@ -5,6 +5,7 @@ using sql4js.Executor;
 using System;
 using Xunit;
 using System.Collections.Generic;
+using sql4js.Tokens;
 
 namespace sql4js.tests
 {

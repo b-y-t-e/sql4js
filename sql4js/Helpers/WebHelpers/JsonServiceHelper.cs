@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace Else.HttpService.Helpers.WebHelpers
+namespace sql4js.Helpers.WebHelpers
 {
     /*public static class JsonServiceHelper
     {

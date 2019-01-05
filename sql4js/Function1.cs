@@ -11,7 +11,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Threading.Tasks;
 using sql4js.Helpers;
-using Database;
+using sql4js.Helpers.DatabaseHelpers;
 
 namespace sql4js
 {

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.Common;
-using ProZ.Base.Helpers;
+using sql4js.Helpers;
 using System.Data.SqlClient;
 using System.Data;
 using System.Threading;
 
-namespace Database
+namespace sql4js.Helpers.DatabaseHelpers
 {
     public static class MyDataSetHelper
     {

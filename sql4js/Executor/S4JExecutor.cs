@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
-using ProZ.Base.Helpers;
+using sql4js.Helpers;
 using sql4js.Parser;
 using System;
 using System.Linq;
@@ -7,8 +7,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using ProZ.App.Base.Helpers;
+
 using sql4js.Helpers.CoreHelpers;
+using sql4js.Tokens;
 
 namespace sql4js.Executor
 {

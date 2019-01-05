@@ -1,9 +1,10 @@
 ﻿using System;
+using sql4js.Helpers.CoreHelpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Else.HttpService.Helpers.QueryHelpers
+namespace sql4js.Helpers.DatabaseHelpers
 {
     public class DatabaseQueryHelper
     {

@@ -7,28 +7,31 @@ using Newtonsoft.Json.Converters;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
-public static class JsonToCsHelper
+namespace sql4js.Helpers.CoreHelpers
 {
-    public static object Deserialize(string json)
+    public static class JsonToCsHelper
     {
-        
-        return ToObject(JToken.Parse(json));
-    }
-
-    public static object ToObject(JToken token)
-    {
-        switch (token.Type)
+        public static object Deserialize(string json)
         {
-            case JTokenType.Object:
-                return token.Children<JProperty>()
-                            .ToDictionary(prop => prop.Name,
-                                          prop => ToObject(prop.Value));
 
-            case JTokenType.Array:
-                return token.Select(ToObject).ToList();
+            return ToObject(JToken.Parse(json));
+        }
 
-            default:
-                return ((JValue)token).Value;
+        public static object ToObject(JToken token)
+        {
+            switch (token.Type)
+            {
+                case JTokenType.Object:
+                    return token.Children<JProperty>()
+                                .ToDictionary(prop => prop.Name,
+                                              prop => ToObject(prop.Value));
+
+                case JTokenType.Array:
+                    return token.Select(ToObject).ToList();
+
+                default:
+                    return ((JValue)token).Value;
+            }
         }
     }
 }

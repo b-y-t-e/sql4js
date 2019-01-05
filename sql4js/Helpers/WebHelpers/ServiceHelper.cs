@@ -6,7 +6,7 @@ using System.Reflection;
 //using System.ServiceModel.Web;
 using System.Text;
 
-namespace Else.HttpService.Helpers.WebHelpers
+namespace sql4js.Helpers.WebHelpers
 {
 
     /*public enum StreamContentType

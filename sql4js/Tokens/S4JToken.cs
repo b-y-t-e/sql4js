@@ -2,10 +2,12 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using ProZ.Base.Helpers;
+using sql4js.Helpers;
 using System.Collections;
+using sql4js.Helpers.CoreHelpers;
+using sql4js.Parser;
 
-namespace sql4js.Parser
+namespace sql4js.Tokens
 {
     public abstract class S4JToken
     {

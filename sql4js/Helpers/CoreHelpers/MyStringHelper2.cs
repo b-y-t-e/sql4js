@@ -6,7 +6,7 @@ using System.Text;
 using System.Globalization;
 using System.IO;
 
-namespace Else.HttpService.Helpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public static class MyStringHelper
     {

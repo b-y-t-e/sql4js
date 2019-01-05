@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-using ProZ.Base.Helpers;
+using sql4js.Helpers;
 using System.Reflection;
-using ProZ.App.Base.Helpers;
+using sql4js.Helpers.CoreHelpers;
 
-namespace DatabaseHelper
+namespace sql4js.Helpers.DatabaseHelpers
 {
     public class MyDbReader<T> : IDisposable
     {

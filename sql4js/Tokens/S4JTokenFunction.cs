@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using sql4js.Executor;
 
-namespace sql4js.Parser
+namespace sql4js.Tokens
 {
     public class S4JTokenFunction : S4JToken
     {

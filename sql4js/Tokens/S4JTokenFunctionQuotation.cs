@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sql4js.Parser
+namespace sql4js.Tokens
 {
     public class S4JTokenFunctionQuotation : S4JToken
     {

@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.Globalization;
-using Database;
 using System.Data.SqlClient;
 using System.Data.Common;
 
-namespace Database
+namespace sql4js.Helpers.DatabaseHelpers
 {
     public static class DatabaseHelper
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Else.HttpService.Helpers.CoreHelpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public static class StringHelper
     {

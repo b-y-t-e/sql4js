@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Else.HttpService.Helpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public static class StringLock
     {

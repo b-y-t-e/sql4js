@@ -1,6 +1,4 @@
-﻿using Database;
-using ProZ.App.Base.Helpers;
-using ProZ.Base.Helpers;
+﻿using sql4js.Helpers;
 using sql4js.Executor;
 using sql4js.Parser;
 using System;
@@ -10,6 +8,9 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
 using System.Threading.Tasks;
+using sql4js.Helpers.CoreHelpers;
+using sql4js.Helpers.DatabaseHelpers;
+using sql4js.Tokens;
 
 namespace sql4js.Functions
 {

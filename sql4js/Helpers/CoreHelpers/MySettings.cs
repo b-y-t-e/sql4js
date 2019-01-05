@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Else.HttpService.Helpers
+namespace sql4js.Helpers.CoreHelpers
 {
     public class MySettings
     {
