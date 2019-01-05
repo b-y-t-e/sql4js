@@ -8,18 +8,6 @@ using System.Collections.Generic;
 
 namespace sql4js.tests
 {
-    /// <summary>
-    /// TODO:  
-    /// integration with azure functions
-    /// converstion from josn to net
-    /// integration with self hosting environment
-    /// support for http methods (get / post / put .. ) via tags
-    /// support for saving data through api (c# helpers)
-    /// support for add refenernces for executing project / custom namespaces / custom dll's
-    /// add test for parameter types, 
-    /// support for jsonsettings, 
-    /// ? support for diffirent parameters parsing styles (dynamic / json / pure .net)
-    /// </summary>
     public class tests_execution
     {
         [Fact]
