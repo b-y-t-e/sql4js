@@ -25,6 +25,9 @@ namespace sql4js.Tokens
                 if (State.StateType == EStateType.S4J_OBJECT)
                     result = new S4JTokenObject();
 
+                if (State.StateType == EStateType.S4J_TAG)
+                    result = new S4JTokenTag();
+
                 if (State.StateType == EStateType.S4J_PARAMETERS)
                     result = new S4JTokenParameters();
 

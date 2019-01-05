@@ -11,7 +11,7 @@ namespace sql4js.Parser
 
         public List<S4JStateGate> Gates { get; set; }
 
-        public S4JStateGate Gate { get; set; }
+        public List<S4JStateGate> FoundGates { get; set; }
 
         public EStateType StateType { get; set; }
 
@@ -137,7 +137,8 @@ namespace sql4js.Parser
         FUNCTION_QUOTATION,
 
         S4J_VALUE_DELIMITER,
-        S4J_COMA
+        S4J_COMA,
+        S4J_TAG
     }
 
 }

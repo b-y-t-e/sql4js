@@ -154,7 +154,8 @@ namespace sql4js.Tokens
             // próba określenia czy token jest w obiekcie
             // oraz czy jest 'kluczem bez wartosci' 
             if (Token is S4JTokenObject ||
-                Token is S4JTokenParameters)
+                Token is S4JTokenParameters ||
+                Token is S4JTokenTag)
             {
                 S4JToken prevChild = null;
                 foreach (S4JToken child in Token.Children)
@@ -194,8 +195,8 @@ namespace sql4js.Tokens
 
             ////////////////////////////////////
 
-            if (State.Gate != null)
-                foreach (var ch in State.Gate.Start)
+            if (State.FoundGates != null)
+                foreach (var ch in State.FoundGates.First().Start)
                     Builder.Append(ch);
             else if (State.Gates.Count > 0)
                 foreach (var ch in State.Gates[0].Start)
@@ -208,8 +209,8 @@ namespace sql4js.Tokens
 
             ////////////////////////////////////
 
-            if (State.Gate != null)
-                foreach (var ch in State.Gate.End)
+            if (State.FoundGates != null)
+                foreach (var ch in State.FoundGates.First().End)
                     Builder.Append(ch);
             else if (State.Gates.Count > 0)
                 foreach (var ch in State.Gates[0].End)
@@ -220,15 +221,15 @@ namespace sql4js.Tokens
         {
             StringBuilder builder = new StringBuilder();
             BuildJson(builder);
-            if (State?.Gate != null)
+            if (State?.FoundGates != null)
             {
-                if (builder.ToString().StartsWith(new string(State.Gate.Start.ToArray())))
+                if (builder.ToString().StartsWith(new string(State.FoundGates.First().Start.ToArray())))
                 {
-                    builder.Remove(0, State.Gate.Start.Count);
+                    builder.Remove(0, State.FoundGates.First().Start.Count);
                 }
-                if (builder.ToString().EndsWith(new string(State.Gate.End.ToArray())))
+                if (builder.ToString().EndsWith(new string(State.FoundGates.First().End.ToArray())))
                 {
-                    builder.Remove(builder.Length - State.Gate.End.Count, State.Gate.End.Count);
+                    builder.Remove(builder.Length - State.FoundGates.First().End.Count, State.FoundGates.First().End.Count);
                 }
             }
             return builder.ToString();
@@ -345,8 +346,7 @@ namespace sql4js.Tokens
             return Type.ToString().ToLower();
         }
     }
-
-
+    
     [Serializable]
     public class S4JNullParameterException : Exception
     {

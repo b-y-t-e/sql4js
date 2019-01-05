@@ -18,7 +18,7 @@ namespace sql4js.Parser
         }
 
         ////////////////////////////////////////////////////////////////
-        
+
         public S4JToken Parse(String Text)
         {
             IList<char> chars = Text.Trim().ToCharArray();
@@ -142,11 +142,10 @@ namespace sql4js.Parser
         private static IEnumerable<S4JStateStackEvent> Analyse(IList<char> code, int index, S4JStateBag StateBag, S4JTokenStack stateStack) // S4JStateStack stateStack)
         {
             // sprawdzamy zakończenie stanu
-            // S4JToken prevTokenNonValue = stateStack.PeekNonValue();
             S4JToken prevToken = stateStack.Peek();
             if (GetStateEnd(code, index, StateBag, prevToken) != null)
             {
-                Int32 nextIndex = index + (prevToken.State.Gate.End == null ? 0 : (prevToken.State.Gate.End.Count - 1)) + 1;
+                Int32 nextIndex = index + (prevToken.State.FoundGates.First().End == null ? 0 : (prevToken.State.FoundGates.First().End.Count - 1)) + 1;
 
                 yield return new S4JStateStackEvent()
                 {
@@ -158,18 +157,18 @@ namespace sql4js.Parser
 
                 yield break;
             }
-            
+
             prevToken = stateStack.Peek();
             S4JState state = GetStateBegin(code, index, StateBag, prevToken);
             if (state != null)
             {
-                Int32 nextIndex = index + (state.Gate?.Start == null ? 0 : (state.Gate.Start.Count - 1)) + 1;
+                Int32 nextIndex = index + (state.FoundGates?.FirstOrDefault()?.Start == null ? 0 : (state.FoundGates.First().Start.Count - 1)) + 1;
 
                 yield return new S4JStateStackEvent()
                 {
                     // NewIndex = null,
                     NewIndex = state.IsQuotation ?
-                            nextIndex:
+                            nextIndex :
                             // state.IsCollection ?
                             S4JParserHelper.SkipWhiteSpaces(code, nextIndex),
                     //   index + (matchedGate?.Start == null ? 0 : (matchedGate.Start.Count - 1)) + 1,
@@ -222,18 +221,27 @@ namespace sql4js.Parser
             if (prevToken == null)
                 return null;
 
-            IList<char> end = prevToken?.State?.Gate?.End;  // prevTokenNonValue?.State?.Gate?.End;
-            if (S4JParserHelper.Is(code, index, end))
+            if (prevToken?.State?.FoundGates == null)
+                return null;
+
+            foreach (var gate in prevToken.State.FoundGates)
             {
-                return prevToken?.State;
-                /*yield return new S4JStateStackEvent()
+                // TODO GATE
+                IList<char> end = gate.End;  // prevTokenNonValue?.State?.Gate?.End;
+                if (S4JParserHelper.Is(code, index, end))
                 {
-                    NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + (end == null ? 0 : (end.Count - 1)) + 1),
-                    State = stateStack.Peek()?.State,
-                    Popped = true,
-                    // Chars = end
-                };
-                */
+                    prevToken.State.FoundGates.RemoveAll(g => g != gate);
+
+                    return prevToken?.State;
+                    /*yield return new S4JStateStackEvent()
+                    {
+                        NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + (end == null ? 0 : (end.Count - 1)) + 1),
+                        State = stateStack.Peek()?.State,
+                        Popped = true,
+                        // Chars = end
+                    };
+                    */
+                }
             }
 
             return null;
@@ -252,7 +260,7 @@ namespace sql4js.Parser
                 {
 
                     Boolean isAllowed = false;
-                    S4JStateGate matchedGate = null;
+                    List<S4JStateGate> matchedGates = new List<S4JStateGate>();
 
                     // IsSimpleValue -> bedzie zawsze sprawdzany na końcu
                     /*if (state.IsSimpleValue)
@@ -266,9 +274,9 @@ namespace sql4js.Parser
                         {
                             if (S4JParserHelper.Is(code, index, gate.Start))
                             {
-                                matchedGate = gate.Clone();
+                                matchedGates.Add(gate.Clone());
                                 isAllowed = true;
-                                break;
+                                // break;
                             }
                         }
                     }
@@ -278,7 +286,7 @@ namespace sql4js.Parser
                         // if (!state.IsComment)
                         {
                             S4JState newState = state.Clone();
-                            newState.Gate = matchedGate;
+                            newState.FoundGates = matchedGates;
                             return newState;
                         }
                         break;

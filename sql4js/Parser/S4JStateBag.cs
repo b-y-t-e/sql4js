@@ -32,7 +32,8 @@ namespace sql4js.Parser
                     EStateType.S4J_COMA,
                     EStateType.S4J_TEXT_VALUE,
                     EStateType.FUNCTION,
-                    EStateType.S4J_PARAMETERS
+                    EStateType.S4J_PARAMETERS,
+                    EStateType.S4J_TAG
                 },
                 Gates = new List<S4JStateGate>()
                 {
@@ -197,6 +198,43 @@ namespace sql4js.Parser
                     {
                         Start = "{".ToCharArray(),
                         End = "}".ToCharArray()
+                    }
+                }
+            });
+
+            ////////////////////////////////
+
+            this.items.Add(new S4JState()
+            {
+                Priority = 2500,
+                StateType = EStateType.S4J_TAG,
+                IsCollection = true,
+                AllowedStatesNames = new List<EStateType?>()
+                {
+                    //EStateType.S4J_COMMENT,
+                    //EStateType.S4J_QUOTATION,
+                    //EStateType.S4J_OBJECT,
+                    //EStateType.S4J_ARRAY,
+                    EStateType.S4J_VALUE_DELIMITER,
+                    //EStateType.S4J_COMA,
+                    EStateType.S4J_TEXT_VALUE
+                },
+                Gates = new List<S4JStateGate>()
+                {
+                    new S4JStateGate()
+                    {
+                        Start = "#".ToCharArray(),
+                        End = " ".ToCharArray()
+                    },
+                    new S4JStateGate()
+                    {
+                        Start = "#".ToCharArray(),
+                        End = "\n".ToCharArray()
+                    },
+                    new S4JStateGate()
+                    {
+                        Start = "#".ToCharArray(),
+                        End = "\r".ToCharArray()
                     }
                 }
             });
