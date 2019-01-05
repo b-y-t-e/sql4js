@@ -9,17 +9,11 @@ namespace sql4js.Parser
 {
     public abstract class S4JToken
     {
-        public String Name { get; set; }
-
         public S4JToken Parent { get; set; }
 
         public List<S4JToken> Children { get; set; }
 
         public S4JState State { get; set; }
-
-        public Dictionary<String, S4JFieldDescription> Arguments { get; set; }
-
-        public Dictionary<String, Object> Parameters { get; set; }
 
         //////////////////////////////////////////////////
 
@@ -35,8 +29,6 @@ namespace sql4js.Parser
 
         public S4JToken()
         {
-            Parameters = new Dictionary<string, object>();
-            Arguments = new Dictionary<string, S4JFieldDescription>();
         }
 
         //////////////////////////////////////////////////
@@ -195,29 +187,6 @@ namespace sql4js.Parser
         public virtual void BuildJson(StringBuilder Builder)
         {
             ////////////////////////////////////
-
-            if (!string.IsNullOrEmpty(Name))
-            {
-                Builder.Append(Name);
-
-                Builder.Append("(");
-                Int32 index = 0;
-                if (Parameters != null)
-                    foreach (var attr in Arguments)
-                    {
-                        if (index > 0) Builder.Append(",");
-                        if (attr.Value == null)
-                        {
-                            Builder.Append($"{attr.Key}");
-                        }
-                        else
-                        {
-                            Builder.Append($"{attr.Key}:{attr.Value.ToJson()}");
-                        }
-                        index++;
-                    }
-                Builder.Append(")");
-            }
 
             ////////////////////////////////////
 

@@ -57,7 +57,7 @@ namespace sql4js.Executor
                             parameterValue = Parameters[index];
 
                         S4JFieldDescription fieldDescription = null;
-                        root.Arguments.TryGetValue(key, out fieldDescription);
+                        root.ParametersDefinitions.TryGetValue(key, out fieldDescription);
 
                         if (fieldDescription != null)
                             fieldDescription.Validate(parameterValue);
@@ -73,6 +73,7 @@ namespace sql4js.Executor
 
             if (MethodDefinition is S4JTokenRoot)
                 return MethodDefinition.Children.LastOrDefault();
+
             return MethodDefinition;
         }
 

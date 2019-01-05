@@ -17,7 +17,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_simple_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" sql( select 1  ) ";
 
@@ -34,7 +34,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_parameters_in_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" method(param1) sql( select @param1 + 1  ) ";
 
@@ -51,7 +51,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_object_parameter_in_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko  ) ";
 
@@ -68,12 +68,12 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_list_in_object_parameter_in_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" method(param1) sql( select @param1_imie + '!' + @param1_nazwisko + '!' + cast((select count(*) from @param1_rodzice) as varchar(max))  ) ";
 
             var result = await new S4JExecutorForTests().
-                ExecuteWithParameters(script1, new osobaWithList() { imie = "IMIE", nazwisko = "NAZWISKO", rodzice = new List<osoba>() { new osoba() { imie = "tata" }, new osoba() { imie = "mama" } } } );
+                ExecuteWithParameters(script1, new osobaWithList() { imie = "IMIE", nazwisko = "NAZWISKO", rodzice = new List<osoba>() { new osoba() { imie = "tata" }, new osoba() { imie = "mama" } } });
 
             var txt = result.ToJson();
 
@@ -85,7 +85,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_list_parameter_in_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" method(param1) sql( select count(*) from @param1  ) ";
 
@@ -107,7 +107,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_object_from_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" {sql( select imie, nazwisko from osoba where imie = 'imie1' )} ";
 
@@ -124,7 +124,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_object_with_inner_fields_from_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" {sql( select imie, nazwisko, idrodzica from osoba where imie = 'imie1' ), ""parent"": { sql(select imie from osoba where id = @idrodzica) } } ";
 
@@ -141,7 +141,7 @@ namespace sql4js.tests
         [Fact]
         async public void executor_should_understand_objects_from_sql()
         {
-            await PrepareDb();
+            await new DbForTest().PrepareDb();
 
             var script1 = @" [{sql( select imie, nazwisko from osoba where idrodzica is not null )}] ";
 
@@ -154,29 +154,43 @@ namespace sql4js.tests
                 @"[{""imie"":""imie1"",""nazwisko"":""nazwisko1""},{""imie"":""imie2"",""nazwisko"":""nazwisko2""}]",
                 result.ToJson());
         }
+    }
 
-        private async Task PrepareDb()
+    public class DbForTest
+    {
+        private static object lck = new object();
+
+        public async Task PrepareDb()
         {
             var script = @"
 [
     sql(
 
+        begin transaction
+
         if object_id('dbo.osoba') is not null  
             drop table dbo.osoba
 
-        create table dbo.osoba(
-            id int identity(1,1), 
-            idrodzica int,
-            imie varchar(max), 
-            nazwisko nvarchar(max), 
-            wiek int, 
-            dataurodzenia datetime, 
-            utworzono datetime default(getdate())
-        )
+        if object_id('dbo.osoba') is null  
+            create table dbo.osoba(
+                id int identity(1,1), 
+                idrodzica int,
+                imie varchar(max), 
+                nazwisko nvarchar(max), 
+                wiek int, 
+                dataurodzenia datetime, 
+                utworzono datetime default(getdate())
+            )
+
+        commit
 
     ),
 
     sql(
+
+        begin transaction
+
+        delete from dbo.osoba
 
         insert into dbo.osoba(imie, nazwisko, wiek, dataurodzenia, utworzono)
         select 'imie1', 'nazwisko1', 20, '2000-01-01', getdate();
@@ -189,12 +203,14 @@ namespace sql4js.tests
 
         update osoba set idrodzica = scope_identity() where imie <> 'imie rodzica';
 
+        commit
     )
 ]
 ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script);
+
         }
     }
 
