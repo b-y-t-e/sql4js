@@ -1,13 +1,15 @@
 using Newtonsoft.Json.Linq;
 using sql4js.Parser;
 using System;
-using Xunit;
+using NUnit;
+using NUnit.Framework;
 
 namespace sql4js.tests
 {
+    [TestFixture]
     public class tests_parser
     {
-        [Fact]
+        [Test]
         public void parser_method_is_should_work_fine()
         {
             var chars = @"{a:'cos'}".ToCharArray();
@@ -53,7 +55,7 @@ namespace sql4js.tests
                     S4JParserHelper.Is(chars, 8, "}}}".ToCharArray()));
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_root_name()
         {
             var script1 = @" a( p ) { 1 } ";
@@ -61,12 +63,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 "a(p){1}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_root_name_and_few_parameters()
         {
             var script1 = @" a( p, c : int, b : string ) { 1 } ";
@@ -74,12 +76,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 "a(p,c:int,b:string){1}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_invalid_object()
         {
             var script1 = @" { ""a"" } ";
@@ -87,12 +89,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{""a""}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_invalid_object_version2()
         {
             var script1 = @" { ""a"" , ""b""  } ";
@@ -100,12 +102,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{""a"",""b""}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_invalid_object_version3()
         {
             var script1 = @" { 11 } ";
@@ -113,12 +115,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{11}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_invalid_object_version4()
         {
             var script1 = @" { 22 , 33  } ";
@@ -126,12 +128,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{22,33}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_ignore_comment()
         {
             var script1 = @" 3 /* abc */ ";
@@ -139,12 +141,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
             
-            Assert.Equal(
+            Assert.AreEqual(
                 "3",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_object()
         {
             var script1 = @" {  a: 1, b: 2, c: 3 } ";
@@ -154,13 +156,13 @@ namespace sql4js.tests
 
             var txt = result.ToJson();
 
-            Assert.Equal(
+            Assert.AreEqual(
                 "{a:1,b:2,c:3}",
                 result.ToJson());
         }
 
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_function()
         {
             var script1 = @"{ b : sql( select 1 )   }";
@@ -168,12 +170,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select 1)}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_sql_function_wth_getdate()
         {
             var script1 = @"{ b : sql( select getdate())   }";
@@ -181,12 +183,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select getdate())}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_quotation_with_sql_function()
         {
             var script1 = @"{ b : "" sql( select getdate()   )  "" }";
@@ -196,12 +198,12 @@ namespace sql4js.tests
 
             var txt = result.ToJson();
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:"" sql( select getdate()   )  ""}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_function_with_quotation1()
         {
             var script1 = @"{ b : sql(select abc('def'))   }";
@@ -209,12 +211,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select abc('def'))}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_function_with_quotation1_inside_quotation1()
         {
             var script1 = @"{ b : sql(select abc('d\'ef'))   }";
@@ -222,12 +224,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select abc('d\'ef'))}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_function_with_quotation2_inside_quotation2()
         {
             var script1 = @"{ b : sql(select abc(""d\""ef""))   }";
@@ -235,12 +237,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select abc(""d\""ef""))}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_function_with_quotation2_inside_quotation2_version2()
         {
             var script1 = @"{ b : sql(select abc(""d\""ff\""ef""))   }";
@@ -248,12 +250,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select abc(""d\""ff\""ef""))}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_function_with_quotation1_inside_quotation2()
         {
             var script1 = @"{ b : sql(select abc(""d'ff'ef""))   }";
@@ -261,12 +263,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select abc(""d'ff'ef""))}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_function_with_comments()
         {
             var script1 = @"{ b : sql( select 1 /* abc */ )   }";
@@ -274,12 +276,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:sql(select 1)}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_function_with_outer_comments()
         {
             var script1 = @"{ b : /*sql( select 1 /* abc */ )*/   }";
@@ -287,12 +289,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{b:}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_json_object_test1()
         {
             var script1 = @"{    a : 'cos', b : sql(select 1 ), c: 'aaa' }";
@@ -300,12 +302,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{a:'cos',b:sql(select 1),c:'aaa'}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_json_object_test2()
         {
             var script1 = @"{a : 'cos', sql( select 1 as val ), c: 'aaa' }";
@@ -313,12 +315,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{a:'cos',sql(select 1 as val),c:'aaa'}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_json_array_test1()
         {
             var script1 = @"[1 , 2 , 3 , 'abc' ]";
@@ -326,12 +328,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"[1,2,3,'abc']",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_string_value1()
         {
             var script1 = @" 'ab c ' ";
@@ -341,12 +343,12 @@ namespace sql4js.tests
 
             var txt = result.ToJson();
 
-            Assert.Equal(
+            Assert.AreEqual(
                 "'ab c '",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_simple_double_value1()
         {
             var script1 = @" 4324234.66 ";
@@ -354,13 +356,13 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 "4324234.66",
                 result.ToJson());
         }
 
 
-        [Fact]
+        [Test]
         public void parser_should_ignore_comment_in_comment()
         {
             var script1 = @" 4324234.66 /* abc /* abc */ abc */ ";
@@ -368,12 +370,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 "4324234.66",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_ignore_comment_inside_table()
         {
             var script1 = @"[1 , 2 , /* /* abc */ */ 3 , 'abc' ]";
@@ -381,12 +383,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"[1,2,3,'abc']",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_ignore_comment_inside_object()
         {
             var script1 = @"{a : 'cos', /* abc*/  sql( select 1 as val ), c: 'aaa' }";
@@ -396,12 +398,12 @@ namespace sql4js.tests
 
             var txt = result.ToJson();
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{a:'cos',sql(select 1 as val),c:'aaa'}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_inner_object()
         {
             var script1 = @"{a : 'cos', d : { a : 1, b : 2, c : 'abc'}, c: 'aaa' }";
@@ -409,12 +411,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{a:'cos',d:{a:1,b:2,c:'abc'},c:'aaa'}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_inner_object_and_arrays1()
         {
             var script1 = @"{  d: [ {@f : 6} ] , c: 'aaa' }";
@@ -422,13 +424,13 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{d:[{@f:6}],c:'aaa'}",
                 result.ToJson());
         }
 
 
-        [Fact]
+        [Test]
         public void parser_should_understand_inner_object_and_arrays2()
         {
             var script1 = @"
@@ -447,12 +449,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{a:'cos',d:{a:1,b:2,c:'abc',d:[1,2,3,{g:8,@f:6}]},c:'aaa'}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_inner_object_and_arrays3()
         {
             var script1 = @"{d:[{@f:6}],c:'aaa'}";
@@ -460,12 +462,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 @"{d:[{@f:6}],c:'aaa'}",
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_inner_object_and_arrays4()
         {
             var script1 = @"{d:[{@f:6}],c:'aaa',d:[{a:['gg']}],e:'b'}";
@@ -473,12 +475,12 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 script1,
                 result.ToJson());
         }
 
-        [Fact]
+        [Test]
         public void parser_should_understand_inner_object_and_arrays5()
         {
             var script1 = @"[{d:[{a:['gg']}]},9,1]";
@@ -486,7 +488,7 @@ namespace sql4js.tests
             var result = new S4JParserForTests().
                 Parse(script1);
 
-            Assert.Equal(
+            Assert.AreEqual(
                 script1,
                 result.ToJson());
         }

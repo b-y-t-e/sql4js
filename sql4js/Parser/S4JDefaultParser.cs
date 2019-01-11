@@ -13,6 +13,11 @@ namespace sql4js.Parser
             {
 
             });
+
+            AvailableFunctions.Add(new DynLanFunction("dynlan")
+            {
+
+            });
         }
     }
 }

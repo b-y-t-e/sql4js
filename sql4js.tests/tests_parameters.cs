@@ -3,116 +3,119 @@ using Newtonsoft.Json.Linq;
 using sql4js.Parser;
 using sql4js.Executor;
 using System;
-using Xunit;
+using NUnit;
+using NUnit.Framework;
 using System.Collections.Generic;
 using sql4js.Tokens;
+using System.Threading.Tasks;
 
 namespace sql4js.tests
 {
+    [TestFixture]
     public class tests_parameters
     {
-        [Fact]
-        async public void test_isrequired_parameter()
+        [Test]
+        async public Task test_isrequired_parameter()
         {
             var script1 = @" method ( a : int, b : string!, c: any ) sql( select 1  ) ";
 
-            await Assert.ThrowsAsync<S4JNullParameterException>(async () =>
-          {
+            Assert.ThrowsAsync<S4JNullParameterException>(async () =>
+              {
               var result = await new S4JExecutorForTests().
                   ExecuteWithParameters(script1);
-          });
+            });
         }
 
-        [Fact]
-        async public void test_valid_int_parameter()
+        [Test]
+        async public Task test_valid_int_parameter()
         {
             var script1 = @" method ( a : any, b : string!, c: int ) sql( select 1  ) ";
 
-            await Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
+            Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
             {
                 var result = await new S4JExecutorForTests().
                     ExecuteWithParameters(script1, 4.1, "", 4.1);
             });
         }
 
-        [Fact]
-        async public void test_valid_array_parameter()
+        [Test]
+        async public Task test_valid_array_parameter()
         {
             var script1 = @" method ( a : array ) sql( select 1  ) ";
 
-            await Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
+            Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
             {
                 var result = await new S4JExecutorForTests().
                     ExecuteWithParameters(script1,"{a:1}");
             });
         }
 
-        [Fact]
-        async public void test_valid_object_parameter()
+        [Test]
+        async public Task test_valid_object_parameter()
         {
             var script1 = @" method ( a : object ) sql( select 1  ) ";
 
-            await Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
+            Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
             {
                 var result = await new S4JExecutorForTests().
                     ExecuteWithJsonParameters(script1, "[1,2,3,4,5]");
             });
         }
 
-        [Fact]
-        async public void test_isrequired_parameter_json()
+        [Test]
+        async public Task test_isrequired_parameter_json()
         {
             var script1 = @" method ( a : int, b : string!, c: any ) sql( select 1  ) ";
 
-            await Assert.ThrowsAsync<S4JNullParameterException>(async () =>
+            Assert.ThrowsAsync<S4JNullParameterException>(async () =>
             {
                 var result = await new S4JExecutorForTests().
                     ExecuteWithJsonParameters(script1);
             });
         }
 
-        [Fact]
-        async public void test_array_parameter_json()
+        [Test]
+        async public Task test_array_parameter_json()
         {
             var script1 = @" method ( c: array ) c#( Globals.c.Count  ) ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithJsonParameters(script1, "[1,2,3,4]");
 
-            Assert.Equal("4", result.ToJson());
+            Assert.AreEqual("4", result.ToJson());
         }
 
-        [Fact]
-        async public void test_object_parameter_json()
+        [Test]
+        async public Task test_object_parameter_json()
         {
             var script1 = @" method ( c: object ) c#( Globals.c.g  ) ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithJsonParameters(script1, "{g:123}");
 
-            Assert.Equal("123", result.ToJson());
+            Assert.AreEqual("123", result.ToJson());
         }
 
-        [Fact]
-        async public void test_int_parameter_json()
+        [Test]
+        async public Task test_int_parameter_json()
         {
             var script1 = @" method ( a : any, b : string!, c: int ) sql( select @c  ) ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithJsonParameters(script1, "4.1", "''", "4");
 
-            Assert.Equal("4", result.ToJson());
+            Assert.AreEqual("4", result.ToJson());
         }
 
-        [Fact]
-        async public void test_int_complex_parameter_json()
+        [Test]
+        async public Task test_int_complex_parameter_json()
         {
             var script1 = @" method ( a : any, b : string!, c: int ) sql( select @c + @a_f2  ) ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithJsonParameters(script1, "{ f1: 1, f2 : 2, f3: 'c' }", "''", "4");
 
-            Assert.Equal("6", result.ToJson());
+            Assert.AreEqual("6", result.ToJson());
         }
 
     }

@@ -1,9 +1,14 @@
 ﻿
 TODO:  
+support for saving data through api (c# helpers)
 integration with azure functions
 integration with self hosting environment
 support for http methods (get / post / put .. ) via tags
-support for saving data through api (c# helpers)
 support for add refenernces for executing project / custom namespaces / custom dll's
 support for complex type
 ? support for diffirent parameters parsing styles (dynamic / json / pure .net)
+support for redis cache
+support for table storage
+support for file storage
+support service bus
+support for table queue
