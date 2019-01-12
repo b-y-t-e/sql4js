@@ -78,7 +78,7 @@ namespace sql4js.tests
         {
             var a = 1 + null;
 
-            var script1 = @"   { ""a"": null, ""b"" : dynlan(1+(int?)a)  }";
+            var script1 = @"   { ""a"": null, ""b"" : dynlan(1+a)  }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -93,7 +93,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_dunamicl_fields_and_values_no_quotes()
         {
-            var script1 = @"{ a: 1, dynlan(""bb"") : dynlan( 999 )  }";
+            var script1 = @"{ a: 1, dynlan('bb') : dynlan( 999 )  }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -101,19 +101,16 @@ namespace sql4js.tests
             var txt = result.ToJson();
 
             Assert.AreEqual(
-                @"{a:1,""bb"":999}",
+                @"{a:1,""bb"":999.0}",
                 result.ToJson());
         }
 
-        [Test]
+        /*[Test]
         async public Task executor_should_understand_additional_class_fields_for_object()
         {
             var script1 = @"{ a: 1, dynlan( 
-    class osoba { public string imie; public string nazwisko; } 
-    osoba o = new osoba(); 
-    o.imie = ""adam""; 
-    o.nazwisko = ""adsafasg""; 
-    return o; )  }";
+class osoba() { imie= ''; nazwisko = ''; } o = osoba(); o.imie = 'adam'; o.nazwisko = 'adsafasg'; return o;
+)  }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -123,7 +120,7 @@ namespace sql4js.tests
             Assert.AreEqual(
                 @"{a:1,""imie"":""adam"",""nazwisko"":""adsafasg""}",
                 result.ToJson());
-        }
+        }*/
 
         [Test]
         async public Task executor_should_understand_simple_function_with_outer_comments()
@@ -160,7 +157,7 @@ namespace sql4js.tests
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"{a:1,b:2}",
+                @"{a:1,b:2.0}",
                 result.ToJson());
         }
 
@@ -173,7 +170,7 @@ namespace sql4js.tests
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"{a:1,b:2,c:3}",
+                @"{a:1,b:2.0,c:3.0}",
                 result.ToJson());
         }
 
@@ -186,20 +183,20 @@ namespace sql4js.tests
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"{a:1,b:2,c:3,d:{a:10,b:13}}",
+                @"{a:1,b:2.0,c:3.0,d:{a:10,b:13.0}}",
                 result.ToJson());
         }
 
         [Test]
         async public Task executor_should_understand_additional_fields_for_object()
         {
-            var script1 = @"{ a: 1, dynlan(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   }";
+            var script1 = @"{ a: 1, dynlan(  dict = dictionary(); dict.b = 2; dict.c = 3; return dict;  )   }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"{a:1,""b"":2,""c"":3}",
+                @"{a:1,""b"":2.0,""c"":3.0}",
                 result.ToJson());
         }
 
@@ -219,20 +216,20 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_additional_items_for_array()
         {
-            var script1 = @"[ 1, dynlan(  var list = new List<Object>(); list.Add(2); list.Add(3); return list;  )   ]";
+            var script1 = @"[ 1, dynlan(  result = list(); result.Add(2); result.Add(3); return result;  )   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"[1,2,3]",
+                @"[1,2.0,3.0]",
                 result.ToJson());
         }
 
         [Test]
         async public Task executor_should_understand_additional_empty_items_for_array()
         {
-            var script1 = @"[ 1, dynlan(  var list = new List<Object>(); return list;  )   ]";
+            var script1 = @"[ 1, dynlan(  result = list(); return result;  )   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -262,13 +259,13 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_additional_items_for_array_version2()
         {
-            var script1 = @"[ 1, dynlan(  var dict = new Dictionary<String, Object>(); dict[""b""] = 2; dict[""c""] = 3; return dict;  )   ]";
+            var script1 = @"[ 1, dynlan(  dict = dictionary(); dict['b'] = 2; dict['c'] = 3; return dict;  )   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"[1,2]",
+                @"[1,2.0]",
                 result.ToJson());
         }
 
@@ -276,26 +273,26 @@ namespace sql4js.tests
         async public Task executor_should_understand_additional_items_for_array_version3()
         {
             var script1 = @"[ 1, dynlan(  
-                var list = new List<Object>();
+                result = list();
                 {
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 2; 
-                    dict[""c""] = 3; 
-                    list.Add(dict);
+                    dict = dictionary(); 
+                    dict['b'] = 2; 
+                    dict['c'] = 3; 
+                    result.Add(dict);
                 }
                 {
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 22; 
-                    dict[""c""] = 33; 
-                    list.Add(dict);
+                    dict = dictionary(); 
+                    dict['b'] = 22; 
+                    dict['c'] = 33; 
+                    result.Add(dict);
                 }
-                return list;  )   ]";
+                return result;  )   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"[1,2,22]",
+                @"[1,2.0,22.0]",
                 result.ToJson());
         }
 
@@ -303,26 +300,26 @@ namespace sql4js.tests
         async public Task executor_should_understand_additional_objects_for_array()
         {
             var script1 = @"[ 1, {dynlan(  
-                var list = new List<Object>();
+                lista = list();
                 {
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 2; 
-                    dict[""c""] = 3; 
-                    list.Add(dict);
+                    dict = dictionary(); 
+                    dict['b'] = 2; 
+                    dict.c = 3; 
+                    lista.Add(dict);
                 }
                 {
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 22; 
-                    dict[""c""] = 33; 
-                    list.Add(dict);
+                    dict = dictionary(); 
+                    dict.b = 22; 
+                    dict['c'] = 33; 
+                    lista.Add(dict);
                 }
-                return list;  )}   ]";
+                return lista;  )}   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"[1,{""b"":2,""c"":3},{""b"":22,""c"":33}]",
+                @"[1,{""b"":2.0,""c"":3.0},{""b"":22.0,""c"":33.0}]",
                 result.ToJson());
         }
 
@@ -330,26 +327,26 @@ namespace sql4js.tests
         async public Task executor_should_understand_additional_objects_with_fields_for_array()
         {
             var script1 = @"[ 1, {dynlan(  
-                var list = new List<Object>();
+                lista = list();
                 {
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 2; 
-                    dict[""c""] = 3; 
-                    list.Add(dict);
+                    dict = dictionary(); 
+                    dict['b'] = 2; 
+                    dict['c'] = 3; 
+                    lista.Add(dict);
                 }
                 {
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 22; 
-                    dict[""c""] = 33; 
-                    list.Add(dict);
+                    dict = dictionary(); 
+                    dict['b'] = 22; 
+                    dict['c'] = 33; 
+                    lista.Add(dict);
                 }
-                return list;  ),d:100}   ]";
+                return lista;  ),d:100}   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"[1,{""b"":2,""c"":3,d:100},{""b"":22,""c"":33,d:100}]",
+                @"[1,{""b"":2.0,""c"":3.0,d:100},{""b"":22.0,""c"":33.0,d:100}]",
                 result.ToJson());
         }
 
@@ -357,16 +354,16 @@ namespace sql4js.tests
         async public Task executor_should_understand_additional_objects_for_array_version2()
         {
             var script1 = @"[ 1, {dynlan(  
-                    var dict = new Dictionary<String, Object>(); 
-                    dict[""b""] = 2; 
-                    dict[""c""] = 3;                    
+                    dict = dictionary(); 
+                    dict['b'] = 2; 
+                    dict['c'] = 3;                    
                     return dict;  )}   ]";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"[1,{""b"":2,""c"":3}]",
+                @"[1,{""b"":2.0,""c"":3.0}]",
                 result.ToJson());
         }
         
@@ -387,13 +384,13 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_additional_fields_for_object_version2()
         {
-            var script1 = @"{ a: 1, b: dynlan(  var dict = new Dictionary<String, Object>(); dict[""bb""] = 22; dict[""cc""] = 33; return dict;  )   }";
+            var script1 = @"{ a: 1, b: dynlan(  dict = dictionary(); dict['bb'] = 22; dict['cc'] = 33; return dict;  )   }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
 
             Assert.AreEqual(
-                @"{a:1,b:22}",
+                @"{a:1,b:22.0}",
                 result.ToJson());
         }
 
@@ -417,9 +414,9 @@ namespace sql4js.tests
         {
             var script1 = @"{ b : dynlan( 
 
-def abc():
+def abc(){
   return 3
-        
+        }
 return abc()
 
         )   }";
