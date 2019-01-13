@@ -19,7 +19,7 @@ namespace sql4js.Parser
 
         ////////////////////////////////////////////////////////////////
 
-        public S4JToken Parse(String Text)
+        public S4JTokenRoot Parse(String Text)
         {
             IList<char> chars = Text.Trim().ToCharArray();
 
@@ -131,10 +131,10 @@ namespace sql4js.Parser
                 valueStack.Pop();
             }
 
-            if (String.IsNullOrEmpty(rootVal.Name))
+            /*if (String.IsNullOrEmpty(rootVal.Name))
             {
                 return rootVal.Children.Single() as S4JToken;
-            }
+            }*/
 
             return rootVal;
         }
