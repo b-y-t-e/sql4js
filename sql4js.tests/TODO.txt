@@ -2,7 +2,6 @@
 TODO:  
 support for storing tablename in data (is this safe?)
 support for global methods for data checking
-support for saving data through api (c# helpers)
 integration with azure functions
 integration with self hosting environment
 support for http methods (get / post / put .. ) via tags
@@ -16,4 +15,5 @@ support service bus
 support for table queue
 
 DONE:
-support for saving data through api (dynlan helpers)
+support for saving data through api (dynlan)
+support for saving data through api (c#)

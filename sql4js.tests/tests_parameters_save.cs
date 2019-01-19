@@ -71,5 +71,38 @@ sql( select imie from osoba where imie = 'test_dynlan2' )
             Assert.AreEqual("\"test_dynlan2\"", result.ToJson());
         }
 
+        [Test]
+        async public Task test_complex_parameter_save_csharp_1()
+        {
+            // await new DbForTest().PrepareDb();
+
+            var script1 = @" 
+method ( osoba : any ) 
+c#( var item = new Dictionary<string, object>(); item[""imie""] = osoba.imie; db.sql.save(""osoba"", item);  ),
+sql( select imie from osoba where imie = 'test_dynlan_cs' )
+
+";
+            var result = await new S4JExecutorForTests().
+                ExecuteWithJsonParameters(script1, "{ imie: 'test_dynlan_cs' }");
+
+            Assert.AreEqual("\"test_dynlan_cs\"", result.ToJson());
+        }
+
+        [Test]
+        async public Task test_complex_parameter_save_csharp_2()
+        {
+            // await new DbForTest().PrepareDb();
+
+            var script1 = @" 
+method ( osoba : any ) 
+c#( db.sql.save(""osoba"", osoba)  ),
+sql( select imie from osoba where imie = 'test_dynlan2' )
+
+";
+            var result = await new S4JExecutorForTests().
+                ExecuteWithJsonParameters(script1, "{ imie: 'test_dynlan2' }");
+
+            Assert.AreEqual("\"test_dynlan2\"", result.ToJson());
+        }
     }
 }

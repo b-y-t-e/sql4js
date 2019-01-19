@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using sql4js.Tokens;
+using sql4js.Database;
 
 namespace sql4js.Functions
 {
@@ -137,18 +138,14 @@ namespace sql4js.Functions
             foreach (KeyValuePair<string, object> keyAndVal in variables)
             {
                 globaVariables[keyAndVal.Key] = keyAndVal.Value;
-
                 code.Append("var ").Append(keyAndVal.Key).Append(" = ").Append("Globals.").Append(keyAndVal.Key).Append(";");
-
-                /*if (keyAndVal.Value == null)
-                {
-                    code.Append($"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
-                }
-                else
-                {
-                    code.Append($"var {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
-                }*/
             }
+
+            dynamic dbProxy = new ExpandoObject();
+            foreach (var source in Executor.Sources)
+                (dbProxy as IDictionary<string, object>)[source.Key] = new DbApi(source.Value);
+            globaVariables["db"] = dbProxy;
+            code.Append("var ").Append("db").Append(" = ").Append("Globals.").Append("db").Append(";");
 
             code.Append(function.ToJsonWithoutGate());
 
@@ -162,7 +159,7 @@ namespace sql4js.Functions
                     "System",
                     "System.Text",
                     "System.Linq",
-                    "System.Collections", 
+                    "System.Collections",
                     "System.Collections.Generic").
                 WithReferences(refs);
 

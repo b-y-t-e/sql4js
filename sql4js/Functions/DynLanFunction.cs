@@ -148,10 +148,9 @@ namespace sql4js.Functions
                 }*/
             }
 
-            DynLanDbProxy dbProxy = new DynLanDbProxy();
+            Dictionary<String, Object> dbProxy = new Dictionary<String, Object>();
             foreach (var source in Executor.Sources)
                 dbProxy[source.Key] = new DbApi(source.Value);
-
             globaVariables["db"] = dbProxy;
 
             code.Append(function.ToJsonWithoutGate());
@@ -166,8 +165,4 @@ namespace sql4js.Functions
         }
     }
 
-    public class DynLanDbProxy : Dictionary<String, Object>
-    {
-
-    }
 }
