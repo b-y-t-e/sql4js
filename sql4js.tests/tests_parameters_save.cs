@@ -54,5 +54,22 @@ sql( select imie from osoba where imie = 'test_dynlan' )
             Assert.AreEqual("\"test_dynlan\"", result.ToJson());
         }
 
+        [Test]
+        async public Task test_complex_parameter_save_dynlan_2()
+        {
+            // await new DbForTest().PrepareDb();
+
+            var script1 = @" 
+method ( osoba : any ) 
+dynlan( db.sql.save('osoba', osoba)  ),
+sql( select imie from osoba where imie = 'test_dynlan2' )
+
+";
+            var result = await new S4JExecutorForTests().
+                ExecuteWithJsonParameters(script1, "{ imie: 'test_dynlan2' }");
+
+            Assert.AreEqual("\"test_dynlan2\"", result.ToJson());
+        }
+
     }
 }
