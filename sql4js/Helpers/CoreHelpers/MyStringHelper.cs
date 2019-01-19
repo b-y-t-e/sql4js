@@ -168,7 +168,7 @@ namespace sql4js.Helpers.CoreHelpers
             return str.ToString();
         }
 
-        public static String AddReturnStatement(this String Text)
+        /*public static String AddReturnStatement(this String Text)
         {
             if (!Text.Contains("return"))
             {
@@ -196,7 +196,7 @@ namespace sql4js.Helpers.CoreHelpers
             {
                 return Text;
             }
-        }
+        }*/
 
         public static String JoinString<T>(this IEnumerable<T> Elements, String Separator = ",")
         {

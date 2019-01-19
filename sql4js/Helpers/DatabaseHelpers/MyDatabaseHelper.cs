@@ -13,11 +13,11 @@ namespace sql4js.Helpers.DatabaseHelpers
     {
         private static object _lck = new object();
 
-        private static Dictionary<String, IList<DbDataColumn>> _columnsCache = new Dictionary<String, IList<DbDataColumn>>();
+        private static Dictionary<String, DbDataColumns> _columnsCache = new Dictionary<String, DbDataColumns>();
 
         //////////////////////////////////////////
 
-        public static IList<DbDataColumn> GetColumns(
+        public static DbDataColumns GetColumns(
             this DbConnection Connection,
             String TableName)
         {
@@ -28,20 +28,24 @@ namespace sql4js.Helpers.DatabaseHelpers
                 {
                     Connection.OpenIfClosed();
 
-                    List<DbDataColumn> columns = new List<DbDataColumn>();
+                    DbDataColumns columns = new DbDataColumns();
                     using (var lCommand = Connection.CreateCommand())
                     {
+                        MyQuery query = new MyQuery();
+                        query.Append("select column_name from information_schema.columns where table_name = {0}", TableName);
+
                         lCommand.CommandTimeout = 60 * 5;
-                        lCommand.CommandText = " PRAGMA table_info(" + TableName + "); ";
-                       
+                        lCommand.CommandText = query.ToString();
+
                         using (var lReader = lCommand.ExecuteReader())
                         {
                             while (lReader.Read())
                             {
-                                columns.Add(new DbDataColumn()
+                                string name = Convert.ToString(lReader.GetValue(0), CultureInfo.InvariantCulture);
+                                columns[name] = new DbDataColumn()
                                 {
-                                    Name = Convert.ToString(lReader.GetValue(1), CultureInfo.InvariantCulture),
-                                });
+                                    Name = name,
+                                };
                             }
                         }
                     }
@@ -78,6 +82,14 @@ namespace sql4js.Helpers.DatabaseHelpers
 
     }
 
+    public class DbDataColumns : Dictionary<string, DbDataColumn>
+    {
+        public DbDataColumns()
+            : base(StringComparer.OrdinalIgnoreCase)
+        {
+
+        }
+    }
 
     public class DbDataColumn
     {

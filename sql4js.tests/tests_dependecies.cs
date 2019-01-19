@@ -16,12 +16,55 @@ using Microsoft.CodeAnalysis.Scripting;
 using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DynLan;
+using DynLan.Exceptions;
 
 namespace sql4js.tests
 {
     [TestFixture]
     public class tests_dependecies
     {
+        [Test]
+        public void dynlan_should_throw_exceptionn_if_method_is_not_avaiable()
+        {
+            string code = "db.sql.exec('select 1') ";
+
+            Assert.Throws(typeof(DynLanExecuteException), () =>
+            {
+                Object result = new Compiler().
+                    Compile(code).
+                    Eval();
+            });
+        }
+        
+        [Test]
+        public async Task inner_dynlan_should_throw_exceptionn_if_method_is_not_avaiable()
+        {
+            var script1 = @" 
+dynlan( db.sql.exec('select 1')  )
+
+";          
+            Assert.ThrowsAsync(typeof(DynLanExecuteException), async () =>
+            {
+                var result2 = await new S4JExecutorForTests().
+                    ExecuteWithJsonParameters(script1);
+            });
+        }
+
+        [Test]
+        public async Task inner_dynlan_should_throw_exceptionn_if_method_is_not_avaiable_version2()
+        {
+            var script1 = @" 
+dynlan( item = dictionary(); db.sql.save('osoba', item);  )
+
+";
+            Assert.ThrowsAsync(typeof(DynLanExecuteException), async () =>
+            {
+                var result2 = await new S4JExecutorForTests().
+                    ExecuteWithJsonParameters(script1);
+            });
+        }
+
         [Test]
         public void deserializer_cs_should_properly_deserialize_outer_lists()
         {
@@ -122,7 +165,7 @@ namespace sql4js.tests
                 MetadataReference.CreateFromFile(typeof(System.Linq.Enumerable).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)};
-                
+
                 var imports = ScriptOptions.Default.
                     WithImports(
                         "System",

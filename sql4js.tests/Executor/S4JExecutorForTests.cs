@@ -11,7 +11,7 @@ namespace sql4js.Executor
         public S4JExecutorForTests() :
             base(new S4JParserForTests())
         {
-
+            Sources.Register("sql", "Data Source=.;uid=dba;pwd=xxxxxxxxxxxx;initial catalog=dynjson;");
         }
     }
 }

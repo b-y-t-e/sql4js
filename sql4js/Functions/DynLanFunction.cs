@@ -11,6 +11,7 @@ using sql4js.Tokens;
 using DynLan;
 using DynLan.Classes;
 using sql4js.Helpers.CoreHelpers;
+using sql4js.Database;
 
 namespace sql4js.Functions
 {
@@ -23,7 +24,7 @@ namespace sql4js.Functions
         }
 
         public DynLanFunction(string aliasName) :
-            base(aliasName, null)
+            base(aliasName)
         {
             Priority = 0;
             BracketsDefinition = new DynLanBrackets();
@@ -125,7 +126,7 @@ namespace sql4js.Functions
 
     public class DynLanEvaluator : IEvaluator
     {
-        public async Task<Object> Evaluate(S4JToken token, IDictionary<String, object> variables)
+        public async Task<Object> Evaluate(S4JExecutor Executor, S4JToken token, IDictionary<String, object> variables)
         {
             S4JTokenFunction function = token as S4JTokenFunction;
             StringBuilder code = new StringBuilder();
@@ -147,15 +148,26 @@ namespace sql4js.Functions
                 }*/
             }
 
+            DynLanDbProxy dbProxy = new DynLanDbProxy();
+            foreach (var source in Executor.Sources)
+                dbProxy[source.Key] = new DbApi(source.Value);
+
+            globaVariables["db"] = dbProxy;
+
             code.Append(function.ToJsonWithoutGate());
 
-            string finalCode = MyStringHelper.AddReturnStatement(code.ToString());
+            // string finalCode = MyStringHelper.AddReturnStatement(code.ToString());
 
             Object result = new Compiler().
-                Compile(finalCode).
+                Compile(code.ToString()).
                 Eval(globaVariables);
-            
+
             return result;
         }
+    }
+
+    public class DynLanDbProxy : Dictionary<String, Object>
+    {
+
     }
 }

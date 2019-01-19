@@ -9,10 +9,6 @@ namespace sql4js.Parser
     {
         public S4JParserForTests()
         {
-            AvailableFunctions.Add(new TSqlFunction("sql", "Data Source=.;uid=dba;pwd=;initial catalog=dynjson;")
-            {
-
-            });
         }
     }
 }

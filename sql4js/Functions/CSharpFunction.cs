@@ -23,7 +23,7 @@ namespace sql4js.Functions
         }
 
         public CSharpFunction(string aliasName) :
-            base(aliasName, null)
+            base(aliasName)
         {
             Priority = 0;
             BracketsDefinition = new CSharpBrackets();
@@ -125,7 +125,7 @@ namespace sql4js.Functions
 
     public class CSharpEvaluator : IEvaluator
     {
-        public async Task<Object> Evaluate(S4JToken token, IDictionary<String, object> variables)
+        public async Task<Object> Evaluate(S4JExecutor Executor, S4JToken token, IDictionary<String, object> variables)
         {
             S4JTokenFunction function = token as S4JTokenFunction;
             StringBuilder code = new StringBuilder();

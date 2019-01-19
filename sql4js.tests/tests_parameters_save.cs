@@ -44,7 +44,7 @@ sql( select imie from osoba where imie = 'test_sql' )
 
             var script1 = @" 
 method ( osoba : any ) 
-dynlan( item = dictionary(); item.imie = osoba_imie; db.sql.save('osoba', item)  ),
+dynlan( item = dictionary(); item.imie = osoba.imie; db.sql.save('osoba', item)  ),
 sql( select imie from osoba where imie = 'test_dynlan' )
 
 ";
@@ -53,5 +53,6 @@ sql( select imie from osoba where imie = 'test_dynlan' )
 
             Assert.AreEqual("\"test_dynlan\"", result.ToJson());
         }
+
     }
 }

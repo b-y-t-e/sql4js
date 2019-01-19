@@ -16,14 +16,8 @@ namespace sql4js.Functions
 {
     public class TSqlFunction : S4JStateFunction
     {
-        public TSqlFunction(string ConnectionString) :
-            this("sqlserver", ConnectionString)
-        {
-
-        }
-
-        public TSqlFunction(string aliasName, string ConnectionString) :
-            base(aliasName, ConnectionString)
+        public TSqlFunction(string aliasName) :
+            base(aliasName)
         {
             Priority = 0;
             BracketsDefinition = new TSqlBrackets();
@@ -108,7 +102,7 @@ namespace sql4js.Functions
 
     public class TSqlEvaluator : IEvaluator
     {
-        public async Task<Object> Evaluate(S4JToken token, IDictionary<String, object> variables)
+        public async Task<Object> Evaluate(S4JExecutor Executor, S4JToken token, IDictionary<String, object> variables)
         {
             S4JTokenFunction functionToken = token as S4JTokenFunction;
             S4JStateFunction functionState = token.State as S4JStateFunction;
@@ -122,7 +116,8 @@ namespace sql4js.Functions
 
             query.Append(functionToken.ToJsonWithoutGate());
 
-            using (SqlConnection con = new SqlConnection(functionState.Source))
+            String connectionString = Executor.Sources.Get(functionState.FunctionName);
+            using (SqlConnection con = new SqlConnection(connectionString))
             {
                 var result = con.SelectItems(query.ToString());
                 return result;

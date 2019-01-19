@@ -11,6 +11,7 @@ using sql4js.Helpers;
 using sql4js.Helpers;
 using System.Data.SqlClient;
 using sql4js.Helpers.CoreHelpers;
+using System.Collections;
 //using ProZ.Classes.Classes;
 
 namespace sql4js.Helpers.DatabaseHelpers
@@ -325,7 +326,7 @@ namespace sql4js.Helpers.DatabaseHelpers
         private static DbDataAdapter CreateDataAdapter(DbConnection Connection, IDbCommand Command)
         {
             DbDataAdapter adapter;
-            
+
             if (Connection is System.Data.SqlClient.SqlConnection)
                 adapter = new System.Data.SqlClient.SqlDataAdapter(Command as System.Data.SqlClient.SqlCommand);
             //if (Connection is System.Data.Odbc.OdbcConnection)
@@ -419,6 +420,83 @@ namespace sql4js.Helpers.DatabaseHelpers
             }
         }
 
+        private static Object GetPrimaryKeyValue(Object Item, String PrimaryKey)
+        {
+            Object primaryKeyValue = null;
+            if (Item is IDictionary<string, object> dictKeyValue)
+            {
+                if (dictKeyValue.ContainsKey(PrimaryKey))
+                    primaryKeyValue = dictKeyValue[PrimaryKey];                
+            }
+            else if (Item is IDictionary dict)
+            {
+                if (dict.Contains(PrimaryKey))
+                    primaryKeyValue = dict[PrimaryKey];
+            }
+            else
+            {
+                var lPrimaryKeyProperty = PrimaryKey != null ?
+                    ReflectionHelper.GetProperty(Item, PrimaryKey) :
+                    null;
+
+                primaryKeyValue = lPrimaryKeyProperty != null ?
+                    lPrimaryKeyProperty.GetValue(Item, null) :
+                    null;
+            }
+            return primaryKeyValue;
+        }
+
+        private static IEnumerable<DbDataColumnValue> GetItemValuesForDbFields(Object Item, DbDataColumns DbFields)
+        {
+            if (Item is IDictionary<string, object> dictKeyValue)
+            {
+                foreach( var val in dictKeyValue)
+                {
+                    DbDataColumn dataColumn = null;
+                    DbFields.TryGetValue(val.Key, out dataColumn);
+                    if (dataColumn == null)
+                        continue;
+
+                    yield return new DbDataColumnValue()
+                    {
+                        Name = dataColumn.Name,
+                        Value = val.Value
+                    };
+                }
+            }
+            else if (Item is IDictionary dict)
+            {
+                foreach (var key in dict.Keys)
+                {
+                    DbDataColumn dataColumn = null;
+                    DbFields.TryGetValue(UniConvert.ToString(key), out dataColumn);
+                    if (dataColumn == null)
+                        continue;
+
+                    yield return new DbDataColumnValue()
+                    {
+                        Name = dataColumn.Name,
+                        Value = dict[key]
+                    };
+                }
+            }
+            else
+            {
+                foreach (DbDataColumn databaseColumn in DbFields.Values)
+                {
+                    PropertyInfo itemProperty = ReflectionHelper.GetProperty(Item, databaseColumn.Name);
+                    if (itemProperty != null)
+                    {
+                        yield return new DbDataColumnValue()
+                        {
+                            Name = databaseColumn.Name,
+                            Value = itemProperty.GetValue(Item, null)
+                        };
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// wykonuje update
         /// </summary>
@@ -434,70 +512,44 @@ namespace sql4js.Helpers.DatabaseHelpers
             if (Connection != null)
             {
                 if (String.IsNullOrEmpty(TableName))
-                    TableName = getTableName(Item.GetType());
+                    throw new NotSupportedException("TableName sould not be empty!");
+                //TableName = getTableName(Item.GetType());
 
-                Object lPkValue = null;
-                var lColumns = DatabaseHelper.GetColumns(Connection, TableName);
-                var lQuery = new MyQuery();
-                var lValues = new List<DbDataColumnValue>();
-                //var lColumnsInQuery = new String[0]; // Columns == null ? new String[0] : Columns.SelectMany(i => i.Split(new char[] { ' ', ';', ',' })).Where(i => i != null && i.Trim() != String.Empty).Select(i => i.Trim()).ToArray();
-                var lAllColumns = true; // lColumnsInQuery.Length == 0 ? true : false;
-                                        // ObjectValuesHelper.GetProperties
-                                        // pobranie klucza głównego
+                DbDataColumns databaseColumns = DatabaseHelper.GetColumns(Connection, TableName);
+                MyQuery saveQuery = new MyQuery();
 
-                var lPrimaryKey = PrimaryKey != null ? ReflectionHelper.GetProperty(Item, PrimaryKey) : null; // ReflectionValueHelper.GetProperty(Item, PrimaryKey) : null;
-                lPkValue = lPrimaryKey != null ? lPrimaryKey.GetValue(Item, null) : null;
+                Object primaryKeyValue = GetPrimaryKeyValue(Item, PrimaryKey);
+                IList<DbDataColumnValue> valuesToSave = GetItemValuesForDbFields(Item, databaseColumns).ToArray();
 
-                for (int i = 0; i < lColumns.Count; i++)
-                {
-                    var lColumn = lColumns[i];
-
-                    // iteracja do propertiesach
-                    var lProperty = ReflectionHelper.GetProperty(Item, lColumn.Name); // ReflectionValueHelper.GetProperty(Item, lColumn.Name);
-                    if (lProperty != null)
-                    {
-                        if (lAllColumns/* ||
-                            lColumnsInQuery.FirstOrDefault(col => col.EqualsNonsensitive(lColumn.Name)) != null*/)
-                        {
-                            lValues.Add(new DbDataColumnValue()
-                            {
-                                // IsDateTime = lColumn.IsDateTime,
-                                Name = lColumn.Name,
-                                Value = lProperty.GetValue(Item, null) // .Value
-                            });
-                        }
-                    }
-                }
-
-                if (lValues.Count > 0) // && lPkValue != null)
+                if (valuesToSave.Count > 0)
                 {
                     if (IsInsert)
                     {
-                        lQuery.
+                        saveQuery.
                             Append(" insert into " + TableName + " ( ");
 
                         var lCount = 0;
-                        foreach (var lValue in lValues)
+                        foreach (DbDataColumnValue lValue in valuesToSave)
                         {
                             // dla sqlite
                             if (OverridePrimaryKey || !lValue.Name.EqualsNonsensitive(PrimaryKey))
                             {
-                                if (lCount > 0) lQuery.Append(", ");
-                                lQuery.Append(lValue.Name);
+                                if (lCount > 0) saveQuery.Append(", ");
+                                saveQuery.Append(lValue.Name);
                                 lCount++;
                             }
                         }
 
-                        lQuery.
+                        saveQuery.
                             Append(" ) values ( ");
 
                         lCount = 0;
-                        foreach (var lValue in lValues)
+                        foreach (DbDataColumnValue lValue in valuesToSave)
                         {
                             if (OverridePrimaryKey || !lValue.Name.EqualsNonsensitive(PrimaryKey))
                             {
-                                if (lCount > 0) lQuery.Append(", ");
-                                lQuery.AppendVal(lValue.Value);
+                                if (lCount > 0) saveQuery.Append(", ");
+                                saveQuery.AppendVal(lValue.Value);
                                 lCount++;
                             }
                             // dla sqlite
@@ -509,29 +561,28 @@ namespace sql4js.Helpers.DatabaseHelpers
                             }*/
                         }
 
-                        lQuery.
+                        saveQuery.
                             Append(" ) ");
                     }
                     else
                     {
-                        lQuery.Append(" update " + TableName + " set ");
+                        saveQuery.Append(" update " + TableName + " set ");
 
                         var lCount = 0;
-                        for (int i = 0; i < lValues.Count; i++)
+                        foreach (DbDataColumnValue lValue in valuesToSave)
                         {
-                            var lValue = lValues[i];
                             if (!lValue.Name.EqualsNonsensitive(PrimaryKey))
                             {
-                                if (lCount > 0) lQuery.Append(", ");
-                                lQuery.Append(lValue.Name).Append(" = ").AppendVal(lValue.Value);
+                                if (lCount > 0) saveQuery.Append(", ");
+                                saveQuery.Append(lValue.Name).Append(" = ").AppendVal(lValue.Value);
                                 lCount++;
                             }
                         }
 
-                        lQuery.Append(" where ").Append(PrimaryKey).Append(" = ").AppendVal(lPkValue);
+                        saveQuery.Append(" where ").Append(PrimaryKey).Append(" = ").AppendVal(primaryKeyValue);
                     }
 
-                    return lQuery.ToString() + (PostfixSql ?? "");
+                    return saveQuery.ToString() + (PostfixSql ?? "");
                 }
                 else
                 {
@@ -776,7 +827,7 @@ namespace sql4js.Helpers.DatabaseHelpers
             if (Connection != null && !String.IsNullOrEmpty(SqlStatement))
             {
                 Connection.OpenIfClosed();
-                
+
                 using (var lCommand = Connection.CreateCommand())
                 {
                     // lCommand.Transaction = Transaction;
@@ -1007,7 +1058,7 @@ namespace sql4js.Helpers.DatabaseHelpers
 
         ////////////////////////////////////////////////////
 
-        private static String getTableName(Type Type)
+        /*private static String getTableName(Type Type)
         {
             var lAttribute = Type.GetCustomAttributes(typeof(MyTableNameAttribute), true).FirstOrDefault() as MyTableNameAttribute;
             if (lAttribute == null)
@@ -1018,10 +1069,10 @@ namespace sql4js.Helpers.DatabaseHelpers
             {
                 return lAttribute.TableName;
             }
-        }
+        }*/
     }
 
-    public class MyTableNameAttribute : Attribute
+    /*public class MyTableNameAttribute : Attribute
     {
         public String TableName { get; set; }
 
@@ -1029,7 +1080,7 @@ namespace sql4js.Helpers.DatabaseHelpers
         {
             this.TableName = TableName;
         }
-    }
+    }*/
 
     public class DbDataColumnValue
     {

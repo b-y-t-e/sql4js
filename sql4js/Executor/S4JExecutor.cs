@@ -10,18 +10,22 @@ using System.Threading.Tasks;
 
 using sql4js.Helpers.CoreHelpers;
 using sql4js.Tokens;
+using sql4js.Classes;
 
 namespace sql4js.Executor
 {
     public class S4JExecutor
     {
-        public S4JParser Parser { get; set; }
+        public S4JParser Parser { get; private set; }
+
+        public Sources Sources { get; private set; }
 
         public Object Result { get; private set; }
 
         public S4JExecutor(S4JParser Parser)
         {
             this.Parser = Parser;
+            this.Sources = new Sources();
         }
 
         async public Task<S4JToken> ExecuteWithJsonParameters(String MethodDefinitionAsJson, params String[] ParametersAsJson)
@@ -87,7 +91,7 @@ namespace sql4js.Executor
             {
                 IDictionary<String, object> variables = GetExecutiongVariables(token);
                 S4JTokenFunction function = token as S4JTokenFunction;
-                object result = await function.Evaluator?.Evaluate(token, variables);
+                object result = await function.Evaluator?.Evaluate(this, token, variables);
 
                 function.IsEvaluated = true;
                 function.Result = result;
@@ -395,7 +399,7 @@ namespace sql4js.Executor
 
     public interface IEvaluator
     {
-        Task<Object> Evaluate(S4JToken node, IDictionary<String, object> variables);
+        Task<Object> Evaluate(S4JExecutor Executor, S4JToken node, IDictionary<String, object> variables);
     }
 
     public class ExecutionTree

@@ -9,7 +9,7 @@ namespace sql4js.Parser
     {
         public String FunctionName { get; set; }
 
-        public String Source { get; set; }
+        // public String Source { get; set; }
 
         ////////////////////////////////////////
 
@@ -23,10 +23,10 @@ namespace sql4js.Parser
 
         ////////////////////////////////////////
 
-        public S4JStateFunction(String FunctionName, String Source)
+        public S4JStateFunction(String FunctionName/*, String Source*/)
         {
             this.FunctionName = FunctionName;
-            this.Source = Source;
+            // this.Source = Source;
             this.IsValue = true;
             this.IsFunction = true;
             this.Priority = 0;

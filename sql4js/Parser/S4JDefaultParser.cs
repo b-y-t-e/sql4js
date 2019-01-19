@@ -18,6 +18,11 @@ namespace sql4js.Parser
             {
 
             });
+
+            AvailableFunctions.Add(new TSqlFunction("sql")
+            {
+
+            });
         }
     }
 }
