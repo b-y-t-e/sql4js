@@ -31,7 +31,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_empty_arguments()
         {
-            var script1 = @"  method1 (param1) { ""a"": c#(Globals.param1) }";
+            var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -46,7 +46,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_one_argument()
         {
-            var script1 = @"  method1 (param1) { ""a"": c#(Globals.param1) }";
+            var script1 = @"  method1 (param1) { ""a"": c#(param1) }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1, 999);
@@ -61,7 +61,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_many_arguments()
         {
-            var script1 = @"  method1 (param1, param2, param3, param4) { ""a"": c#(Globals.param1+Globals.param2+Globals.param3+Globals.param4) }";
+            var script1 = @"  method1 (param1, param2, param3, param4) { ""a"": c#(param1+param2+param3+param4) }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1, 1, 10, 100, 1000.0);
@@ -78,7 +78,7 @@ namespace sql4js.tests
         {
             var a = 1 + null;
 
-            var script1 = @"   { ""a"": null, ""b"" : c#(1+(int?)Globals.a)  }";
+            var script1 = @"   { ""a"": null, ""b"" : c#(1+(int?)a)  }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -154,7 +154,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_parent_values()
         {
-            var script1 = @"{ a: 1, b : c#( Globals.a + 1 )   }";
+            var script1 = @"{ a: 1, b : c#( a + 1 )   }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -167,7 +167,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_parent_values_version2()
         {
-            var script1 = @"{ a: 1, b : c#( Globals.a + 1 ), c : c#( Globals.a + Globals.b )   }";
+            var script1 = @"{ a: 1, b : c#( a + 1 ), c : c#( a + b )   }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
@@ -180,7 +180,7 @@ namespace sql4js.tests
         [Test]
         async public Task executor_should_understand_parent_values_version3()
         {
-            var script1 = @"{ a: 1, b : c#( Globals.a + 1 ), c : c#( Globals.a + Globals.b ), d: {a:10, b:c#(Globals.a+Globals.c)}   }";
+            var script1 = @"{ a: 1, b : c#( a + 1 ), c : c#( a + b ), d: {a:10, b:c#(a+c)}   }";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);

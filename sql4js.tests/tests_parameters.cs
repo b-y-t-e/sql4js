@@ -77,7 +77,7 @@ namespace sql4js.tests
         [Test]
         async public Task test_array_parameter_json()
         {
-            var script1 = @" method ( c: array ) c#( Globals.c.Count  ) ";
+            var script1 = @" method ( c: array ) c#( c.Count  ) ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithJsonParameters(script1, "[1,2,3,4]");
@@ -88,7 +88,7 @@ namespace sql4js.tests
         [Test]
         async public Task test_object_parameter_json()
         {
-            var script1 = @" method ( c: object ) c#( Globals.c.g  ) ";
+            var script1 = @" method ( c: object ) c#( c.g  ) ";
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithJsonParameters(script1, "{g:123}");

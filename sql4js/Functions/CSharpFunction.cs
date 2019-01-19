@@ -137,6 +137,9 @@ namespace sql4js.Functions
             foreach (KeyValuePair<string, object> keyAndVal in variables)
             {
                 globaVariables[keyAndVal.Key] = keyAndVal.Value;
+
+                code.Append("var ").Append(keyAndVal.Key).Append(" = ").Append("Globals.").Append(keyAndVal.Key).Append(";");
+
                 /*if (keyAndVal.Value == null)
                 {
                     code.Append($"object {keyAndVal.Key} = {keyAndVal.Value.SerializeJson()};\n");
