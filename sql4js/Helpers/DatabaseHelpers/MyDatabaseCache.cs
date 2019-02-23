@@ -9,7 +9,7 @@ using System.Data.Common;
 
 namespace sql4js.Helpers.DatabaseHelpers
 {
-    public static class DatabaseHelper
+    public static class DatabaseCache
     {
         private static object _lck = new object();
 

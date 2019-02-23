@@ -31,7 +31,7 @@ namespace sql4js.Parser
             this.IsFunction = true;
             this.Priority = 0;
             this.StateType = EStateType.FUNCTION;
-            this.AllowedStatesNames = new List<EStateType?>()
+            this.AllowedStateTypes = new []
                 {
                     EStateType.FUNCTION_COMMENT,
                     EStateType.FUNCTION_BRACKETS,

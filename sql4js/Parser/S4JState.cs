@@ -7,7 +7,17 @@ namespace sql4js.Parser
 {
     public class S4JState
     {
-        public List<EStateType?> AllowedStatesNames { get; set; }
+        private HashSet<EStateType> allowedStatesNames;
+        public ICollection<EStateType> AllowedStateTypes
+        {
+            get { return allowedStatesNames; }
+            set
+            {
+                allowedStatesNames = value == null ? null : new HashSet<EStateType>(value);
+              }
+        }
+        
+        public IList<S4JState> AllowedStates { get; set; }
 
         public List<S4JStateGate> Gates { get; set; }
 
@@ -39,7 +49,7 @@ namespace sql4js.Parser
 
         public S4JState()
         {
-            AllowedStatesNames = new List<EStateType?>();
+            AllowedStateTypes = new EStateType[0];
             Gates = new List<S4JStateGate>();
         }
 
@@ -50,17 +60,21 @@ namespace sql4js.Parser
             return IsAllowed(State.StateType);
         }
 
-        public bool IsAllowed(EStateType? StateType)
+        private bool IsAllowed(EStateType StateType)
         {
-            if (AllowedStatesNames.Contains(null))
+            if (allowedStatesNames.Contains(StateType))
                 return true;
-            return AllowedStatesNames.Contains(StateType);
+
+            if (allowedStatesNames.Contains(EStateType.ANY))
+                return true;
+
+            return false;
         }
 
         public S4JState Clone()
         {
             S4JState item = (S4JState)this.MemberwiseClone();
-            item.AllowedStatesNames = this.AllowedStatesNames.ToList();
+            item.AllowedStateTypes = this.AllowedStateTypes;
             item.Gates = this.Gates.ToList();
             return item;
         }
@@ -68,11 +82,11 @@ namespace sql4js.Parser
 
     public class S4JStateGate
     {
-        public IList<char> Start { get; set; }
+        public char[] Start { get; set; }
 
-        public IList<char> End { get; set; }
+        public char[] End { get; set; }
 
-        public IList<char> Inner { get; set; }
+        public char[] Inner { get; set; }
 
         public S4JStateGate Clone()
         {
@@ -121,24 +135,26 @@ namespace sql4js.Parser
 
     public enum EStateType
     {
-        S4J,
-        S4J_COMMENT,
-        S4J_QUOTATION,
-        S4J_ARRAY,
-        // S4J_SIMPLE_VALUE,
-        S4J_TEXT_VALUE,
-        S4J_OBJECT_CONTENT,
-        S4J_OBJECT,
-        S4J_PARAMETERS,
+        ANY = 0,
 
-        FUNCTION,
-        FUNCTION_COMMENT,
-        FUNCTION_BRACKETS,
-        FUNCTION_QUOTATION,
+        S4J = 1,
+        S4J_COMMENT = 2,
+        S4J_QUOTATION = 3,
+        S4J_ARRAY = 4,
 
-        S4J_VALUE_DELIMITER,
-        S4J_COMA,
-        S4J_TAG
+        S4J_TEXT_VALUE = 5,
+        S4J_OBJECT_CONTENT = 6,
+        S4J_OBJECT = 7,
+        S4J_PARAMETERS = 8,
+
+        FUNCTION = 9,
+        FUNCTION_COMMENT = 10,
+        FUNCTION_BRACKETS = 11,
+        FUNCTION_QUOTATION = 12,
+
+        S4J_VALUE_DELIMITER = 13,
+        S4J_COMA = 14,
+        S4J_TAG = 15
     }
 
 }

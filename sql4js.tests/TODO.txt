@@ -1,10 +1,13 @@
 ﻿
 TODO:  
-support for storing tablename in data (is this safe?)
-support for global methods for data checking
+cloning
+pararell tests
 integration with azure functions
 integration with self hosting environment
 support for http methods (get / post / put .. ) via tags
+
+support for storing tablename in data (is this safe?)
+support for global methods for data checking (c# / dynlan / sql)
 support for add refenernces for executing project / custom namespaces / custom dll's
 support for complex types
 ? support for diffirent parameters parsing styles (dynamic / json / pure .net)
@@ -13,6 +16,8 @@ support for table storage
 support for file storage
 support service bus
 support for table queue
+
+refactoing & simplifying exection (tokens should be immutable and results should be save in other collection)
 
 DONE:
 support for saving data through api (dynlan)

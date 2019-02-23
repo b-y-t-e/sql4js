@@ -21,17 +21,18 @@ namespace sql4js.Parser
 
         public S4JTokenRoot Parse(String Text)
         {
-            IList<char> chars = Text.Trim().ToCharArray();
+            char[] chars = Text.Trim().ToCharArray();
 
             S4JStateBag stateBag = new S4JStateBag();
             if (AvailableFunctions != null)
             {
                 foreach (S4JStateFunction function in AvailableFunctions)
                 {
-                    stateBag.Add(function);
-                    stateBag.Add(function.BracketsDefinition);
-                    stateBag.Add(function.CommentDefinition);
-                    stateBag.Add(function.QuotationDefinition);
+                    stateBag.Add(
+                        function,
+                        function.BracketsDefinition,
+                        function.CommentDefinition,
+                        function.QuotationDefinition);
                 }
             }
 
@@ -42,9 +43,10 @@ namespace sql4js.Parser
             };
             valueStack.Push(rootVal);
 
-            Int32 startIndex = S4JParserHelper.SkipWhiteSpaces(chars, 0) ?? Int32.MaxValue;
+            Int32 startIndex = S4JParserHelper.
+                SkipWhiteSpaces(chars, 0) ?? Int32.MaxValue;
 
-            for (int i = startIndex; i < chars.Count; i++)
+            for (int i = startIndex; i < chars.Length; i++)
             {
                 foreach (S4JStateStackEvent stackEvent in Analyse(chars, i, stateBag, valueStack))
                 {
@@ -139,13 +141,13 @@ namespace sql4js.Parser
             return rootVal;
         }
 
-        private static IEnumerable<S4JStateStackEvent> Analyse(IList<char> code, int index, S4JStateBag StateBag, S4JTokenStack stateStack) // S4JStateStack stateStack)
+        private static IEnumerable<S4JStateStackEvent> Analyse(char[] code, int index, S4JStateBag StateBag, S4JTokenStack stateStack) // S4JStateStack stateStack)
         {
             // sprawdzamy zakończenie stanu
             S4JToken prevToken = stateStack.Peek();
             if (GetStateEnd(code, index, StateBag, prevToken) != null)
             {
-                Int32 nextIndex = index + (prevToken.State.FoundGates.First().End == null ? 0 : (prevToken.State.FoundGates.First().End.Count - 1)) + 1;
+                Int32 nextIndex = index + (prevToken.State.FoundGates.First().End == null ? 0 : (prevToken.State.FoundGates.First().End.Length - 1)) + 1;
 
                 yield return new S4JStateStackEvent()
                 {
@@ -162,7 +164,7 @@ namespace sql4js.Parser
             S4JState state = GetStateBegin(code, index, StateBag, prevToken);
             if (state != null)
             {
-                Int32 nextIndex = index + (state.FoundGates?.FirstOrDefault()?.Start == null ? 0 : (state.FoundGates.First().Start.Count - 1)) + 1;
+                Int32 nextIndex = index + (state.FoundGates?.FirstOrDefault()?.Start == null ? 0 : (state.FoundGates.First().Start.Length - 1)) + 1;
 
                 yield return new S4JStateStackEvent()
                 {
@@ -216,7 +218,7 @@ namespace sql4js.Parser
             }
         }
 
-        private static S4JState GetStateEnd(IList<char> code, Int32 index, S4JStateBag StateBag, S4JToken prevToken)
+        private static S4JState GetStateEnd(char[] code, Int32 index, S4JStateBag StateBag, S4JToken prevToken)
         {
             if (prevToken == null)
                 return null;
@@ -227,139 +229,89 @@ namespace sql4js.Parser
             foreach (var gate in prevToken.State.FoundGates)
             {
                 // TODO GATE
-                IList<char> end = gate.End;  // prevTokenNonValue?.State?.Gate?.End;
+                char[] end = gate.End;
                 if (S4JParserHelper.Is(code, index, end))
                 {
                     prevToken.State.FoundGates.RemoveAll(g => g != gate);
 
                     return prevToken?.State;
-                    /*yield return new S4JStateStackEvent()
-                    {
-                        NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + (end == null ? 0 : (end.Count - 1)) + 1),
-                        State = stateStack.Peek()?.State,
-                        Popped = true,
-                        // Chars = end
-                    };
-                    */
                 }
             }
 
             return null;
         }
 
-        private static S4JState GetStateBegin(IList<char> code, Int32 index, S4JStateBag StateBag, S4JToken prevToken)
+        private static S4JState GetStateBegin(char[] code, Int32 index, S4JStateBag StateBag, S4JToken prevToken)
         {
             if (prevToken == null)
                 return null;
 
-            foreach (S4JState state in StateBag)
+            //foreach (S4JState state in StateBag.GetStates(prevToken.State.AllowedStatesNames))
             {
                 // sprawdzamy rozpoczecie stanu
-                if (prevToken == null ||
-                    prevToken.State.IsAllowed(state))
+                // if (prevToken == null /*||
+                //    prevToken.State.IsAllowed(state)*///)
                 {
-
                     Boolean isAllowed = false;
                     List<S4JStateGate> matchedGates = new List<S4JStateGate>();
 
-                    // IsSimpleValue -> bedzie zawsze sprawdzany na końcu
-                    /*if (state.IsSimpleValue)
+                    S4JState foundState = null;
+
+                    // pobszukiwanie rozpoczecia stanu
+                    foreach (S4JState state in StateBag.GetStates(prevToken?.State))
                     {
-                        isAllowed = true;
-                    }
-                    else*/
-                    {
-                        // pobszukiwanie rozpoczecia stanu
                         foreach (S4JStateGate gate in state.Gates)
                         {
                             if (S4JParserHelper.Is(code, index, gate.Start))
                             {
                                 matchedGates.Add(gate.Clone());
                                 isAllowed = true;
-                                // break;
+                                foundState = state;
+                                //break;
                             }
+                        }
+
+                        //if (isAllowed)
+                        //    break;
+                    }
+
+                    if (isAllowed)
+                    {
+                        S4JState newState = foundState.Clone();
+                        newState.FoundGates = matchedGates;
+                        return newState;
+                    }
+                }
+            }
+
+            /*foreach (S4JState state in StateBag)
+            {
+                // sprawdzamy rozpoczecie stanu
+                if (prevToken == null ||
+                    prevToken.State.IsAllowed(state))
+                {
+                    Boolean isAllowed = false;
+                    List<S4JStateGate> matchedGates = new List<S4JStateGate>();
+
+                    // pobszukiwanie rozpoczecia stanu
+                    foreach (S4JStateGate gate in state.Gates)
+                    {
+                        if (S4JParserHelper.Is(code, index, gate.Start))
+                        {
+                            matchedGates.Add(gate.Clone());
+                            isAllowed = true;
                         }
                     }
 
                     if (isAllowed)
                     {
-                        // if (!state.IsComment)
-                        {
-                            S4JState newState = state.Clone();
-                            newState.FoundGates = matchedGates;
-                            return newState;
-                        }
-                        break;
-                        /*if (!state.IsComment)
-                        {
-                            if (state.IsComa || state.IsDelimiter)
-                            {
-                                yield return new S4JStateStackEvent()
-                                {
-                                    NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + 1),
-                                    State = state,
-                                    Chars = null
-                                };
-
-                                yield break;
-                            }
-
-                            // jeśli poprzedni stan to 'prosta wartość' 
-                            // i aktualny to też 'prosta wartość'
-                            // to chcemy dodać znak do aktualnego stanu na stosie
-                            if (prevToken.State.IsSimpleValue &&
-                                !prevToken.IsCommited &&
-                                state.IsSimpleValue)
-                            {
-                                yield return new S4JStateStackEvent()
-                                {
-                                    NewIndex = S4JParserHelper.SkipWhiteSpaces(code, index + 1),
-                                    State = stateStack.Peek()?.State,
-                                    Chars = new[] { code[index] }
-                                };
-
-                                yield break;
-                            }
-
-                            // jeśli poprzedni stan to 'prosta wartość' 
-                            // i aktualny to nie 'prosta wartość'
-                            // to sciagamy aktualny stan ze stosu 
-                            // i dodajemy nowy stany na stos
-                            if (prevToken.State.IsSimpleValue &&
-                                (prevToken.IsCommited || !state.IsSimpleValue))
-                            {
-                                yield return new S4JStateStackEvent()
-                                {
-                                    NewIndex = null,
-                                    State = prevToken?.State,
-                                    Popped = true,
-                                    Chars = null
-                                };
-                            }
-                        }
-                        else
-                        {
-
-                        }*/
-
-                        /* S4JState newState = state.Clone();
-                         newState.Gate = matchedGate;
-                         yield return new S4JStateStackEvent()
-                         {
-                             // NewIndex = null,
-                             NewIndex =
-                                     // state.IsCollection ?
-                                     S4JParserHelper.SkipWhiteSpaces(code, index + (matchedGate?.Start == null ? 0 : (matchedGate.Start.Count - 1)) + 1),
-                             //   index + (matchedGate?.Start == null ? 0 : (matchedGate.Start.Count - 1)) + 1,
-                             State = newState,
-                             Pushed = true,
-                             // Chars = matchedGate?.Start ?? new[] { code[index] }
-                         };
-
-                         yield break;*/
+                        S4JState newState = state.Clone();
+                        newState.FoundGates = matchedGates;
+                        return newState;
                     }
                 }
-            }
+            }*/
+
             return null;
         }
     }

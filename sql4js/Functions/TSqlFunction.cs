@@ -33,7 +33,7 @@ namespace sql4js.Functions
         {
             Priority = 1;
             StateType = EStateType.FUNCTION_COMMENT;
-            AllowedStatesNames = new List<EStateType?>()
+            AllowedStateTypes = new [] 
                 {
                     EStateType.FUNCTION_COMMENT
                 };
@@ -60,10 +60,6 @@ namespace sql4js.Functions
         {
             Priority = 2;
             StateType = EStateType.FUNCTION_QUOTATION;
-            AllowedStatesNames = new List<EStateType?>()
-            {
-
-            };
             IsValue = true;
             IsQuotation = true;
             Gates = new List<S4JStateGate>()
@@ -84,7 +80,7 @@ namespace sql4js.Functions
         {
             IsValue = true;
             StateType = EStateType.FUNCTION_BRACKETS;
-            AllowedStatesNames = new List<EStateType?>()
+            AllowedStateTypes = new [] 
                 {
                     EStateType.FUNCTION_BRACKETS,
                     EStateType.FUNCTION_COMMENT

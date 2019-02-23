@@ -12,6 +12,7 @@ using sql4js.Helpers;
 using System.Data.SqlClient;
 using sql4js.Helpers.CoreHelpers;
 using System.Collections;
+using System.Dynamic;
 //using ProZ.Classes.Classes;
 
 namespace sql4js.Helpers.DatabaseHelpers
@@ -99,6 +100,22 @@ namespace sql4js.Helpers.DatabaseHelpers
             return default(T);
         }
 
+        public static T Select<T>(
+            this DbConnection Connection,
+            String Query)
+            where T : class, new()
+        {
+            T lResult = null;
+            if (Connection != null)
+            {
+                Connection.ExecuteReader<T>(Query, true, (r) =>
+                {
+                    lResult = r.MatchTo<T>();
+                });
+            }
+            return lResult;
+        }
+
         public static List<T> SelectMany<T>(
             this DbConnection Connection,
             String Query)
@@ -112,22 +129,6 @@ namespace sql4js.Helpers.DatabaseHelpers
                     var lItem = r.MatchTo<T>();
                     if (lItem != null)
                         lResult.Add(lItem);
-                });
-            }
-            return lResult;
-        }
-
-        public static T Select<T>(
-            this DbConnection Connection,
-            String Query)
-            where T : class, new()
-        {
-            T lResult = null;
-            if (Connection != null)
-            {
-                Connection.ExecuteReader<T>(Query, true, (r) =>
-                {
-                    lResult = r.MatchTo<T>();
                 });
             }
             return lResult;
@@ -515,7 +516,7 @@ namespace sql4js.Helpers.DatabaseHelpers
                     throw new NotSupportedException("TableName sould not be empty!");
                 //TableName = getTableName(Item.GetType());
 
-                DbDataColumns databaseColumns = DatabaseHelper.GetColumns(Connection, TableName);
+                DbDataColumns databaseColumns = DatabaseCache.GetColumns(Connection, TableName);
                 MyQuery saveQuery = new MyQuery();
 
                 Object primaryKeyValue = GetPrimaryKeyValue(Item, PrimaryKey);
@@ -686,6 +687,78 @@ namespace sql4js.Helpers.DatabaseHelpers
             }
         }*/
 
+        public static dynamic Select(
+            this DbConnection Connection,
+            String Query)
+        {
+            dynamic lResult = null;
+            if (Connection != null)
+            {
+                Connection.ExecuteReader(Query, true, (r) =>
+                {
+                    var item = new ExpandoObject() as IDictionary<string, object>;
+                    for (var i = 0; i < r.FieldCount; i++)
+                    {
+                        Object val = r.GetValue(i);
+                        String name = r.GetName(i);
+                        if (val == null || val is DBNull)
+                            val = null;
+                        item[name.Replace(" ", "_")] = val;
+                    }
+                    lResult = item;
+                });
+            }
+            return lResult;
+        }
+
+        public static List<dynamic> SelectMany(
+            this DbConnection Connection,
+            String Query)
+        {
+            List<dynamic> lResult = new List<dynamic>();
+            if (Connection != null)
+            {
+                Connection.ExecuteReader(Query, false, (r) =>
+                {
+                    var item = new ExpandoObject() as IDictionary<string, object>;
+                    for (var i = 0; i < r.FieldCount; i++)
+                    {
+                        Object val = r.GetValue(i);
+                        String name = r.GetName(i);
+                        if (val == null || val is DBNull)
+                            val = null;
+                        item[name.Replace(" ", "_")] = val;
+                    }
+                    lResult.Add(item);
+                });
+            }
+            return lResult;
+        }
+
+        public static Dictionary<String, Object> SelectAsDict(
+            this DbConnection Connection,
+            String Query)
+        {
+            Dictionary<String, Object> lResult = null;
+            if (Connection != null)
+            {
+                Connection.ExecuteReader(Query, true, (r) =>
+                {
+                    Dictionary<String, Object> item = new Dictionary<String, Object>();
+                    for (var i = 0; i < r.FieldCount; i++)
+                    {
+                        Object val = r.GetValue(i);
+                        String name = r.GetName(i);
+                        if (val == null || val is DBNull)
+                            val = null;
+                        item[name.Replace(" ", "_")] = val;
+                    }
+                    lResult = item;
+                });
+            }
+            return lResult;
+        }
+
         public static List<Dictionary<String, Object>> SelectManyAsDict(
             this DbConnection Connection,
             String Query)
@@ -709,7 +782,6 @@ namespace sql4js.Helpers.DatabaseHelpers
             }
             return lResult;
         }
-
 
         /// <summary>
         /// odpala datareader'a

@@ -21,17 +21,17 @@ namespace sql4js.Parser
             return newIndex;
         }
 
-        public static bool Is(IList<char> chars, int index, IList<char> toFindChars)
+        public static bool Is(char[] chars, int index, char[] toFindChars)
         {
             if (toFindChars == null)
                 return false;
 
             bool result = false;
-            var j = toFindChars.Count - 1;
+            var j = toFindChars.Length - 1;
             var i = index + j;
-            if (chars.Count > 0)
+            if (chars.Length > 0)
             {
-                if (i >= chars.Count)
+                if (i >= chars.Length)
                 {
                     result = false;
                     return result;

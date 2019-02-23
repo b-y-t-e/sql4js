@@ -5,7 +5,11 @@ VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sql4js", "sql4js\sql4js.csproj", "{918867DB-BE6E-4AAF-BC62-46C937653755}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sql4js.tests", "sql4js.tests\sql4js.tests.csproj", "{805A30B6-009D-47E2-844D-DEB0651B92C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sql4js.tests", "sql4js.tests\sql4js.tests.csproj", "{805A30B6-009D-47E2-844D-DEB0651B92C5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynJsonAzureService", "DynJsonAzureService\DynJsonAzureService.csproj", "{E95D5DC2-ADC9-4B28-876C-D4D473083472}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sql4j.for.profiler", "sql4j.for.profiler\sql4j.for.profiler.csproj", "{896E2EFB-70F7-4AEE-A896-C453CCFDF2F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{805A30B6-009D-47E2-844D-DEB0651B92C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{805A30B6-009D-47E2-844D-DEB0651B92C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{805A30B6-009D-47E2-844D-DEB0651B92C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E95D5DC2-ADC9-4B28-876C-D4D473083472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E95D5DC2-ADC9-4B28-876C-D4D473083472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E95D5DC2-ADC9-4B28-876C-D4D473083472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E95D5DC2-ADC9-4B28-876C-D4D473083472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{896E2EFB-70F7-4AEE-A896-C453CCFDF2F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{896E2EFB-70F7-4AEE-A896-C453CCFDF2F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{896E2EFB-70F7-4AEE-A896-C453CCFDF2F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{896E2EFB-70F7-4AEE-A896-C453CCFDF2F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

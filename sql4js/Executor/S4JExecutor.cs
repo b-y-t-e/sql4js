@@ -44,7 +44,7 @@ namespace sql4js.Executor
 
         async public Task<S4JToken> ExecuteWithParameters(String MethodDefinitionAsJson, params Object[] Parameters)
         {
-            S4JToken methodDefinition = Parser.Parse(MethodDefinitionAsJson);
+            S4JTokenRoot methodDefinition = Parser.Parse(MethodDefinitionAsJson);
             return await ExecuteWithParameters(methodDefinition, Parameters);
         }
 
@@ -123,6 +123,7 @@ namespace sql4js.Executor
                             foreach (S4JToken tokenFromResult in tokensFromResult)
                             {
                                 S4JToken newObjectToken = objectToken.Clone();
+                                newObjectToken.Parent = objectToken.Parent;
 
                                 newObjectToken.ReplaceChild(
                                     indexOfFun,

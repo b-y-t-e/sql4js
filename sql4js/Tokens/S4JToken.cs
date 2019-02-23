@@ -225,21 +225,22 @@ namespace sql4js.Tokens
             {
                 if (builder.ToString().StartsWith(new string(State.FoundGates.First().Start.ToArray())))
                 {
-                    builder.Remove(0, State.FoundGates.First().Start.Count);
+                    builder.Remove(0, State.FoundGates.First().Start.Length);
                 }
                 if (builder.ToString().EndsWith(new string(State.FoundGates.First().End.ToArray())))
                 {
-                    builder.Remove(builder.Length - State.FoundGates.First().End.Count, State.FoundGates.First().End.Count);
+                    builder.Remove(builder.Length - State.FoundGates.First().End.Length, State.FoundGates.First().End.Length);
                 }
             }
             return builder.ToString();
         }
 
-        public S4JToken Clone()
+        public virtual S4JToken Clone()
         {
             S4JToken newToken = (S4JToken)this.MemberwiseClone();
             newToken.State = newToken.State?.Clone();
-            newToken.Children = newToken.Children.Select(i => i.Clone()).ToList();
+            newToken.Parent = null;
+            newToken.Children = newToken.Children.Select(i => { S4JToken token = i.Clone(); token.Parent = newToken; return token; }).ToList();
             // newToken.Parent = newToken.Parent?.Clone();
             return newToken;
         }
@@ -301,7 +302,7 @@ namespace sql4js.Tokens
 
             if (IsRequired && Value == null)
                 throw new S4JNullParameterException("Parameter " + Name + " cannot be null");
-            
+
             if (Value != null && Type == S4JFieldType.BOOL)
                 if (!MyTypeHelper.IsBoolean(Value.GetType()))
                     throw new S4JInvalidParameterTypeException("Parameter " + Name + " should be of type boolean");
@@ -346,7 +347,7 @@ namespace sql4js.Tokens
             return Type.ToString().ToLower();
         }
     }
-    
+
     [Serializable]
     public class S4JNullParameterException : Exception
     {

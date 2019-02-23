@@ -12,17 +12,24 @@ namespace sql4js.Parser
 
         public S4JState ValueState;
 
+        ////////////////////////////////////////
+
         private List<S4JState> items;
+
+        private Dictionary<EStateType, List<S4JState>> dict;
+
+        ////////////////////////////////////////
 
         public S4JStateBag()
         {
             items = new List<S4JState>();
+            dict = new Dictionary<EStateType, List<S4JState>>();
 
-            RootState = new S4JState()
+            RootState = AddBase(new S4JState()
             {
                 Priority = -1000,
                 StateType = EStateType.S4J,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
                     EStateType.S4J_COMMENT,
                     EStateType.S4J_QUOTATION,
@@ -39,16 +46,15 @@ namespace sql4js.Parser
                 {
 
                 }
-            };
-            this.items.Add(RootState);
+            });
 
             ////////////////////////////////
 
-            S4JState sS4jComment = new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = -999,
                 StateType = EStateType.S4J_COMMENT,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
                     EStateType.S4J_COMMENT
                 },
@@ -66,16 +72,15 @@ namespace sql4js.Parser
                         End = "\n".ToCharArray()
                     }
                 }
-            };
-            this.items.Add(sS4jComment);
+            });
 
             ////////////////////////////////
 
-            /*S4JState sS4jSqlExpression = new S4JState()
+            /*AddBase( new S4JState()
             {
                 StateType = EStateType.SQL,
                 IsValue = true,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStatesNames = new [] 
                 {
                     EStateType.SQL_COMMENT
                 },
@@ -88,15 +93,14 @@ namespace sql4js.Parser
                         Inner = "\\".ToCharArray()
                     }
                 }
-            };
-            this.items.Add(sS4jSqlExpression);*/
+            });*/
 
             ////////////////////////////////
 
-            //S4JState sSqlComment = new S4JState()
+            //AddBase(new S4JState()
             //{
             //    StateType = EStateType.SQL_COMMENT,
-            //    AllowedStatesNames = new List<EStateType?>()
+            //    AllowedStatesNames = new [] 
             //    {
             //        EStateType.SQL_COMMENT
             //    },
@@ -114,21 +118,16 @@ namespace sql4js.Parser
             //            End = "\n".ToCharArray()
             //        }
             //    }
-            //};
-            //this.items.Add(sSqlComment);
+            //});
 
             ////////////////////////////////
 
-            S4JState sS4jQuotation = new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = -998,
                 StateType = EStateType.S4J_QUOTATION,
                 IsValue = true,
                 IsQuotation = true,
-                AllowedStatesNames = new List<EStateType?>()
-                {
-                    // EStateType.S4J_QUOTATION
-                },
                 Gates = new List<S4JStateGate>()
                 {
                     new S4JStateGate()
@@ -144,17 +143,16 @@ namespace sql4js.Parser
                         Inner = "\\".ToCharArray()
                     }
                 }
-            };
-            this.items.Add(sS4jQuotation);
+            });
 
             ////////////////////////////////
 
-            this.items.Add(new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = 1000,
                 StateType = EStateType.S4J_ARRAY,
                 IsCollection = true,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
                     EStateType.S4J_COMMENT,
                     EStateType.S4J_QUOTATION,
@@ -176,12 +174,12 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            this.items.Add(new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = 2000,
                 StateType = EStateType.S4J_OBJECT,
                 IsCollection = true,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
                     EStateType.S4J_COMMENT,
                     EStateType.S4J_QUOTATION,
@@ -204,12 +202,12 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            this.items.Add(new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = 2500,
                 StateType = EStateType.S4J_TAG,
                 IsCollection = true,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
                     //EStateType.S4J_COMMENT,
                     //EStateType.S4J_QUOTATION,
@@ -241,12 +239,12 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            this.items.Add(new S4JState()
+            AddBase(new S4JState()
             {
-                Priority = 2500,
+                Priority = 2600,
                 StateType = EStateType.S4J_PARAMETERS,
                 IsCollection = true,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
                     EStateType.S4J_COMMENT,
                     EStateType.S4J_QUOTATION,
@@ -265,15 +263,16 @@ namespace sql4js.Parser
                     }
                 }
             });
+
             ////////////////////////////////
 
-            S4JState sS4jDelimiter = new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = 3000,
                 StateType = EStateType.S4J_VALUE_DELIMITER,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
-                    null
+                    EStateType.ANY
                 },
                 IsDelimiter = true,
                 Gates = new List<S4JStateGate>()
@@ -283,18 +282,17 @@ namespace sql4js.Parser
                         Start = ":".ToCharArray()
                     }
                 }
-            };
-            this.items.Add(sS4jDelimiter);
+            });
 
             ////////////////////////////////
 
-            S4JState sS4jSeparator = new S4JState()
+            AddBase(new S4JState()
             {
                 Priority = 4000,
                 StateType = EStateType.S4J_COMA,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
-                    null
+                    EStateType.ANY
                 },
                 IsComa = true,
                 Gates = new List<S4JStateGate>()
@@ -304,18 +302,17 @@ namespace sql4js.Parser
                         Start = ",".ToCharArray()
                     }
                 }
-            };
-            this.items.Add(sS4jSeparator);
+            });
 
             ////////////////////////////////
 
-            S4JState sS4jValue = new S4JState()
+            this.ValueState = AddBase(new S4JState()
             {
                 Priority = 5000,
                 StateType = EStateType.S4J_TEXT_VALUE,
-                AllowedStatesNames = new List<EStateType?>()
+                AllowedStateTypes = new[]
                 {
-                    null
+                    EStateType.ANY
                 },
                 IsValue = true,
                 IsSimpleValue = true,
@@ -330,9 +327,73 @@ namespace sql4js.Parser
                         End = ":".ToCharArray()
                     }
                 }
-            };
-            this.items.Add(sS4jValue);
-            this.ValueState = sS4jValue;
+            });
+
+            CorrectItems();
+            CorrectOrderOfItems();
+        }
+
+        public IEnumerable<S4JState> GetStates(S4JState State)
+        {
+            if (State?.AllowedStateTypes == null)
+                return items;
+
+            return State.AllowedStates; // StateTypes.Select(i => dict[i]).OrderBy(i => i.Priority);
+
+            // return this.items.Where((s, i) => StateTypes.Contains(s.StateType));
+        }
+
+        public void Add(params S4JState[] States)
+        {
+            foreach (S4JState state in States)
+            {
+                AddBase(state);
+                Correct(state);
+            }
+            CorrectDependent(States);
+            CorrectOrderOfItems();
+        }
+
+        S4JState AddBase(S4JState state)
+        {
+            this.items.Add(state);
+
+            if (!this.dict.ContainsKey(state.StateType))
+                this.dict[state.StateType] = new List<S4JState>();
+
+            this.dict[state.StateType].Add(state);
+            return state;
+        }
+
+        void CorrectItems()
+        {
+            foreach (S4JState state in items)
+                Correct(state);
+        }
+
+        void CorrectDependent(IEnumerable<S4JState> States)
+        {
+            foreach (EStateType stateType in States.Select(s => s.StateType))
+                foreach (S4JState state in items)
+                    if (state.AllowedStateTypes.Contains(stateType))
+                        Correct(state);
+        }
+
+        void Correct(S4JState State)
+        {
+            State.AllowedStates = State.AllowedStateTypes == null ? null :
+                (State.AllowedStateTypes.
+                    Where(i => dict.ContainsKey(i)).
+                    SelectMany(i => dict[i]).
+                    OrderBy(i => i.Priority).
+                    ToArray());
+        }
+
+        void CorrectOrderOfItems()
+        {
+            this.items = this.items.
+                OrderBy(i => i.Priority).
+                ToList();
         }
 
         public IEnumerator<S4JState> GetEnumerator()
@@ -343,15 +404,6 @@ namespace sql4js.Parser
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)items.GetEnumerator();
-        }
-     
-        public void Add(S4JState State)
-        {
-            if (State == null)
-                return;
-
-            this.items.Add(State);
-            this.items = this.items.OrderBy(i => i.Priority).ToList();
         }
     }
 }

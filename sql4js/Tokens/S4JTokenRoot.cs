@@ -27,6 +27,15 @@ namespace sql4js.Tokens
             Tags = new Dictionary<string, Object>();
         }
 
+        public override S4JToken Clone()
+        {
+            S4JTokenRoot token = base.Clone() as S4JTokenRoot;
+            token.Tags = new Dictionary<string, object>(this.Tags);
+            token.ParametersDefinitions = new Dictionary<string, S4JFieldDescription>(this.ParametersDefinitions);
+            token.Parameters = new Dictionary<string, object>(this.Parameters);
+            return token;
+        }
+
         public override void AddChildToToken(S4JToken Child)
         {
             base.AddChildToToken(Child);

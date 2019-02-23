@@ -233,7 +233,7 @@ class osoba() { imie= ''; nazwisko = ''; } o = osoba(); o.imie = 'adam'; o.nazwi
 
             var result = await new S4JExecutorForTests().
                 ExecuteWithParameters(script1);
-
+            
             var txt = result.ToJson();
 
             Assert.AreEqual(
