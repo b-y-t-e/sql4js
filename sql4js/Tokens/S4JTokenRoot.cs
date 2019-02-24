@@ -75,75 +75,53 @@ namespace sql4js.Tokens
             base.Commit();
 
             S4JTokenRoot root = this;
-            /*if (root.Children.Any(c => c is S4JTokenParameters))
+
+            // ustalenie root name
+            if (root.Children.Count > 1 && (root.Children.FirstOrDefault() is S4JTokenTextValue nameToken))
             {
-                if (root.Children.Count < 3 ||
-                    !(root.Children[0] is S4JTokenTextValue) ||
-                    !(root.Children[1] is S4JTokenParameters))
-                {
-                    throw new InvalidParametersException();
-                }
+                // dodanie tagów do root'a
+                foreach (var tagKV in nameToken.Tags)
+                    this.Tags[tagKV.Key] = tagKV.Value;
 
-                S4JTokenTextValue name = root.Children[0] as S4JTokenTextValue;
-                S4JTokenParameters parameters = root.Children[1] as S4JTokenParameters;
-
-                root.Name = UniConvert.ToString(name.ToJson().ParseJsonOrText());
-
-                //root.ReplaceChild(name, null);
-                //root.ReplaceChild(parameters, null);
+                root.Name = UniConvert.ToString(nameToken.ToJson().ParseJsonOrText());
+                root.RemoveChild(nameToken, null);
             }
-            else*/
 
+            // ustalenie parameters
+            if ((root.Children.FirstOrDefault() is S4JTokenParameters parametersToken))
             {
+                // dodanie tagów do root'a
+                foreach (var tagKV in parametersToken.Tags)
+                    this.Tags[tagKV.Key] = tagKV.Value;
 
-                // root name
-                if (root.Children.Count > 1 && (root.Children.FirstOrDefault() is S4JTokenTextValue nameToken))
+                root.ParametersDefinitions = new Dictionary<string, S4JFieldDescription>();
+                root.Parameters = new Dictionary<string, object>();
+
+                string lastKey = null;
+                foreach (S4JToken child in parametersToken.Children)
                 {
-                    // dodanie tagów
-                    foreach (var tagKV in nameToken.Tags)
-                        this.Tags[tagKV.Key] = tagKV.Value;
+                    Object val = child.ToJson().ParseJsonOrText();
 
-                    root.Name = UniConvert.ToString(nameToken.ToJson().ParseJsonOrText());
-                    root.RemoveChild(nameToken, null);
-                }
-
-                // parameters
-                if ((root.Children.FirstOrDefault() is S4JTokenParameters parametersToken))
-                {
-                    // dodanie tagów
-                    foreach (var tagKV in parametersToken.Tags)
-                        this.Tags[tagKV.Key] = tagKV.Value;
-
-                    root.ParametersDefinitions = new Dictionary<string, S4JFieldDescription>();
-                    root.Parameters = new Dictionary<string, object>();
-
-                    string lastKey = null;
-                    foreach (S4JToken child in parametersToken.Children)
+                    if (child.IsObjectSingleKey)
                     {
-                        Object val = child.ToJson().ParseJsonOrText();
-
-                        if (child.IsObjectSingleKey)
-                        {
-                            lastKey = null;
-                            root.ParametersDefinitions[UniConvert.ToString(val)] = null;
-                            root.Parameters[UniConvert.ToString(val)] = null;
-                        }
-                        else if (child.IsObjectKey)
-                        {
-                            lastKey = null;
-                            lastKey = UniConvert.ToString(val);
-                            root.ParametersDefinitions[lastKey] = null;
-                            root.Parameters[lastKey] = null;
-                        }
-                        else if (child.IsObjectValue)
-                        {
-                            root.ParametersDefinitions[lastKey] = S4JFieldDescription.Parse(lastKey, UniConvert.ToString(val));
-                            root.Parameters[lastKey] = null;
-                        }
+                        lastKey = null;
+                        root.ParametersDefinitions[UniConvert.ToString(val)] = null;
+                        root.Parameters[UniConvert.ToString(val)] = null;
                     }
-                    root.RemoveChild(parametersToken, null);
+                    else if (child.IsObjectKey)
+                    {
+                        lastKey = null;
+                        lastKey = UniConvert.ToString(val);
+                        root.ParametersDefinitions[lastKey] = null;
+                        root.Parameters[lastKey] = null;
+                    }
+                    else if (child.IsObjectValue)
+                    {
+                        root.ParametersDefinitions[lastKey] = S4JFieldDescription.Parse(lastKey, UniConvert.ToString(val));
+                        root.Parameters[lastKey] = null;
+                    }
                 }
-
+                root.RemoveChild(parametersToken, null);
             }
         }
     }
