@@ -28,6 +28,21 @@ namespace sql4js.Executor
             this.Sources = new Sources();
         }
 
+        async public Task<S4JToken> ExecuteWithJsonParameters(String MethodDefinitionAsJson, Dictionary<string, string> ParametersAsJson)
+        {
+            Dictionary<string, object> parameters = null;
+
+            if (ParametersAsJson != null)
+            {
+                parameters = ParametersAsJson.
+                    ToDictionary(
+                        p => p.Key,
+                        p => JsonToDynamicDeserializer.Deserialize(p.Value));
+            }
+
+            return await ExecuteWithParameters(MethodDefinitionAsJson, parameters);
+        }
+
         async public Task<S4JToken> ExecuteWithJsonParameters(String MethodDefinitionAsJson, params String[] ParametersAsJson)
         {
             Object[] parameters = null;
@@ -81,9 +96,9 @@ namespace sql4js.Executor
         {
             if (MethodDefinition is S4JTokenRoot root)
             {
-                if (Parameters != null)                
-                    foreach (string parameterName in Parameters.Keys)                    
-                        root.Parameters[parameterName] = Parameters[parameterName];                                    
+                if (Parameters != null)
+                    foreach (string parameterName in Parameters.Keys)
+                        root.Parameters[parameterName] = Parameters[parameterName];
 
                 // validate parameters
                 foreach (var parameter in root.Parameters)
