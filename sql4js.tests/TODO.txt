@@ -6,6 +6,11 @@ dodanie obslugi dla tagow -> np.
  + przekazujemy jakis dodatkowy parametr do funckji wewnatrz (np w sql tablice # zamiast @)
  + albo sprawdzamy czy funkcje mozna zawolac np. post / get
 
+refactoring dla Root'a -> de facto root to metoda s4j (czy zmiana nazwy) 
+refactoring dla Root'a -> oznaczenie stan'ów / token'ów które będą 'wystawiane' jako output (a nie ich usuwanie)
+refactoring dla Root'a -> zaprzestanie usuwania tokenów
+refactoring dla Root'a -> przemyślenie tematu tag'ów / parametrów dla root'a
+
 tagi dla funkcji wewnatrz
 cloning
 pararell tests
