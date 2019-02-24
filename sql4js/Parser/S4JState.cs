@@ -14,10 +14,10 @@ namespace sql4js.Parser
             set
             {
                 allowedStatesNames = value == null ? null : new HashSet<EStateType>(value);
-              }
+            }
         }
-        
-        public IList<S4JState> AllowedStates { get; set; }
+
+        //public IList<S4JState> AllowedStates { get; set; }
 
         public List<S4JStateGate> Gates { get; set; }
 
@@ -45,10 +45,13 @@ namespace sql4js.Parser
 
         public Boolean IsComa { get; set; }
 
+        public Guid ID { get; set; }
+
         ////////////////////////////////
 
         public S4JState()
         {
+            ID = Guid.NewGuid();
             AllowedStateTypes = new EStateType[0];
             Gates = new List<S4JStateGate>();
         }
@@ -76,6 +79,7 @@ namespace sql4js.Parser
             S4JState item = (S4JState)this.MemberwiseClone();
             item.AllowedStateTypes = this.AllowedStateTypes;
             item.Gates = this.Gates.ToList();
+            item.FoundGates = null;
             return item;
         }
     }

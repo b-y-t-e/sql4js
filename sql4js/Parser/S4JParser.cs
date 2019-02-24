@@ -8,33 +8,9 @@ namespace sql4js.Parser
 {
     public class S4JParser
     {
-        public List<S4JStateFunction> AvailableFunctions { get; set; }
-
-        ////////////////////////////////////////////////////////////////
-
-        public S4JParser()
-        {
-            AvailableFunctions = new List<S4JStateFunction>();
-        }
-
-        ////////////////////////////////////////////////////////////////
-
-        public S4JTokenRoot Parse(String Text)
+        public S4JTokenRoot Parse(String Text, S4JStateBag stateBag)
         {
             char[] chars = Text.Trim().ToCharArray();
-
-            S4JStateBag stateBag = new S4JStateBag();
-            if (AvailableFunctions != null)
-            {
-                foreach (S4JStateFunction function in AvailableFunctions)
-                {
-                    stateBag.Add(
-                        function,
-                        function.BracketsDefinition,
-                        function.CommentDefinition,
-                        function.QuotationDefinition);
-                }
-            }
 
             S4JTokenStack valueStack = new S4JTokenStack();
             S4JTokenRoot rootVal = new S4JTokenRoot()
@@ -91,7 +67,7 @@ namespace sql4js.Parser
                                 valueStack.Peek().Commit();
                             }
                         }
-                        
+
                         else
                         {
 
@@ -260,8 +236,12 @@ namespace sql4js.Parser
                     S4JState foundState = null;
 
                     // pobszukiwanie rozpoczecia stanu
-                    foreach (S4JState state in StateBag.GetStates(prevToken?.State))
+                    var allowedStates = StateBag.GetAllowedStates(prevToken?.State);
+                    //foreach (S4JState state in )
+                    for (var i = 0; i < allowedStates.Length; i++)
                     {
+                        var state = allowedStates[i];
+
                         Int32 gateStartCount = 0;
                         foreach (S4JStateGate gate in state.Gates)
                         {

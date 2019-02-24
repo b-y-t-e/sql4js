@@ -8,24 +8,30 @@ namespace sql4js.Parser
 {
     public class S4JStateBag : IEnumerable<S4JState> //: List<S4JState>
     {
-        public S4JState RootState;
+        public S4JState RootState { get; private set; }
 
-        public S4JState ValueState;
+        public S4JState ValueState { get; private set; }
 
         ////////////////////////////////////////
 
-        private List<S4JState> items;
+        private List<S4JState> all_states;
 
-        private Dictionary<EStateType, List<S4JState>> dict;
+        private Dictionary<Guid, S4JState> all_states_dict;
+
+        private Dictionary<EStateType, List<S4JState>> stateType_states;
+
+        private Dictionary<Guid, S4JState[]> stateID_allowed_states;
 
         ////////////////////////////////////////
 
         public S4JStateBag()
         {
-            items = new List<S4JState>();
-            dict = new Dictionary<EStateType, List<S4JState>>();
+            all_states = new List<S4JState>();
+            all_states_dict = new Dictionary<Guid, S4JState>();
+            stateType_states = new Dictionary<EStateType, List<S4JState>>();
+            stateID_allowed_states = new Dictionary<Guid, S4JState[]>();
 
-            RootState = AddBase(new S4JState()
+            RootState = AddState(new S4JState()
             {
                 Priority = -1000,
                 StateType = EStateType.S4J,
@@ -50,7 +56,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = -999,
                 StateType = EStateType.S4J_COMMENT,
@@ -122,7 +128,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = -998,
                 StateType = EStateType.S4J_QUOTATION,
@@ -147,7 +153,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = 1000,
                 StateType = EStateType.S4J_ARRAY,
@@ -175,7 +181,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = 2000,
                 StateType = EStateType.S4J_OBJECT,
@@ -204,7 +210,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = 2500,
                 StateType = EStateType.S4J_PARAMETERS,
@@ -232,7 +238,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = 2600,
                 StateType = EStateType.S4J_TAG,
@@ -274,7 +280,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = 3000,
                 StateType = EStateType.S4J_VALUE_DELIMITER,
@@ -294,7 +300,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            AddBase(new S4JState()
+            AddState(new S4JState()
             {
                 Priority = 4000,
                 StateType = EStateType.S4J_COMA,
@@ -314,7 +320,7 @@ namespace sql4js.Parser
 
             ////////////////////////////////
 
-            this.ValueState = AddBase(new S4JState()
+            this.ValueState = AddState(new S4JState()
             {
                 Priority = 5000,
                 StateType = EStateType.S4J_TEXT_VALUE,
@@ -341,77 +347,114 @@ namespace sql4js.Parser
             CorrectOrderOfItems();
         }
 
-        public IEnumerable<S4JState> GetStates(S4JState State)
+        ////////////////////////////////////
+
+        public S4JStateBag Clone()
         {
-            if (State?.AllowedStateTypes == null)
-                return items;
-
-            return State.AllowedStates; // StateTypes.Select(i => dict[i]).OrderBy(i => i.Priority);
-
-            // return this.items.Where((s, i) => StateTypes.Contains(s.StateType));
+            S4JStateBag item = new S4JStateBag();
+            item.all_states = this.all_states.Select(i => i.Clone()).ToList();
+            item.all_states_dict = item.all_states.ToDictionary(i => i.ID, i => i);
+            item.RootState = item.all_states_dict[this.RootState.ID];
+            item.ValueState = item.all_states_dict[this.ValueState.ID];
+            item.stateType_states = this.stateType_states.ToDictionary(i => i.Key, i => i.Value.Select(v => item.all_states_dict[v.ID]).ToList());
+            item.stateID_allowed_states = this.stateID_allowed_states.ToDictionary(i => i.Key, i => i.Value.Select(v => item.all_states_dict[v.ID]).ToArray());
+            return item;
         }
 
-        public void Add(params S4JState[] States)
+        public S4JState[] GetAllowedStates(S4JState State)
+        {
+            if (State == null)
+                return new S4JState[0];
+
+            return this.stateID_allowed_states[State.ID];
+
+        }
+
+        public void AddStatesToBag(params S4JState[] States)
         {
             foreach (S4JState state in States)
             {
-                AddBase(state);
+                AddState(state);
                 Correct(state);
             }
             CorrectDependent(States);
             CorrectOrderOfItems();
         }
 
-        S4JState AddBase(S4JState state)
+        public void AddStatesToBag(params S4JStateFunction[] States)
         {
-            this.items.Add(state);
+            foreach (S4JStateFunction state in States)
+            {
+                AddState(state);
+                AddState(state.BracketsDefinition);
+                AddState(state.CommentDefinition);
+                AddState(state.QuotationDefinition);
 
-            if (!this.dict.ContainsKey(state.StateType))
-                this.dict[state.StateType] = new List<S4JState>();
+                Correct(state);
+                Correct(state.CommentDefinition);
+                Correct(state.BracketsDefinition);
+                Correct(state.QuotationDefinition);
+            }
+            CorrectDependent(States);
+            CorrectOrderOfItems();
+        }
 
-            this.dict[state.StateType].Add(state);
+        ////////////////////////////////////
+
+        S4JState AddState(S4JState state)
+        {
+            this.all_states.Add(state);
+            this.all_states_dict[state.ID] = state;
+
+            if (!this.stateType_states.ContainsKey(state.StateType))
+                this.stateType_states[state.StateType] = new List<S4JState>();
+
+            this.stateType_states[state.StateType].Add(state);
             return state;
         }
 
         void CorrectItems()
         {
-            foreach (S4JState state in items)
+            foreach (S4JState state in all_states)
                 Correct(state);
         }
 
         void CorrectDependent(IEnumerable<S4JState> States)
         {
             foreach (EStateType stateType in States.Select(s => s.StateType))
-                foreach (S4JState state in items)
+                foreach (S4JState state in all_states)
                     if (state.AllowedStateTypes.Contains(stateType))
                         Correct(state);
         }
 
         void Correct(S4JState State)
         {
-            State.AllowedStates = State.AllowedStateTypes == null ? null :
+            if (State == null)
+                return;
+
+            this.stateID_allowed_states[State.ID] = State.AllowedStateTypes == null ? null :
                 (State.AllowedStateTypes.
-                    Where(i => dict.ContainsKey(i)).
-                    SelectMany(i => dict[i]).
+                    Where(i => stateType_states.ContainsKey(i)).
+                    SelectMany(i => stateType_states[i]).
                     OrderBy(i => i.Priority).
                     ToArray());
         }
 
         void CorrectOrderOfItems()
         {
-            this.items = this.items.
+            this.all_states = this.all_states.
                 OrderBy(i => i.Priority).
                 ToList();
         }
 
         public IEnumerator<S4JState> GetEnumerator()
         {
-            return (IEnumerator<S4JState>)items.GetEnumerator();
+            return (IEnumerator<S4JState>)all_states.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator)items.GetEnumerator();
+            return (IEnumerator)all_states.GetEnumerator();
         }
     }
 }

@@ -6,10 +6,9 @@ using System.Text;
 
 namespace sql4js.Executor
 {
-    public class S4JExecutorForTests : S4JExecutor
+    public class S4JExecutorForTests : S4JDefaultExecutor
     {
-        public S4JExecutorForTests() :
-            base(new S4JParserForTests())
+        public S4JExecutorForTests() 
         {
             Sources.Register("sql", "Data Source=.;uid=dba;pwd=sql;initial catalog=dynjson;");
         }

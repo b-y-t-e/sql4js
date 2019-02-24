@@ -4,6 +4,7 @@
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Parser\S4JDefaultParser.cs" />
     <Compile Remove="Tokens\jtr.cs" />
     <Compile Remove="Tokens\S4JTokenSimpleValue.cs" />
   </ItemGroup>

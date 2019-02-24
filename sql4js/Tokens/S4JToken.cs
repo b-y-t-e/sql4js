@@ -25,6 +25,14 @@ namespace sql4js.Tokens
 
         //////////////////////////////////////////////////
 
+        public S4JToken this[int index]
+        {
+            get { return this.Children[index]; }
+            set { Children[index] = value; }
+        }
+
+        //////////////////////////////////////////////////
+
         public bool IsObjectKey { get; set; }
 
         public bool IsObjectValue { get; set; }

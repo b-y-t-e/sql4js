@@ -9,9 +9,9 @@ namespace sql4js.Executor
     public class S4JDefaultExecutor : S4JExecutor
     {
         public S4JDefaultExecutor() :
-            base(new S4JDefaultParser())
+            base(S4JDefaultStateBag.Get())
         {
-
+            
         }
     }
 }

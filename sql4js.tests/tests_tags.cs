@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using sql4js.Parser;
 using sql4js.Executor;
 using System;
+using System.Linq;
 using NUnit;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -71,6 +72,26 @@ method ( a : int, b : string!, c: any )
             Assert.AreEqual(1, result.Tags.Count);
 
             Assert.AreEqual("admin", result.Tags["permission"]);
+        }
+
+        [Test]
+        async public Task test_simple_inner_tag()
+        {
+            var script1 = @" 
+{
+    a : 1, 
+    #tagb
+    b : 2,
+    c: 3
+}
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1) as S4JTokenRoot;
+            
+            Assert.AreEqual(1, result[0][2].Tags.Count);
+
+            Assert.AreEqual("tagb", result[0][2].Tags.Keys.FirstOrDefault());
         }
     }
 }

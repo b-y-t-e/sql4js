@@ -1,5 +1,11 @@
 ﻿
 TODO:  
+
+dodanie obslugi dla tagow -> np. 
+ + jesli mamy permission to wystawiamy wezel, 
+ + przekazujemy jakis dodatkowy parametr do funckji wewnatrz (np w sql tablice # zamiast @)
+ + albo sprawdzamy czy funkcje mozna zawolac np. post / get
+
 tagi dla funkcji wewnatrz
 cloning
 pararell tests

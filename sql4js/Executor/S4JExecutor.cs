@@ -16,15 +16,15 @@ namespace sql4js.Executor
 {
     public class S4JExecutor
     {
-        public S4JParser Parser { get; private set; }
+        public S4JStateBag StateBag { get; private set; }
 
         public Sources Sources { get; private set; }
 
         public Object Result { get; private set; }
 
-        public S4JExecutor(S4JParser Parser)
+        public S4JExecutor(S4JStateBag StateBag)
         {
-            this.Parser = Parser;
+            this.StateBag = StateBag;
             this.Sources = new Sources();
         }
 
@@ -44,7 +44,9 @@ namespace sql4js.Executor
 
         async public Task<S4JToken> ExecuteWithParameters(String MethodDefinitionAsJson, params Object[] Parameters)
         {
-            S4JTokenRoot methodDefinition = Parser.Parse(MethodDefinitionAsJson);
+            S4JTokenRoot methodDefinition = new S4JParser().
+                Parse(MethodDefinitionAsJson, StateBag);
+
             return await ExecuteWithParameters(methodDefinition, Parameters);
         }
 
