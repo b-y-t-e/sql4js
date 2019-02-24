@@ -91,7 +91,7 @@ namespace sql4js.Parser
                                 valueStack.Peek().Commit();
                             }
                         }
-
+                        
                         else
                         {
 
@@ -164,7 +164,9 @@ namespace sql4js.Parser
             S4JState state = GetStateBegin(code, index, StateBag, prevToken);
             if (state != null)
             {
-                Int32 nextIndex = index + (state.FoundGates?.FirstOrDefault()?.Start == null ? 0 : (state.FoundGates.First().Start.Length - 1)) + 1;
+                Int32 nextIndex = index + (state.FoundGates?.FirstOrDefault()?.Start == null ?
+                    0 :
+                    (state.FoundGates.First().Start.Length - 1)) + 1;
 
                 yield return new S4JStateStackEvent()
                 {
@@ -260,13 +262,18 @@ namespace sql4js.Parser
                     // pobszukiwanie rozpoczecia stanu
                     foreach (S4JState state in StateBag.GetStates(prevToken?.State))
                     {
+                        Int32 gateStartCount = 0;
                         foreach (S4JStateGate gate in state.Gates)
                         {
                             if (S4JParserHelper.Is(code, index, gate.Start))
                             {
+                                // jesli znaleziony ciag jest wiekszy od ostatniego
+                                if (gateStartCount < gate.Start.Length && matchedGates.Count > 0)
+                                    matchedGates.Clear();
                                 matchedGates.Add(gate.Clone());
                                 isAllowed = true;
                                 foundState = state;
+                                gateStartCount = gate.Start.Length;
                                 //break;
                             }
                         }

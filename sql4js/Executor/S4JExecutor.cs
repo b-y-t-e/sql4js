@@ -108,7 +108,7 @@ namespace sql4js.Executor
                             IList<S4JToken> tokensFromResult = ConvertToToken(
                                 GetManyObjectsFromResult(result)).ToArray();
 
-                            objectToken.Parent.ReplaceChild(
+                            objectToken.Parent.RemoveChild(
                                 objectToken,
                                 tokensFromResult);
                         }
@@ -125,14 +125,14 @@ namespace sql4js.Executor
                                 S4JToken newObjectToken = objectToken.Clone();
                                 newObjectToken.Parent = objectToken.Parent;
 
-                                newObjectToken.ReplaceChild(
+                                newObjectToken.RemoveChild(
                                     indexOfFun,
                                     new[] { tokenFromResult });
 
                                 newTokens.Add(newObjectToken);
                             }
 
-                            objectToken.Parent.ReplaceChild(
+                            objectToken.Parent.RemoveChild(
                                 objectToken,
                                 newTokens);
                         }
@@ -142,7 +142,7 @@ namespace sql4js.Executor
                         IList<S4JToken> tokens = ConvertToTokens(
                             GetSingleObjectFromResult(result)).ToArray();
 
-                        objectToken.ReplaceChild(
+                        objectToken.RemoveChild(
                             function,
                             tokens);
                     }
@@ -152,7 +152,7 @@ namespace sql4js.Executor
                     IList<S4JToken> tokens = ConvertToToken(
                         GetListOfSingleObjectsFromResult(result)).ToArray();
 
-                    function.Parent.ReplaceChild(
+                    function.Parent.RemoveChild(
                         function,
                         tokens);
                 }

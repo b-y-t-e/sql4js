@@ -36,10 +36,10 @@ method ( a : int, b : string!, c: any )
         }
 
         [Test]
-        async public Task test_simple_value_tag()
+        async public Task test_simple_tags_with_nospaces()
         {
             var script1 = @" 
-#post #get #permission:admin
+(#post)(#get)
 method ( a : int, b : string!, c: any ) 
 'ok'
 ";
@@ -47,7 +47,28 @@ method ( a : int, b : string!, c: any )
             var result = new S4JParserForTests().
                 Parse(script1) as S4JTokenRoot;
 
-            Assert.AreEqual(3, result.Tags.Count);
+            Assert.AreEqual(2, result.Tags.Count);
+
+            if (!result.Tags.ContainsKey("post"))
+                throw new Exception("Tag 'post' is missing");
+
+            if (!result.Tags.ContainsKey("get"))
+                throw new Exception("Tag 'get' is missing");
+        }
+
+        [Test]
+        async public Task test_simple_value_tag()
+        {
+            var script1 = @" 
+#permission:admin
+method ( a : int, b : string!, c: any ) 
+'ok'
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1) as S4JTokenRoot;
+
+            Assert.AreEqual(1, result.Tags.Count);
 
             Assert.AreEqual("admin", result.Tags["permission"]);
         }

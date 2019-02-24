@@ -429,6 +429,63 @@ namespace sql4js.tests
                 result.ToJson());
         }
 
+        [Test]
+        public void parser_should_ignore_root_tags()
+        {
+            var script1 = @"
+#tag1 #tag2
+{  
+    d: [ {@f : 6} ] , 
+    c: 'aaa' }
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1);
+
+            Assert.AreEqual(
+                @"{d:[{@f:6}],c:'aaa'}",
+                result.ToJson());
+        }
+
+        [Test]
+        public void parser_should_ignore_inner_tags()
+        {
+            var script1 = @"
+{  
+    #permission:admin
+    d: [ {@f : 6} ] , 
+    c: 'aaa' 
+}
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1);
+
+            Assert.AreEqual(
+                @"{d:[{@f:6}],c:'aaa'}",
+                result.ToJson());
+        }
+
+
+        [Test]
+        public void parser_should_ignore_any_tags()
+        {
+            var script1 = @"
+#tag1 #tag2
+{  
+    #permission:admin
+    d: [ {@f : 6} ] , 
+    c: 'aaa' }
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1);
+
+            Assert.AreEqual(
+                @"{d:[{@f:6}],c:'aaa'}",
+                result.ToJson());
+        }
+
 
         [Test]
         public void parser_should_understand_inner_object_and_arrays2()

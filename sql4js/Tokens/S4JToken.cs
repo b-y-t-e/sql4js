@@ -13,7 +13,13 @@ namespace sql4js.Tokens
     {
         public S4JToken Parent { get; set; }
 
+        public S4JToken PrevToken { get; set; }
+
+        public S4JToken NextToken { get; set; }
+
         public List<S4JToken> Children { get; set; }
+
+        public Dictionary<String, Object> Tags { get; set; }
 
         public S4JState State { get; set; }
 
@@ -31,6 +37,7 @@ namespace sql4js.Tokens
 
         public S4JToken()
         {
+            Tags = new Dictionary<string, object>();
         }
 
         //////////////////////////////////////////////////
@@ -40,8 +47,29 @@ namespace sql4js.Tokens
             return null;
         }
 
+        public virtual void InsertChildToToken(Int32 Index, S4JToken Child)
+        {
+            S4JToken prevChild = Index > 0 ? Children[Index - 1] : null;
+            S4JToken nextChild = Index + 1 < Children.Count  ? Children[Index + 1] : null;
+
+            Children.Insert(Index, Child);
+            
+            if (prevChild != null)
+                prevChild.NextToken = Child;
+
+            Child.PrevToken = prevChild;
+            Child.NextToken = nextChild;
+
+            if (nextChild != null)
+                nextChild.PrevToken = Child;
+        }
+
         public virtual void AddChildToToken(S4JToken Child)
         {
+            S4JToken lastChild = Children.LastOrDefault();
+            if (lastChild != null)
+                lastChild.NextToken = Child;
+            Child.PrevToken = lastChild;
             Children.Add(Child);
         }
 
@@ -51,24 +79,33 @@ namespace sql4js.Tokens
             return childIndex;
         }
 
-        public virtual bool ReplaceChild(S4JToken OldChild, IList<S4JToken> NewChilds)
+        public virtual bool RemoveChild(S4JToken OldChild, IList<S4JToken> NewChilds)
         {
             Int32 childIndex = IndexOfChild(OldChild);
-            return ReplaceChild(childIndex, NewChilds);
+            return RemoveChild(childIndex, NewChilds);
         }
 
-        public virtual bool ReplaceChild(Int32 childIndex, IList<S4JToken> NewChilds)
+        public virtual bool RemoveChild(Int32 Index, IList<S4JToken> NewChilds = null)
         {
-            if (childIndex < 0)
+            if (Index < 0)
                 return false;
 
-            this.Children.RemoveAt(childIndex);
+            S4JToken prevChild = Index > 0 ? Children[Index - 1] : null;
+            S4JToken nextChild = Index + 1 < Children.Count ? Children[Index + 1] : null;
+
+            this.Children.RemoveAt(Index);
+
+            if (prevChild != null)
+                prevChild.NextToken = nextChild;
+            
+            if (nextChild != null)
+                nextChild.PrevToken = prevChild;
 
             if (NewChilds != null)
                 foreach (S4JToken newChild in NewChilds)
                 {
-                    this.Children.Insert(childIndex, newChild);
-                    childIndex++;
+                    InsertChildToToken(Index, newChild);
+                    Index++;
                 }
 
             return true;
@@ -80,19 +117,19 @@ namespace sql4js.Tokens
             if (!(lastChild is S4JTokenTextValue) || lastChild.IsCommited)
             {
                 lastChild = new S4JTokenTextValue();
-                this.Children.Add(lastChild);
+                AddChildToToken(lastChild);
             }
             lastChild.AppendCharsToToken(Chars);
         }
 
-        public virtual void MarkLastChildAsObjectValue()
+        /*public virtual void MarkLastChildAsObjectValue()
         {
             S4JToken lastChild = this.Children.LastOrDefault();
             if (lastChild == null)
                 return;
 
             lastChild.MarkAsObjectValue();
-        }
+        }*/
 
         public virtual void MarkAsObjectValue()
         {
@@ -130,6 +167,25 @@ namespace sql4js.Tokens
             if (lastChild is S4JTokenTextValue txtVal)
                 txtVal.Commit();
 
+            CalculateIsSingleKey(this, lastChild);
+
+            for (var i = 0; i < this.Children.Count; i++)
+            {
+                S4JToken token = this.Children[i];
+                if (token?.State?.StateType != EStateType.S4J_TAG)
+                    continue;
+
+                if (token.NextToken != null)
+                {
+                    foreach (var tagKV in token.Tags)
+                        token.NextToken.Tags[tagKV.Key] = tagKV.Value;
+                }
+
+                RemoveChild(i);
+                i--;
+            }
+
+
             //CalculateIsSingleKey(this, lastChild);
             // CalculateIsSingleKey(this.Parent, this);
         }
@@ -142,7 +198,6 @@ namespace sql4js.Tokens
             if (lastChild is S4JTokenTextValue txtVal)
                 txtVal.Commit();
 
-            CalculateIsSingleKey(this, lastChild);
         }
 
         private void CalculateIsSingleKey(S4JToken Token, S4JToken Item)
@@ -239,7 +294,10 @@ namespace sql4js.Tokens
         {
             S4JToken newToken = (S4JToken)this.MemberwiseClone();
             newToken.State = newToken.State?.Clone();
+            newToken.Tags = new Dictionary<string, object>(this.Tags);
             newToken.Parent = null;
+            newToken.PrevToken = null;
+            newToken.NextToken = null;
             newToken.Children = newToken.Children.Select(i => { S4JToken token = i.Clone(); token.Parent = newToken; return token; }).ToList();
             // newToken.Parent = newToken.Parent?.Clone();
             return newToken;

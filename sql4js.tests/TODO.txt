@@ -1,5 +1,6 @@
 ﻿
 TODO:  
+tagi dla funkcji wewnatrz
 cloning
 pararell tests
 integration with azure functions

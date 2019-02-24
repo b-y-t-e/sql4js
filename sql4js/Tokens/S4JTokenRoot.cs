@@ -11,8 +11,6 @@ namespace sql4js.Tokens
     {
         public String Name { get; set; }
 
-        public Dictionary<String, Object> Tags { get; set; }
-
         public Dictionary<String, S4JFieldDescription> ParametersDefinitions { get; set; }
 
         public Dictionary<String, Object> Parameters { get; set; }
@@ -24,13 +22,11 @@ namespace sql4js.Tokens
             Children = new List<S4JToken>();
             Parameters = new Dictionary<string, object>();
             ParametersDefinitions = new Dictionary<string, S4JFieldDescription>();
-            Tags = new Dictionary<string, Object>();
         }
 
         public override S4JToken Clone()
         {
             S4JTokenRoot token = base.Clone() as S4JTokenRoot;
-            token.Tags = new Dictionary<string, object>(this.Tags);
             token.ParametersDefinitions = new Dictionary<string, S4JFieldDescription>(this.ParametersDefinitions);
             token.Parameters = new Dictionary<string, object>(this.Parameters);
             return token;
@@ -99,43 +95,25 @@ namespace sql4js.Tokens
             else*/
 
             {
-                // parameters
-                while ((root.Children.FirstOrDefault() is S4JTokenTag tagToken))
-                {
-                    string lastKey = null;
-                    foreach (S4JToken child in tagToken.Children)
-                    {
-                        Object val = child.ToJson().ParseJsonOrText();
-
-                        if (child.IsObjectKey)
-                        {
-                            lastKey = null;
-                            lastKey = UniConvert.ToString(val);
-                            root.Tags[lastKey] = null;
-                        }
-                        else if (child.IsObjectValue)
-                        {
-                            root.Tags[lastKey] = UniConvert.ToString(val);
-                        }
-                        else
-                        {
-                            lastKey = null;
-                            root.Tags[UniConvert.ToString(val)] = null;
-                        }
-                    }
-                    root.ReplaceChild(tagToken, null);
-                }
 
                 // root name
                 if (root.Children.Count > 1 && (root.Children.FirstOrDefault() is S4JTokenTextValue nameToken))
                 {
+                    // dodanie tagów
+                    foreach (var tagKV in nameToken.Tags)
+                        this.Tags[tagKV.Key] = tagKV.Value;
+
                     root.Name = UniConvert.ToString(nameToken.ToJson().ParseJsonOrText());
-                    root.ReplaceChild(nameToken, null);
+                    root.RemoveChild(nameToken, null);
                 }
 
                 // parameters
                 if ((root.Children.FirstOrDefault() is S4JTokenParameters parametersToken))
                 {
+                    // dodanie tagów
+                    foreach (var tagKV in parametersToken.Tags)
+                        this.Tags[tagKV.Key] = tagKV.Value;
+
                     root.ParametersDefinitions = new Dictionary<string, S4JFieldDescription>();
                     root.Parameters = new Dictionary<string, object>();
 
@@ -163,7 +141,7 @@ namespace sql4js.Tokens
                             root.Parameters[lastKey] = null;
                         }
                     }
-                    root.ReplaceChild(parametersToken, null);
+                    root.RemoveChild(parametersToken, null);
                 }
 
             }
