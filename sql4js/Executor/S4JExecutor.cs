@@ -52,27 +52,47 @@ namespace sql4js.Executor
 
         async public Task<S4JToken> ExecuteWithParameters(S4JToken MethodDefinition, params Object[] Parameters)
         {
+            Dictionary<string, object> parametersAsDict = new Dictionary<string, object>();
             if (MethodDefinition is S4JTokenRoot root)
             {
                 if (Parameters != null)
                 {
-                    Int32 index = 0;
-                    foreach (var key in root.Parameters.Keys.ToArray())
+                    int index = 0;
+                    foreach (string parameterName in root.Parameters.Keys.ToArray())
                     {
                         object parameterValue = null;
                         if (index < Parameters.Length)
                             parameterValue = Parameters[index];
 
-                        S4JFieldDescription fieldDescription = null;
-                        root.ParametersDefinitions.TryGetValue(key, out fieldDescription);
-
-                        if (fieldDescription != null)
-                            fieldDescription.Validate(parameterValue);
-
                         if (index < Parameters.Length)
-                            root.Parameters[key] = Parameters[index];
+                            parametersAsDict[parameterName] = parameterValue;
+
                         index++;
                     }
+                }
+            }
+
+            return await ExecuteWithParameters(
+                MethodDefinition,
+                parametersAsDict);
+        }
+
+        async public Task<S4JToken> ExecuteWithParameters(S4JToken MethodDefinition, Dictionary<string, object> Parameters)
+        {
+            if (MethodDefinition is S4JTokenRoot root)
+            {
+                if (Parameters != null)                
+                    foreach (string parameterName in Parameters.Keys)                    
+                        root.Parameters[parameterName] = Parameters[parameterName];                                    
+
+                // validate parameters
+                foreach (var parameter in root.Parameters)
+                {
+                    S4JFieldDescription fieldDescription = null;
+                    root.ParametersDefinitions.TryGetValue(parameter.Key, out fieldDescription);
+
+                    if (fieldDescription != null)
+                        fieldDescription.Validate(parameter.Value);
                 }
             }
 

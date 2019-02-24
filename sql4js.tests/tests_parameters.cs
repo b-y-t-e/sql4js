@@ -21,9 +21,9 @@ namespace sql4js.tests
 
             Assert.ThrowsAsync<S4JNullParameterException>(async () =>
               {
-              var result = await new S4JExecutorForTests().
-                  ExecuteWithParameters(script1);
-            });
+                  var result = await new S4JExecutorForTests().
+                      ExecuteWithParameters(script1);
+              });
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace sql4js.tests
             Assert.ThrowsAsync<S4JInvalidParameterTypeException>(async () =>
             {
                 var result = await new S4JExecutorForTests().
-                    ExecuteWithParameters(script1,"{a:1}");
+                    ExecuteWithParameters(script1, "{a:1}");
             });
         }
 
@@ -83,6 +83,17 @@ namespace sql4js.tests
                 ExecuteWithJsonParameters(script1, "[1,2,3,4]");
 
             Assert.AreEqual("4", result.ToJson());
+        }
+
+        [Test]
+        async public Task test_parameter_validcase()
+        {
+            var script1 = @" method ( c: int ) c#( c )  ";
+
+            var result = await new S4JExecutorForTests().
+                ExecuteWithParameters(script1, 12);
+
+            Assert.AreEqual("12", result.ToJson());
         }
 
         [Test]
