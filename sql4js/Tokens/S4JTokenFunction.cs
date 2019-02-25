@@ -27,8 +27,11 @@ namespace sql4js.Tokens
             // throw new NotImplementedException();
         }
 
-        public override void BuildJson(StringBuilder Builder)
+        public override bool BuildJson(StringBuilder Builder)
         {
+            if (!IsVisible)
+                return false;
+
             if (IsEvaluated)
             {
                 foreach (var child in Children)
@@ -38,6 +41,8 @@ namespace sql4js.Tokens
             {
                 base.BuildJson(Builder);
             }
+
+            return true;
         }
     }
 }

@@ -14,6 +14,28 @@ using sql4js.Classes;
 
 namespace sql4js.Executor
 {
+    public delegate bool TagExecutor(ExecutorContext Context);
+
+    public class ExecutorContext : IDisposable
+    {
+        public S4JToken Token;
+        public IDictionary<String, object> Variables;
+
+        public ExecutorContext(
+            S4JToken Token,
+            IDictionary<String, object> Variables)
+        {
+            this.Token = Token;
+            this.Variables = Variables;
+        }
+
+        public void Dispose()
+        {
+            Token = null;
+            Variables = null;
+        }
+    }
+
     public class S4JExecutor
     {
         public S4JStateBag StateBag { get; private set; }
@@ -21,6 +43,8 @@ namespace sql4js.Executor
         public Sources Sources { get; private set; }
 
         public Object Result { get; private set; }
+
+        public TagExecutor TagExecutor { get; set; }
 
         public S4JExecutor(S4JStateBag StateBag)
         {
@@ -124,84 +148,20 @@ namespace sql4js.Executor
             if (token == null)
                 return;
 
+            bool canBeEvaluated = true;
+            if (token.Tags.Count > 0 && TagExecutor != null)
+            {
+                using (ExecutorContext context = new ExecutorContext(token, GetExecutiongVariables(token)))
+                    canBeEvaluated = TagExecutor(context);
+            }
+
+            token.IsVisible = canBeEvaluated;
+            if (!canBeEvaluated)
+                return;
+
             if (token.State.StateType == EStateType.FUNCTION)
             {
-                IDictionary<String, object> variables = GetExecutiongVariables(token);
-                S4JTokenFunction function = token as S4JTokenFunction;
-                object result = await function.Evaluator?.Evaluate(this, token, variables);
-
-                function.IsEvaluated = true;
-                function.Result = result;
-
-                if (function.Parent is S4JTokenObject objectToken &&
-                    token.IsObjectSingleKey)
-                {
-                    if (objectToken.Parent is S4JTokenArray)
-                    {
-                        if (objectToken.Children.Count == 1)
-                        {
-                            Int32 indexOfFun = objectToken.IndexOfChild(function);
-
-                            IList<S4JToken> tokensFromResult = ConvertToToken(
-                                GetManyObjectsFromResult(result)).ToArray();
-
-                            objectToken.Parent.RemoveChild(
-                                objectToken,
-                                tokensFromResult);
-                        }
-                        else
-                        {
-                            Int32 indexOfFun = objectToken.IndexOfChild(function);
-
-                            IList<S4JToken> tokensFromResult = ConvertToManyTokens(
-                                GetManyObjectsFromResult(result)).ToArray();
-
-                            List<S4JToken> newTokens = new List<S4JToken>();
-                            foreach (S4JToken tokenFromResult in tokensFromResult)
-                            {
-                                S4JToken newObjectToken = objectToken.Clone();
-                                newObjectToken.Parent = objectToken.Parent;
-
-                                newObjectToken.RemoveChild(
-                                    indexOfFun,
-                                    new[] { tokenFromResult });
-
-                                newTokens.Add(newObjectToken);
-                            }
-
-                            objectToken.Parent.RemoveChild(
-                                objectToken,
-                                newTokens);
-                        }
-                    }
-                    else
-                    {
-                        IList<S4JToken> tokens = ConvertToTokens(
-                            GetSingleObjectFromResult(result)).ToArray();
-
-                        objectToken.RemoveChild(
-                            function,
-                            tokens);
-                    }
-                }
-                else if (function.Parent is S4JTokenArray)
-                {
-                    IList<S4JToken> tokens = ConvertToToken(
-                        GetListOfSingleObjectsFromResult(result)).ToArray();
-
-                    function.Parent.RemoveChild(
-                        function,
-                        tokens);
-                }
-                else
-                {
-                    IList<S4JToken> tokens = ConvertToTokens(
-                        GetSingleAndFirstValueFromResult(result)).ToArray();
-
-                    String text = JsonSerializer.SerializeJson(result);
-                    function.Children.Clear();
-                    function.Children.AddRange(tokens);
-                }
+                await EvaluateFunction(token);
             }
             else
             {
@@ -212,6 +172,157 @@ namespace sql4js.Executor
                     await Evaluate(child);
                 }
             }
+        }
+
+        async private Task EvaluateFunction(S4JToken token)
+        {
+            if (token == null)
+                return;
+
+            IDictionary<String, object> variables = GetExecutiongVariables(token);
+            S4JTokenFunction function = token as S4JTokenFunction;
+
+            object result = null;
+
+            bool canBeEvaluated = true;
+            if (token.Tags.Count > 0 && TagExecutor != null)
+            {
+                using (ExecutorContext context = new ExecutorContext(token, variables))
+                    canBeEvaluated = TagExecutor(context);
+            }
+
+            token.IsVisible = canBeEvaluated;
+            if (canBeEvaluated)
+                result = await function.Evaluator?.Evaluate(this, token, variables);
+
+            function.IsEvaluated = true;
+            function.Result = result;
+
+            if (function.Parent is S4JTokenObject objectParent &&
+                token.IsObjectSingleKey)
+            {
+                EvaluateFunctionInsideObject(
+                    objectParent,
+                    function,
+                    result);
+            }
+            else if (function.Parent is S4JTokenArray arrayParent)
+            {
+                EvaluateFunctionInsideArray(
+                    arrayParent,
+                    function,
+                    result);
+            }
+            else
+            {
+                EvaluateFunctionInsideAnyOther(
+                    function,
+                    result);
+            }
+        }
+
+        private void EvaluateFunctionInsideObject(
+            S4JTokenObject objectParent,
+            S4JTokenFunction function,
+            object result)
+        {
+            if (function == null)
+                return;
+
+            if (objectParent.Parent is S4JTokenArray)
+            {
+                EvaluateFunctionInsideObjectInsideArray(
+                    objectParent,
+                    function,
+                    result);
+            }
+            else
+            {
+                EvaluateFunctionInsideObjectInsideAnyOther(
+                    objectParent,
+                    function,
+                    result);
+            }
+        }
+
+        private void EvaluateFunctionInsideObjectInsideArray(
+            S4JTokenObject objectParent,
+            S4JTokenFunction function,
+            object result)
+        {
+            if (objectParent.Children.Count == 1)
+            {
+                Int32 indexOfFun = objectParent.IndexOfChild(function);
+
+                IList<S4JToken> tokensFromResult = ConvertToToken(
+                    GetManyObjectsFromResult(result)).ToArray();
+
+                objectParent.Parent.RemoveChild(
+                    objectParent,
+                    tokensFromResult);
+            }
+            else
+            {
+                Int32 indexOfFun = objectParent.IndexOfChild(function);
+
+                IList<S4JToken> tokensFromResult = ConvertToManyTokens(
+                    GetManyObjectsFromResult(result)).ToArray();
+
+                List<S4JToken> newTokens = new List<S4JToken>();
+                foreach (S4JToken tokenFromResult in tokensFromResult)
+                {
+                    S4JToken newObjectToken = objectParent.Clone();
+                    newObjectToken.Parent = objectParent.Parent;
+
+                    newObjectToken.RemoveChild(
+                        indexOfFun,
+                        new[] { tokenFromResult });
+
+                    newTokens.Add(newObjectToken);
+                }
+
+                objectParent.Parent.RemoveChild(
+                    objectParent,
+                    newTokens);
+            }
+        }
+
+        private void EvaluateFunctionInsideObjectInsideAnyOther(
+            S4JTokenObject objectParent,
+            S4JTokenFunction function,
+            object result)
+        {
+            IList<S4JToken> tokens = ConvertToTokens(
+                GetSingleObjectFromResult(result)).ToArray();
+
+            objectParent.RemoveChild(
+                function,
+                tokens);
+        }
+
+        private void EvaluateFunctionInsideArray(
+            S4JTokenArray arrayParent,
+            S4JTokenFunction function,
+            object result)
+        {
+            IList<S4JToken> tokens = ConvertToToken(
+                GetListOfSingleObjectsFromResult(result)).ToArray();
+
+            function.Parent.RemoveChild(
+                function,
+                tokens);
+        }
+
+        private void EvaluateFunctionInsideAnyOther(
+            S4JTokenFunction function,
+            object result)
+        {
+            IList<S4JToken> tokens = ConvertToTokens(
+                GetSingleAndFirstValueFromResult(result)).ToArray();
+
+            String text = JsonSerializer.SerializeJson(result);
+            function.Children.Clear();
+            function.Children.AddRange(tokens);
         }
 
         private IDictionary<String, object> GetExecutiongVariables(S4JToken token)

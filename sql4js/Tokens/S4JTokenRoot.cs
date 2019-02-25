@@ -42,8 +42,11 @@ namespace sql4js.Tokens
             return Parameters;
         }
 
-        public override void BuildJson(StringBuilder Builder)
+        public override bool BuildJson(StringBuilder Builder)
         {
+            if (!IsVisible)
+                return false;
+
             if (!string.IsNullOrEmpty(Name))
             {
                 Builder.Append(Name);
@@ -68,6 +71,8 @@ namespace sql4js.Tokens
             }
 
             base.BuildJson(Builder);
+
+            return true;
         }
 
         public override void Commit()

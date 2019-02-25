@@ -45,12 +45,17 @@ namespace sql4js.Tokens
             }
         }
 
-        public override void BuildJson(StringBuilder Builder)
+        public override bool BuildJson(StringBuilder Builder)
         {
+            if (!IsVisible)
+                return false;
+
             //if(Value != null)
             //    Builder.Append(UniConvert.to);
             //else
             Builder.Append(Text);
+
+            return true;
         }
 
         public override void Commit()

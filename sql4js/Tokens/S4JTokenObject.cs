@@ -93,25 +93,40 @@ namespace sql4js.Tokens
             return result;
         }
 
-        public override void BuildJson(StringBuilder Builder)
+        public override bool BuildJson(StringBuilder Builder)
         {
+            if (!IsVisible)
+                return false;
+
             Builder.Append("{");
             Int32 i = 0;
             Boolean prevWasKey = true;
+            Boolean keyWasAdded = false;
             foreach (S4JToken child in Children)
             {
-                if (!prevWasKey)
+                if (keyWasAdded && !prevWasKey)
                 {
                     Builder.Append(",");
                 }
 
                 if (child.IsObjectKey)
                 {
-                    child.BuildJson(Builder);
-                    prevWasKey = true;
-                    Builder.Append(":");
+                    keyWasAdded = child.BuildJson(Builder);
+                    if (keyWasAdded)
+                    {
+                        prevWasKey = true;
+                        Builder.Append(":");
+                    }
                 }
-                else
+                else if (child.IsObjectSingleKey)
+                {
+                    keyWasAdded = child.BuildJson(Builder);
+                    if (keyWasAdded)
+                    {
+                        prevWasKey = false;
+                    }
+                }
+                else if (keyWasAdded)
                 {
                     child.BuildJson(Builder);
                     prevWasKey = false;
@@ -120,6 +135,8 @@ namespace sql4js.Tokens
                 i++;
             }
             Builder.Append("}");
+
+            return true;
         }
     }
 

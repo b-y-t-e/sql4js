@@ -11,17 +11,21 @@ namespace sql4js.Tokens
             Children = new List<S4JToken>();
         }
 
-        public override void BuildJson(StringBuilder Builder)
+        public override bool BuildJson(StringBuilder Builder)
         {
+            if (!IsVisible)
+                return false;
+
             Builder.Append("[");
-            Int32 i = 0;
+            Boolean prevWasAdded = false;
             foreach (var child in Children)
             {
-                if (i > 0) Builder.Append(",");
-                child.BuildJson(Builder);
-                i++;
+                if (prevWasAdded) Builder.Append(",");
+                prevWasAdded = child.BuildJson(Builder);
             }
             Builder.Append("]");
+
+            return true;
         }
     }
 }

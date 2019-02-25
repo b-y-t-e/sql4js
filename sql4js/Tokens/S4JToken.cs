@@ -23,6 +23,8 @@ namespace sql4js.Tokens
 
         public S4JState State { get; set; }
 
+        public Boolean IsVisible { get; set; }
+
         //////////////////////////////////////////////////
 
         public S4JToken this[int index]
@@ -45,6 +47,7 @@ namespace sql4js.Tokens
 
         public S4JToken()
         {
+            IsVisible = true;
             Tags = new Dictionary<string, object>();
         }
 
@@ -250,11 +253,10 @@ namespace sql4js.Tokens
             return builder.ToString();
         }
 
-        public virtual void BuildJson(StringBuilder Builder)
+        public virtual bool BuildJson(StringBuilder Builder)
         {
-            ////////////////////////////////////
-
-            ////////////////////////////////////
+            if (!IsVisible)
+                return false;
 
             ////////////////////////////////////
 
@@ -278,6 +280,8 @@ namespace sql4js.Tokens
             else if (State.Gates.Count > 0)
                 foreach (var ch in State.Gates[0].End)
                     Builder.Append(ch);
+
+            return true;
         }
 
         public string ToJsonWithoutGate()

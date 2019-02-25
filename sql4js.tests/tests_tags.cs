@@ -93,5 +93,121 @@ method ( a : int, b : string!, c: any )
 
             Assert.AreEqual("tagb", result[0][2].Tags.Keys.FirstOrDefault());
         }
+
+        [Test]
+        async public Task test_simple_inner_tag2()
+        {
+            var script1 = @" 
+{
+    a : 1, 
+    b : 2,
+    #tagb
+    c: 3
+}
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1) as S4JTokenRoot;
+
+            Assert.AreEqual(1, result[0][4].Tags.Count);
+
+            Assert.AreEqual("tagb", result[0][4].Tags.Keys.FirstOrDefault());
+        }
+
+        [Test]
+        async public Task test_simple_inner_tag3()
+        {
+            var script1 = @" 
+{
+    a : 1, 
+    b : 2,
+    c: 3,
+    #tagb
+}
+";
+
+            var result = new S4JParserForTests().
+                Parse(script1) as S4JTokenRoot;
+
+            Assert.AreEqual(6, result[0].Children.Count);
+
+            Assert.AreEqual("{a:1,b:2,c:3}", result.ToJson());
+        }
+
+
+        [Test]
+        async public Task test_tag_logic_for_array()
+        {
+            var script1 = @" 
+[
+    1,
+    #notvisible
+    2,
+    3,
+    4
+]
+";
+
+            var executor = new S4JExecutorForTests();
+            executor.TagExecutor = (context) =>
+            {
+                return false;
+            };
+
+            var result = await executor.
+                ExecuteWithParameters(script1);
+            
+            Assert.AreEqual("[1,3,4]", result.ToJson());
+        }
+
+        [Test]
+        async public Task test_tag_logic_for_object()
+        {
+            var script1 = @" 
+{
+    a: 1,
+    #notvisible
+    b: 2,
+    c: 3,
+    d: 4
+}
+";
+
+            var executor = new S4JExecutorForTests();
+            executor.TagExecutor = (context) =>
+            {
+                return false;
+            };
+
+            var result = await executor.
+                ExecuteWithParameters(script1);
+
+            Assert.AreEqual("{a:1,c:3,d:4}", result.ToJson());
+        }
+
+        [Test]
+        async public Task test_tag_logic_for_object2()
+        {
+            var script1 = @" 
+{
+    a: 1,
+    #notvisible
+    b,
+    c: 3,
+    d: 4
+}
+";
+
+            var executor = new S4JExecutorForTests();
+            executor.TagExecutor = (context) =>
+            {
+                return false;
+            };
+
+            var result = await executor.
+                ExecuteWithParameters(script1);
+
+            Assert.AreEqual("{a:1,c:3,d:4}", result.ToJson());
+        }
     }
 }
