@@ -20,6 +20,7 @@ namespace sql4js.Executor
     {
         public S4JToken Token;
         public IDictionary<String, object> Variables;
+        public IDictionary<string, object> Tags { get { return Token?.Tags; } }
 
         public ExecutorContext(
             S4JToken Token,
